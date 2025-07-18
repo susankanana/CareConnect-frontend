@@ -3,18 +3,30 @@ import { ApiDomain } from "../../utils/ApiDomain";
 import type { RootState } from "../../app/store";
 
 export type TDoctor = {
-  doctorId: number;
-  specialization: string;
-  availableDays: string[]; // from `text().array()`
-  createdAt?: string;
-  updatedAt?: string;
-  user?: {
-    id: number;
+  user: {
+    userId: number;
     firstName: string;
     lastName: string;
     email: string;
+    password?: string;
+    contactPhone: string;
+    address: string;
     role: "admin" | "doctor" | "user";
     image_url?: string;
+    isVerified: boolean;
+    verificationCode?: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  doctor: {
+    doctorId: number;
+    specialization: string;
+    availableDays: string[];
+    rating?: number;
+    experience?: number;
+    patients?: number;
+    createdAt: string;
+    updatedAt: string;
   };
 };
 

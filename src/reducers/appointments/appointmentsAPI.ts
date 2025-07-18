@@ -32,7 +32,7 @@ export const appointmentsAPI = createApi({
   tagTypes: ["Appointments"],
   endpoints: (builder) => ({
     // POST /appointment/register
-    createAppointment: builder.mutation<TAppointment, Partial<TAppointment>>({
+    createAppointment: builder.mutation<{ data: TAppointment }, Partial<TAppointment>>({
       query: (newAppointment) => ({
         url: "/appointment/register",
         method: "POST",

@@ -5,11 +5,11 @@ import LandingPage from './pages/LandingPage'
 import Register from './pages/auth/Register'
 import Login from './pages/auth/Login'
 import AboutPage from './pages/AboutPage'
+import Appointment from './pages/Appointment'
 // import AdminDashboard from './dashboard/AdminDashboard/AdminDashboard'
 import Error from './components/error/Error'
 import VerifyUser from './pages/auth/VerifyUser'
 import { Toaster } from 'sonner'
-// import Todos from './dashboard/AdminDashboard/todos/Todos'
 // import Users from './dashboard/AdminDashboard/manageUsers/Users'
 // import Profile from './dashboard/AdminDashboard/Profile'
 import { type RootState } from './app/store'
@@ -42,6 +42,10 @@ function App() {
     {
       path: '/login',
       element: <Login />
+    },
+    {
+      path: '/appointments',
+      element: <Appointment />
     },
     // Admin Dashboard Routes
     // {
