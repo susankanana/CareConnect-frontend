@@ -6,6 +6,8 @@ import Register from './pages/auth/Register'
 import Login from './pages/auth/Login'
 import AboutPage from './pages/AboutPage'
 import Appointment from './pages/Appointment'
+import PaymentSuccess from './pages/payment/PaymentSuccess'
+import PaymentCancelled from './pages/payment/PaymentCancelled'
 // import AdminDashboard from './dashboard/AdminDashboard/AdminDashboard'
 import Error from './components/error/Error'
 import VerifyUser from './pages/auth/VerifyUser'
@@ -86,6 +88,14 @@ function App() {
     //     },
     //   ]
     // },
+    {
+      path: '/payment-success',
+      element: <PaymentSuccess />
+    },
+    {
+      path: '/payment-cancelled',
+      element: <PaymentCancelled />
+    },
     {
       path: '*',
       element: <Error />

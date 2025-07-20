@@ -1,4 +1,4 @@
-import { Heart, Phone, Mail, MapPin, Clock, Facebook, Twitter, Instagram, Calendar, Stethoscope } from 'lucide-react';
+import { Heart, Phone, Mail, MapPin, Clock, Facebook, Twitter, Instagram, Calendar} from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 const Footer = () => {
