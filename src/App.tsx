@@ -8,14 +8,18 @@ import AboutPage from './pages/AboutPage'
 import Appointment from './pages/Appointment'
 import PaymentSuccess from './pages/payment/PaymentSuccess'
 import PaymentCancelled from './pages/payment/PaymentCancelled'
-// import AdminDashboard from './dashboard/AdminDashboard/AdminDashboard'
+import AdminDashboard from './dashboard/adminDashboard/AdminDashboard'
 import Error from './components/error/Error'
 import VerifyUser from './pages/auth/VerifyUser'
 import { Toaster } from 'sonner'
-// import Users from './dashboard/AdminDashboard/manageUsers/Users'
-// import Profile from './dashboard/AdminDashboard/Profile'
+import Users from './dashboard/adminDashboard/main/users/Users'
+import AdminProfile from './dashboard/adminDashboard/main/profile/AdminProfile'
 import { type RootState } from './app/store'
 import { useSelector } from 'react-redux'
+import Doctors from './dashboard/adminDashboard/main/doctors/Doctors'
+import Appointments from './dashboard/adminDashboard/main/appointments/Appointments'
+import Complaints from './dashboard/adminDashboard/main/complaints/Complaints'
+import Analytics from './dashboard/adminDashboard/main/analytics/Analytics'
 // import UserProfile from './dashboard/UserDashboard/UserProfile'
 // import UserDashboard from './dashboard/UserDashboard/UserDashboard'
 
@@ -23,6 +27,7 @@ import { useSelector } from 'react-redux'
 function App() {
   const isAdmin = useSelector((state: RootState) => state.user.user?.role === 'admin');
   const isUser = useSelector((state: RootState) => state.user.user?.role === 'user');
+   const isDoctor = useSelector((state: RootState) => state.user.user?.role === 'doctor');
 
   const router = createBrowserRouter([
     {
@@ -50,24 +55,36 @@ function App() {
       element: <Appointment />
     },
     // Admin Dashboard Routes
-    // {
-    //   path: '/admin/dashboard',
-    //   element: isAdmin ? <AdminDashboard /> : <Login />,
-    //   children: [
-    //     {
-    //       path: 'analytics',
-    //       element: <h1>Analytics</h1>
-    //     },
-    //     {
-    //       path: 'users',
-    //       element: <Users />
-    //     },
-    //     {
-    //       path: 'profile',
-    //       element: <Profile />
-    //     },
-    //   ]
-    // },
+    {
+      path: '/admin/dashboard',
+      element: isAdmin ? <AdminDashboard /> : <Login />,
+      children: [
+        {
+          path: 'users',
+          element: <Users />
+        },
+        {
+          path: 'doctors',
+          element: <Doctors />
+        },
+        {
+          path: 'appointments',
+          element: <Appointments />
+        },
+         {
+          path: 'complaints',
+          element: <Complaints />
+        },
+        {
+          path: 'profile',
+          element: <AdminProfile />
+        },
+        {
+          path: 'analytics',
+          element: <Analytics/>
+        },
+      ]
+    },
 
     // // User dashboard routes
     // {

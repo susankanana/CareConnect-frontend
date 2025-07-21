@@ -16,6 +16,28 @@ export type TAppointment = {
   updatedAt?: string;
 };
 
+export type TDetailedAppointment = {
+  appointmentId: number;
+  appointmentDate: string;
+  timeSlot: string;
+  status: AppointmentStatus;
+  totalAmount: string;
+  patient: {
+    id: number;
+    name: string;
+    lastName: string;
+    email: string;
+    contactPhone: string;
+  };
+  doctor: {
+    id: number;
+    name: string;
+    lastName: string;
+    specialization: string;
+  };
+};
+
+
 export const appointmentsAPI = createApi({
   reducerPath: "appointmentsAPI",
   baseQuery: fetchBaseQuery({
@@ -48,7 +70,7 @@ export const appointmentsAPI = createApi({
     }),
 
     // GET /appointments/detailed
-    getDetailedAppointments: builder.query<{ data: any[] }, void>({
+    getDetailedAppointments: builder.query<{ data: TDetailedAppointment[] }, void>({
       query: () => "/appointments/detailed",
     }),
 
@@ -58,7 +80,7 @@ export const appointmentsAPI = createApi({
     }),
 
     // GET /appointments/user/:userId
-    getAppointmentsByUserId: builder.query<{ data: TAppointment[] }, number>({
+    getAppointmentsByUserId: builder.query<{ data: TDetailedAppointment[] }, number>({
       query: (userId) => `/appointments/user/${userId}`,
     }),
 

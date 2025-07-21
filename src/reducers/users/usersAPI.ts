@@ -3,7 +3,7 @@ import { ApiDomain } from "../../utils/ApiDomain";
 import type { RootState } from "../../app/store";
 
 export type TUser = {
-  id: number;
+  userId: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -53,13 +53,15 @@ export const usersAPI = createApi({
     }),
 
     // GET /users
-    getUsers: builder.query<{ data: TUser[] }, void>({
+    getUsers: builder.query< TUser[], void>({
       query: () => "/users",
+      transformResponse: (response: { data: TUser[] }) => response.data,
       providesTags: ["Users"],
     }),
 
     // GET /user/:id
-    getUserById: builder.query<{ data: TUser[] }, number>({
+    getUserById: builder.query< TUser , number>({
+      transformResponse: (response: { data: TUser }) => response.data,
       query: (id) => `/user/${id}`,
     }),
 
