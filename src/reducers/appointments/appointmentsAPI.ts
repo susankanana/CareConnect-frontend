@@ -85,7 +85,7 @@ export const appointmentsAPI = createApi({
     }),
 
     // GET /appointments/doctor/:doctorId
-    getAppointmentsByDoctorId: builder.query<{ data: TAppointment[] }, number>({
+    getAppointmentsByDoctorId: builder.query<{ data: TDetailedAppointment[] }, number>({
       query: (doctorId) => `/appointments/doctor/${doctorId}`,
     }),
 
@@ -105,11 +105,11 @@ export const appointmentsAPI = createApi({
     }),
 
     // PATCH /appointment/status/:id
-    updateAppointmentStatus: builder.mutation<{ message: string }, { id: number; appointmentStatus: AppointmentStatus }>({
-      query: ({ id, appointmentStatus }) => ({
+    updateAppointmentStatus: builder.mutation<{ message: string }, { id: number; status: AppointmentStatus }>({
+      query: ({ id, status }) => ({
         url: `/appointment/status/${id}`,
         method: "PATCH",
-        body: { appointmentStatus },
+        body: { status },
       }),
       invalidatesTags: ["Appointments"],
     }),

@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Outlet } from "react-router";
-import Navbar from "../../../src/components/nav/Navbar";
-import DoctorDrawer from "./aside/DoctorDrawer";
+import Navbar from "../../components/nav/Navbar";
+import Footer from "../../components/footer/Footer";
 import { FaBars } from "react-icons/fa";
 import { IoCloseSharp } from "react-icons/io5";
-import Footer from "../../components/footer/Footer";
+import PatientDrawer from "./aside/PatientDrawer";
 
-const DoctorDashboard = () => {
+const PatientDashboard = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleDrawerToggle = () => {
-    setDrawerOpen((prev) => !prev);
+    setDrawerOpen(!drawerOpen);
   };
 
   return (
@@ -18,7 +18,7 @@ const DoctorDashboard = () => {
       {/* Top Navbar */}
       <Navbar />
 
-      {/* Main layout area */}
+      {/* Dashboard Section */}
       <div className="flex flex-1">
         {/* Sidebar */}
         <aside
@@ -35,26 +35,26 @@ const DoctorDashboard = () => {
             >
               <IoCloseSharp />
             </button>
-            <DoctorDrawer />
+            <PatientDrawer />
           </div>
         </aside>
 
-        {/* Content section */}
+        {/* Main content */}
         <div className="flex flex-col flex-1">
-          {/* Welcome Header */}
+          {/* Colored heading bar */}
           <div className="flex items-center px-4 py-4 bg-gray-900">
             <button
               className="mr-4 text-white text-2xl lg:hidden"
               onClick={handleDrawerToggle}
             >
-              {drawerOpen ? <IoCloseSharp /> : <FaBars />}
+              <FaBars />
             </button>
             <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-pink-400 text-2xl font-extrabold shadow-md">
-              Welcome to your Doctor dashboard
+              Welcome to your Patient dashboard
             </h1>
           </div>
 
-          {/* Main Routed Content */}
+          {/* Main routed page */}
           <main className="flex-1 bg-gradient-to-br from-teal-50 to-pink-50 p-4">
             <Outlet />
           </main>
@@ -67,4 +67,4 @@ const DoctorDashboard = () => {
   );
 };
 
-export default DoctorDashboard;
+export default PatientDashboard;

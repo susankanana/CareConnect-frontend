@@ -16,22 +16,40 @@ import {
 import { services } from './data/services';
 import { testimonials } from './data/testimonials';
 import { useGetDoctorsQuery, type TDoctor } from '../../../src/reducers/doctors/doctorsAPI';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router'; 
+import { useEffect } from 'react';
 
 
 const Hero = () => {
-    const navigate = useNavigate();
-    // Fetch doctors data using the Redux Toolkit Query hook
-    const { data: doctorsData, isLoading: doctorsLoading, error: doctorsError } = useGetDoctorsQuery(
-        undefined, 
-        {
-            refetchOnMountOrArgChange: true,
-            pollingInterval: 60000,
-        }
-    );
-    const navigateTo = (path: string) => {
-       navigate(path);
-    };
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Fetch doctors data using the Redux Toolkit Query hook
+  const { data: doctorsData, isLoading: doctorsLoading, error: doctorsError } = useGetDoctorsQuery(
+    undefined,
+    {
+      refetchOnMountOrArgChange: true,
+      pollingInterval: 60000,
+    }
+  );
+
+  const navigateTo = (path: string) => {
+    navigate(path);
+  };
+
+  // code for scrolling
+  useEffect(() => {
+    // Check if there's a hash in the URL (e.g., #services, #doctors)
+    if (location.hash) {
+      const id = location.hash.substring(1); // Remove the '#' from the hash
+      const element = document.getElementById(id); // Find the element by its ID
+
+      if (element) {
+        // Scroll to the element smoothly
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -125,7 +143,9 @@ const Hero = () => {
         </div>
       </section>
 
-      {/* Services Section (remains unchanged) */}
+      ---
+
+      {/* Services Section */}
       <section id="services" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -206,7 +226,7 @@ const Hero = () => {
                     <div className="flex items-center space-x-4 mb-4">
                       <div className="flex items-center space-x-1">
                         <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-medium">{doctor.doctor?.rating || 'N/A'}</span> 
+                        <span className="text-sm font-medium">{doctor.doctor?.rating || 'N/A'}</span>
                       </div>
                       <div className="text-sm text-gray-600">
                         {doctor.doctor?.experience != null ? `${doctor.doctor.experience} years experience` : 'N/A'}

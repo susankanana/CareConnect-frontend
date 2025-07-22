@@ -92,7 +92,7 @@ const UpdateProfile = ({ user, refetch }: UpdateProfileProps) => {
                         <img
                             src={imageUrlValue}
                             alt="Profile Preview"
-                            className="w-32 h-32 object-cover rounded-full border-2 border-gray-300 shadow-md" // Increased size, added teal border, and shadow
+                            className="w-32 h-32 object-cover rounded-full border-2 border-teal-300 shadow-md" // Increased size, added teal border, and shadow
                             onError={(e) => {
                                 // Fallback to a generic avatar if the URL is broken
                                 e.currentTarget.src = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";

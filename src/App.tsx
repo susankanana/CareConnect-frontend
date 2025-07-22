@@ -1,6 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import './App.css'
-
 import LandingPage from './pages/LandingPage'
 import Register from './pages/auth/Register'
 import Login from './pages/auth/Login'
@@ -16,12 +15,21 @@ import Users from './dashboard/adminDashboard/main/users/Users'
 import AdminProfile from './dashboard/adminDashboard/main/profile/AdminProfile'
 import { type RootState } from './app/store'
 import { useSelector } from 'react-redux'
-import Doctors from './dashboard/adminDashboard/main/doctors/Doctors'
-import Appointments from './dashboard/adminDashboard/main/appointments/Appointments'
-import Complaints from './dashboard/adminDashboard/main/complaints/Complaints'
-import Analytics from './dashboard/adminDashboard/main/analytics/Analytics'
-// import UserProfile from './dashboard/UserDashboard/UserProfile'
-// import UserDashboard from './dashboard/UserDashboard/UserDashboard'
+import AdminDoctors from './dashboard/adminDashboard/main/doctors/AdminDoctors'
+import AdminComplaints from './dashboard/adminDashboard/main/complaints/AdminComplaints'
+import AdminAnalytics from './dashboard/adminDashboard/main/analytics/AdminAnalytics'
+import DoctorDashboard from './dashboard/doctorDashboard/DoctorDashboard'
+import AdminAppointments from './dashboard/adminDashboard/main/appointments/AdminAppointments'
+import DoctorAppointments from './dashboard/doctorDashboard/main/appointments/DoctorAppointments'
+import DoctorProfile from './dashboard/doctorDashboard/main/profile/DoctorProfile'
+import DoctorPrescriptions from './dashboard/doctorDashboard/main/prescriptions/DoctorPrescriptions'
+import DoctorAnalytics from './dashboard/doctorDashboard/main/analytics/DoctorAnalytics'
+import PatientProfile from './dashboard/patientDashboard/main/profile/PatientProfile'
+import PatientDashboard from './dashboard/patientDashboard/PatientDashboard'
+import PatientAnalytics from './dashboard/patientDashboard/main/analytics/PatientAnalytics'
+import PatientAppointments from './dashboard/patientDashboard/main/appointments/PatientAppointments'
+import PatientDoctors from './dashboard/patientDashboard/main/doctors/PatientDoctors'
+import PatientComplaints from './dashboard/patientDashboard/main/complaints/PatientComplaints'
 
 
 function App() {
@@ -65,15 +73,15 @@ function App() {
         },
         {
           path: 'doctors',
-          element: <Doctors />
+          element: <AdminDoctors />
         },
         {
           path: 'appointments',
-          element: <Appointments />
+          element: <AdminAppointments />
         },
          {
           path: 'complaints',
-          element: <Complaints />
+          element: <AdminComplaints />
         },
         {
           path: 'profile',
@@ -81,30 +89,60 @@ function App() {
         },
         {
           path: 'analytics',
-          element: <Analytics/>
+          element: <AdminAnalytics/>
         },
       ]
     },
-
-    // // User dashboard routes
-    // {
-    //   path: '/user/dashboard',
-    //   element: isUser ? <UserDashboard /> : <Login />,
-    //   children: [
-    //     {
-    //       path: 'analytics',
-    //       element: <h1>Analytics</h1>
-    //     },
-    //     {
-    //       path: 'todos',
-    //       element: <UserTodos />
-    //     },
-    //     {
-    //       path: 'profile',
-    //       element: <UserProfile />
-    //     },
-    //   ]
-    // },
+// Doctor dashboard routes
+    {
+      path: '/doctor/dashboard',
+      element: isDoctor ? <DoctorDashboard /> : <Login />,
+      children: [
+        {
+          path: 'appointments',
+          element: <DoctorAppointments />
+        },
+        {
+          path: 'prescriptions',
+          element: <DoctorPrescriptions />
+        },
+        {
+          path: 'profile',
+          element: <DoctorProfile />
+        },
+        {
+          path: 'analytics',
+          element: <DoctorAnalytics />
+        }
+      ]
+    },
+    // User dashboard routes
+    {
+      path: '/user/dashboard',
+      element: isUser ? <PatientDashboard /> : <Login />,
+      children: [
+        {
+          path: 'appointments',
+          element: <PatientAppointments />
+        },
+        {
+          path: 'doctors',
+          element: <PatientDoctors />
+        },
+        {
+          path: 'complaints',
+          element: <PatientComplaints />
+        },
+        {
+          path: 'profile',
+          element: <PatientProfile />
+        },
+        {
+          path: 'analytics',
+          element: <PatientAnalytics />
+        }
+      ]
+    },
     {
       path: '/payment-success',
       element: <PaymentSuccess />

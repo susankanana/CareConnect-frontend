@@ -6,7 +6,7 @@ import { logout } from "../../../../reducers/login/userSlice";
 import UpdateProfile from "./UpdateProfile";
 import { Mail, UserCircle, ShieldCheck, CheckCircle, LogOut, Pencil } from "lucide-react";
 
-const AdminProfile = () => {
+const DoctorProfile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.user);
@@ -28,12 +28,13 @@ const AdminProfile = () => {
             <img
               src={data?.image_url || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
               alt="Doctor Avatar"
-              className="w-32 h-32 rounded-full border-2 border-gray-400 object-cover"
+              className="w-32 h-32 rounded-full border-2 border-teal-400 object-cover"
               onError={() => console.warn("Image failed to load:", data?.image_url)}
             />
             <div className="space-y-1 text-center sm:text-left">
               <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                Admin: {data?.firstName} {data?.lastName}
+                <UserCircle className="h-6 w-6 text-teal-600" />
+                Dr. {data?.firstName} {data?.lastName}
               </h2>
               <p className="text-gray-600 flex items-center gap-2">
                 <Mail className="h-4 w-4 text-pink-600" />
@@ -80,4 +81,4 @@ const AdminProfile = () => {
   );
 };
 
-export default AdminProfile;
+export default DoctorProfile;

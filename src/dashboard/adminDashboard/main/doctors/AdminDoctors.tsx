@@ -5,7 +5,7 @@ import InsertDoctor from "./InsertDoctor";
 import UpdateDoctor from "./UpdateDoctor";
 import DeleteDoctor from "./DeleteDoctor";
 
-const Doctors = () => {
+const AdminDoctors = () => {
     const { data: doctorsData, isLoading, error, refetch } = doctorsAPI.useGetDoctorsQuery(undefined, {
         refetchOnMountOrArgChange: true,
         pollingInterval: 60000,
@@ -244,4 +244,4 @@ const Doctors = () => {
     );
 };
 
-export default Doctors;
+export default AdminDoctors;

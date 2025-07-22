@@ -36,15 +36,18 @@ const Navbar = () => {
   };
 
   const navigateAndScroll = (sectionId: string) => {
-    if (window.location.pathname !== '/') {
-      navigate(`/#${sectionId}`);
-    } else {
+    setIsMenuOpen(false); // Close menu regardless of navigation
+    if (window.location.pathname === '/') {
+      // If already on the homepage, scroll directly
       const element = document.getElementById(sectionId);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
+    } else {
+      // If on a different page, navigate to homepage with hash
+      // The scroll will be handled by the HomePage component after rendering
+      navigate(`/#${sectionId}`);
     }
-    setIsMenuOpen(false);
   };
 
   return (
@@ -97,7 +100,7 @@ const Navbar = () => {
               Home
             </a>
             <a
-              onClick={() => navigateAndScroll('about')}
+              onClick={() => navigateTo('/about')}
               className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
             >
               About

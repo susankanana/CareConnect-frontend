@@ -1,26 +1,35 @@
-import { appointmentsAPI} from "../../../../reducers/appointments/appointmentsAPI";
-import { Edit, Trash2, Calendar, User, Stethoscope, XCircle, Clock, CreditCard, Phone, Mail } from "lucide-react";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../../app/store";
+import { appointmentsAPI, type TDetailedAppointment } from "../../../../reducers/appointments/appointmentsAPI";
+import { Edit, Calendar, User, Clock, CreditCard, CheckCircle, XCircle, Phone, Mail } from "lucide-react";
+import ChangeStatus from "./ChangeStatus";
 import UpdateAppointment from "./UpdateAppointment";
-import DeleteAppointment from "./DeleteAppointment";
 
-const Appointments = () => {
-    const { data: appointmentsData, isLoading, error, refetch } = appointmentsAPI.useGetDetailedAppointmentsQuery(undefined, {
-        refetchOnMountOrArgChange: true,
-        pollingInterval: 60000,
-    });
+const DoctorAppointments = () => {
+    const user = useSelector((state: RootState) => state.user.user);
+    const doctorId = user?.user_id;
 
-    const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
-    const [appointmentToDelete, setAppointmentToDelete] = useState<any>(null);
+    const { data: appointmentsData, isLoading, error, refetch } = appointmentsAPI.useGetAppointmentsByDoctorIdQuery(
+        doctorId ?? 0,
+        {
+            skip: !doctorId,
+            refetchOnMountOrArgChange: true,
+            pollingInterval: 60000,
+        }
+    );
 
-    const handleEdit = (appointment: any) => {
+    const [selectedAppointment, setSelectedAppointment] = useState<TDetailedAppointment | null>(null);
+    const [appointmentToChangeStatus, setAppointmentToChangeStatus] = useState<TDetailedAppointment | null>(null);
+
+    const handleEdit = (appointment: TDetailedAppointment) => {
         setSelectedAppointment(appointment);
         (document.getElementById('update_appointment_modal') as HTMLDialogElement)?.showModal();
     };
 
-    const handleDelete = (appointment: any) => {
-        setAppointmentToDelete(appointment);
-        (document.getElementById('delete_appointment_modal') as HTMLDialogElement)?.showModal();
+    const handleChangeStatus = (appointment: TDetailedAppointment) => {
+        setAppointmentToChangeStatus(appointment);
+        (document.getElementById('change_status_modal') as HTMLDialogElement)?.showModal();
     };
 
     const getStatusColor = (status: string) => {
@@ -70,23 +79,23 @@ const Appointments = () => {
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                             <Calendar className="h-7 w-7 text-teal-600" />
-                            Appointments Management
+                            My Appointments
                         </h1>
                         <p className="text-gray-600 mt-1">
-                            Manage patient appointments - {appointmentsData?.data?.length || 0} total appointments
+                            Manage your patient appointments - {appointmentsData?.data?.length || 0} total appointments
                         </p>
                     </div>
                 </div>
             </div>
 
             {/* Modals */}
+            <ChangeStatus appointment={appointmentToChangeStatus} refetch={refetch} />
             <UpdateAppointment appointment={selectedAppointment} refetch={refetch} />
-            <DeleteAppointment appointment={appointmentToDelete} refetch={refetch} />
 
             {/* Appointments Grid */}
             {appointmentsData && appointmentsData.data && appointmentsData.data.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {appointmentsData.data.map((appointment: any) => (
+                    {appointmentsData.data.map((appointment: TDetailedAppointment) => (
                         <div
                             key={appointment.appointmentId}
                             className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden"
@@ -105,9 +114,9 @@ const Appointments = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(appointment.appointmentStatus)}`}>
+                                    <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(appointment.status)}`}>
                                         <Clock className="h-3 w-3" />
-                                        {appointment.appointmentStatus}
+                                        {appointment.status}
                                     </span>
                                 </div>
                             </div>
@@ -135,22 +144,6 @@ const Appointments = () => {
                                     </div>
                                 </div>
 
-                                {/* Doctor Information */}
-                                <div className="mb-4">
-                                    <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                                        <Stethoscope className="h-4 w-4 text-teal-600" />
-                                        Doctor Information
-                                    </h4>
-                                    <div className="bg-teal-50 rounded-lg p-3">
-                                        <p className="font-medium text-gray-900">
-                                            Dr. {appointment.doctor?.name} {appointment.doctor?.lastName}
-                                        </p>
-                                        <p className="text-sm text-teal-600 font-medium">
-                                            {appointment.doctor?.specialization}
-                                        </p>
-                                    </div>
-                                </div>
-
                                 {/* Appointment Details */}
                                 <div className="space-y-3 mb-6">
                                     <div className="flex items-center gap-3 text-gray-600">
@@ -174,18 +167,18 @@ const Appointments = () => {
                                 {/* Action Buttons */}
                                 <div className="flex gap-2">
                                     <button
+                                        onClick={() => handleChangeStatus(appointment)}
+                                        className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-blue-200"
+                                    >
+                                        <CheckCircle className="h-4 w-4" />
+                                        Status
+                                    </button>
+                                    <button
                                         onClick={() => handleEdit(appointment)}
                                         className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-teal-200"
                                     >
                                         <Edit className="h-4 w-4" />
                                         Edit
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(appointment)}
-                                        className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-red-200"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                        Delete
                                     </button>
                                 </div>
                             </div>
@@ -195,8 +188,8 @@ const Appointments = () => {
             ) : (
                 <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
                     <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No appointments found</h3>
-                    <p className="text-gray-600 mb-6">Appointments will appear here once patients start booking</p>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No appointments scheduled</h3>
+                    <p className="text-gray-600">Your appointments will appear here once patients book with you</p>
                 </div>
             )}
 
@@ -213,19 +206,19 @@ const Appointments = () => {
                         </div>
                         <div className="text-center p-4 bg-green-50 rounded-lg">
                             <div className="text-2xl font-bold text-green-600">
-                                {appointmentsData.data.filter((apt: any) => apt.appointmentStatus === 'Confirmed').length}
+                                {appointmentsData.data.filter((apt: TDetailedAppointment) => apt.status === 'Confirmed').length}
                             </div>
                             <div className="text-sm text-gray-600">Confirmed</div>
                         </div>
                         <div className="text-center p-4 bg-yellow-50 rounded-lg">
                             <div className="text-2xl font-bold text-yellow-600">
-                                {appointmentsData.data.filter((apt: any) => apt.appointmentStatus === 'Pending').length}
+                                {appointmentsData.data.filter((apt: TDetailedAppointment) => apt.status === 'Pending').length}
                             </div>
                             <div className="text-sm text-gray-600">Pending</div>
                         </div>
                         <div className="text-center p-4 bg-gray-50 rounded-lg">
                             <div className="text-2xl font-bold text-gray-600">
-                                KSh {appointmentsData.data.reduce((total: number, apt: any) => total + parseFloat(apt.totalAmount), 0).toFixed(0)}
+                                KSh {appointmentsData.data.reduce((total: number, apt: TDetailedAppointment) => total + parseFloat(apt.totalAmount), 0).toFixed(0)}
                             </div>
                             <div className="text-sm text-gray-600">Total Revenue</div>
                         </div>
@@ -236,4 +229,4 @@ const Appointments = () => {
     );
 };
 
-export default Appointments;
+export default DoctorAppointments;
