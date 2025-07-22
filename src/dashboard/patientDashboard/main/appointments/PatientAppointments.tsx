@@ -4,7 +4,7 @@ import type { RootState } from "../../../../app/store";
 import { appointmentsAPI, type TDetailedAppointment } from "../../../../reducers/appointments/appointmentsAPI";
 import { paymentsAPI } from "../../../../reducers/payments/paymentsAPI";
 import { prescriptionsAPI } from "../../../../reducers/prescriptions/prescriptionsAPI";
-import { Calendar, Stethoscope, Clock, CreditCard, XCircle, Plus, ArrowRight, Loader, Shield, Receipt, CheckCircle } from "lucide-react";
+import { Calendar, Stethoscope, Clock, CreditCard, XCircle, Plus, ArrowRight, Loader, Shield, Receipt} from "lucide-react";
 import { toast } from "sonner";
 import CreateAppointment from "./CreateAppointment";
 

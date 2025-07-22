@@ -53,7 +53,6 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
     register,
     handleSubmit,
     reset,
-    setValue,
     watch,
     formState: { errors },
   } = useForm<CreateAppointmentInputs>({

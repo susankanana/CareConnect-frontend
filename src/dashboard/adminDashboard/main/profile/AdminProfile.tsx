@@ -4,7 +4,7 @@ import { type RootState } from "../../../../app/store";
 import { usersAPI } from "../../../../reducers/users/usersAPI";
 import { logout } from "../../../../reducers/login/userSlice";
 import UpdateProfile from "./UpdateProfile";
-import { Mail, UserCircle, ShieldCheck, CheckCircle, LogOut, Pencil } from "lucide-react";
+import { Mail,ShieldCheck, CheckCircle, LogOut, Pencil } from "lucide-react";
 
 const AdminProfile = () => {
   const dispatch = useDispatch();
