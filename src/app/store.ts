@@ -1,9 +1,7 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
-
 import userSlice from '../reducers/login/userSlice';
-
 import { usersAPI } from '../reducers/users/usersAPI';
 import { loginAPI } from '../reducers/login/loginAPI';
 import { doctorsAPI } from '../reducers/doctors/doctorsAPI';
@@ -11,6 +9,7 @@ import { appointmentsAPI } from '../reducers/appointments/appointmentsAPI';
 import { complaintsAPI } from '../reducers/complaints/complaintsAPI';
 import { prescriptionsAPI } from '../reducers/prescriptions/prescriptionsAPI';
 import { paymentsAPI } from '../reducers/payments/paymentsAPI';
+import tokenExpirationMiddleware from '../utils/tokenExpiryMiddleware';
 
 const persistConfig = {
   key: 'root',
@@ -27,7 +26,7 @@ const rootReducer = combineReducers({
   [complaintsAPI.reducerPath]: complaintsAPI.reducer,
   [prescriptionsAPI.reducerPath]: prescriptionsAPI.reducer,
   [paymentsAPI.reducerPath]: paymentsAPI.reducer,
-  user: userSlice,
+  user: userSlice
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -44,7 +43,8 @@ export const store = configureStore({
       .concat(appointmentsAPI.middleware)
       .concat(complaintsAPI.middleware)
       .concat(prescriptionsAPI.middleware)
-      .concat(paymentsAPI.middleware),
+      .concat(paymentsAPI.middleware)
+      .concat(tokenExpirationMiddleware), // add the token expiration middleware to check if the token is expired before dispatching any action
 });
 
 export const persistedStore = persistStore(store);
