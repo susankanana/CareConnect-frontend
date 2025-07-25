@@ -174,6 +174,7 @@ const AdminAppointments = () => {
                                 {/* Action Buttons */}
                                 <div className="flex gap-2">
                                     <button
+                                        data-test="edit-appointment-button"
                                         onClick={() => handleEdit(appointment)}
                                         className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-teal-200"
                                     >
@@ -181,6 +182,7 @@ const AdminAppointments = () => {
                                         Edit
                                     </button>
                                     <button
+                                        data-test="delete-appointment-button"
                                         onClick={() => handleDelete(appointment)}
                                         className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-red-200"
                                     >

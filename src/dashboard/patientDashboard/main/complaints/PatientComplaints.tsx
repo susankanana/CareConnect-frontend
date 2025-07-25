@@ -80,6 +80,7 @@ const PatientComplaints = () => {
                         </p>
                     </div>
                     <button
+                        data-test="open-create-complaint-btn"
                         className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-md"
                         onClick={() => (document.getElementById('create_complaint_modal') as HTMLDialogElement)?.showModal()}
                     >

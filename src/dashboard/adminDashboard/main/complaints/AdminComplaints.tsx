@@ -105,6 +105,7 @@ const Complaints = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {complaintsData.data.map((complaint: TComplaint) => (
                         <div
+                            data-test={`complaint-card-${complaint.complaintId}`}
                             key={complaint.complaintId}
                             className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden"
                         >
@@ -171,6 +172,7 @@ const Complaints = () => {
                                 {/* Action Buttons */}
                                 <div className="flex gap-2">
                                     <button
+                                        data-test={`change-status-${complaint.complaintId}`}
                                         onClick={() => handleChangeStatus(complaint)}
                                         className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-blue-200"
                                     >
@@ -178,6 +180,7 @@ const Complaints = () => {
                                         Status
                                     </button>
                                     <button
+                                        data-test={`edit-complaint-${complaint.complaintId}`}
                                         onClick={() => handleEdit(complaint)}
                                         className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-teal-200"
                                     >
@@ -185,6 +188,7 @@ const Complaints = () => {
                                         Edit
                                     </button>
                                     <button
+                                        data-test={`delete-complaint-${complaint.complaintId}`}
                                         onClick={() => handleDelete(complaint)}
                                         className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-red-200"
                                     >

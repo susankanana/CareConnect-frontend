@@ -107,6 +107,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               Appointment Date
             </label>
             <input
+              data-test="appointment-date-input"
               type="date"
               {...register("appointmentDate")}
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
@@ -121,6 +122,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               Time Slot
             </label>
             <select
+              data-test="time-slot-select"
               {...register("timeSlot")}
               className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             >
@@ -141,6 +143,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               Status
             </label>
             <select
+              data-test="appointment-status-select"
               {...register("appointmentStatus")}
               className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             >
@@ -158,6 +161,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               Total Amount (KSh)
             </label>
             <input
+              data-test="total-amount-input"
               type="number"
               step="0.01"
               {...register("totalAmount")}
@@ -170,7 +174,8 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
           </div>
 
           <div className="modal-action">
-            <button 
+            <button
+              data-test="update-appointment-submit" 
               type="submit" 
               className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
               disabled={isLoading}
@@ -184,6 +189,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               )}
             </button>
             <button
+              data-test="update-appointment-cancel"
               className="btn btn-ghost"
               type="button"
               onClick={() => {

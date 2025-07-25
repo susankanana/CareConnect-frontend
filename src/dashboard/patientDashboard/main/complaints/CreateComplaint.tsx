@@ -78,6 +78,7 @@ const CreateComplaint = ({ refetch }: CreateComplaintProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
             <input
+              data-test="complaint-subject-input"
               type="text"
               {...register("subject")}
               placeholder="Brief description of your complaint"
@@ -89,6 +90,7 @@ const CreateComplaint = ({ refetch }: CreateComplaintProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea
+              data-test="complaint-description-input"
               {...register("description")}
               placeholder="Please provide detailed information about your complaint..."
               className="textarea textarea-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
@@ -100,6 +102,7 @@ const CreateComplaint = ({ refetch }: CreateComplaintProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Related Appointment ID (Optional)</label>
             <input
+              data-test="complaint-appointment-id-input"
               type="number"
               {...register("relatedAppointmentId")}
               placeholder="Enter appointment ID if complaint is related to a specific appointment"
@@ -119,6 +122,7 @@ const CreateComplaint = ({ refetch }: CreateComplaintProps) => {
 
           <div className="modal-action">
             <button 
+              data-test="complaint-submit-btn"
               type="submit" 
               className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
               disabled={isLoading}

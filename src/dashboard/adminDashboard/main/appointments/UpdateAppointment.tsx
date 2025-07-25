@@ -101,12 +101,13 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
           </p>
         </div>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <form data-test="update-appointment-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Appointment Date
             </label>
             <input
+              data-test="update-date-input"
               type="date"
               {...register("appointmentDate")}
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
@@ -121,6 +122,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               Time Slot
             </label>
             <select
+              data-test="update-time-slot-select"
               {...register("timeSlot")}
               className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             >
@@ -141,6 +143,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               Status
             </label>
             <select
+              data-test="update-status-select"
               {...register("appointmentStatus")}
               className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             >
@@ -158,6 +161,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               Total Amount (KSh)
             </label>
             <input
+              data-test="update-total-amount-input"
               type="number"
               step="0.01"
               {...register("totalAmount")}
@@ -171,6 +175,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
 
           <div className="modal-action">
             <button 
+              data-test="submit-update-appointment"
               type="submit" 
               className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
               disabled={isLoading}
@@ -184,6 +189,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               )}
             </button>
             <button
+              data-test="cancel-update-appointment"
               className="btn btn-ghost"
               type="button"
               onClick={() => {

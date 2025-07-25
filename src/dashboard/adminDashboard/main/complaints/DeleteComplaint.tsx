@@ -77,6 +77,7 @@ const DeleteComplaint = ({ complaint, refetch }: DeleteComplaintProps) => {
 
                 <div className="modal-action flex gap-4">
                     <button
+                        data-test="confirm-delete-btn"
                         className="btn bg-red-600 hover:bg-red-700 text-white border-none"
                         onClick={handleDelete}
                         disabled={isLoading}
@@ -88,6 +89,7 @@ const DeleteComplaint = ({ complaint, refetch }: DeleteComplaintProps) => {
                         ) : "Yes, Delete"}
                     </button>
                     <button
+                        data-test="cancel-delete-btn"
                         className="btn btn-ghost"
                         type="button"
                         onClick={() => (document.getElementById('delete_complaint_modal') as HTMLDialogElement)?.close()}

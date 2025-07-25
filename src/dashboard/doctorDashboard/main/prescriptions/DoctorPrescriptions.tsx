@@ -66,6 +66,7 @@ const DoctorPrescriptions = () => {
                         </p>
                     </div>
                     <button
+                        data-test="open-create-prescription"
                         className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-md"
                         onClick={() => (document.getElementById('create_prescription_modal') as HTMLDialogElement)?.showModal()}
                     >
@@ -85,6 +86,7 @@ const DoctorPrescriptions = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     {prescriptionsData.data.map((prescription: TPrescription) => (
                         <div
+                            data-test="prescription-card"
                             key={prescription.prescriptionId}
                             className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden"
                         >
@@ -145,6 +147,7 @@ const DoctorPrescriptions = () => {
                                 {/* Action Buttons */}
                                 <div className="flex gap-2">
                                     <button
+                                        data-test="edit-prescription-button"
                                         onClick={() => handleEdit(prescription)}
                                         className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-teal-200"
                                     >
@@ -152,6 +155,7 @@ const DoctorPrescriptions = () => {
                                         Edit
                                     </button>
                                     <button
+                                        data-test="delete-prescription-button"
                                         onClick={() => handleDelete(prescription)}
                                         className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-red-200"
                                     >

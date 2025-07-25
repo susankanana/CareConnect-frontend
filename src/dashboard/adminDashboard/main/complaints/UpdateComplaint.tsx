@@ -83,6 +83,7 @@ const UpdateComplaint = ({ complaint, refetch }: UpdateComplaintProps) => {
               Subject
             </label>
             <input
+              data-test="update-subject-input"
               type="text"
               {...register("subject")}
               placeholder="Complaint subject"
@@ -98,6 +99,7 @@ const UpdateComplaint = ({ complaint, refetch }: UpdateComplaintProps) => {
               Description
             </label>
             <textarea
+               data-test="update-description-textarea"
               {...register("description")}
               placeholder="Detailed description of the complaint"
               className="textarea textarea-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
@@ -110,6 +112,7 @@ const UpdateComplaint = ({ complaint, refetch }: UpdateComplaintProps) => {
 
           <div className="modal-action">
             <button 
+              data-test="submit-update-btn"
               type="submit" 
               className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
               disabled={isLoading}

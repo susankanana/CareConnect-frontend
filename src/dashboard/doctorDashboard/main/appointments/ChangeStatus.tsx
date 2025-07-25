@@ -99,6 +99,7 @@ const ChangeStatus = ({ appointment, refetch }: ChangeStatusProps) => {
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Select New Status:</label>
                         <select
+                            data-test="status-select"
                             {...register("appointmentStatus")}
                             className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
                         >
@@ -123,7 +124,7 @@ const ChangeStatus = ({ appointment, refetch }: ChangeStatusProps) => {
                     </div>
 
                     <div className="modal-action flex flex-col sm:flex-row gap-2">
-                        <button type="submit" className="btn bg-teal-600 hover:bg-teal-700 text-white border-none w-full sm:w-auto" disabled={isLoading}>
+                        <button data-test="status-submit-button" type="submit" className="btn bg-teal-600 hover:bg-teal-700 text-white border-none w-full sm:w-auto" disabled={isLoading}>
                             {isLoading ? (
                                 <>
                                     <span className="loading loading-spinner loading-sm" /> Updating...
@@ -131,6 +132,7 @@ const ChangeStatus = ({ appointment, refetch }: ChangeStatusProps) => {
                             ) : "Update Status"}
                         </button>
                         <button
+                            data-test="status-cancel-button"
                             className="btn btn-ghost w-full sm:w-auto"
                             type="button"
                             onClick={() => {

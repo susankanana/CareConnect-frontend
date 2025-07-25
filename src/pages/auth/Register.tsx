@@ -101,6 +101,7 @@ function Register() {
                                         First Name
                                     </label>
                                     <input
+                                        data-test="signup-firstname"
                                         type="text"
                                         {...register('firstName')}
                                         placeholder="First name"
@@ -116,6 +117,7 @@ function Register() {
                                         Last Name
                                     </label>
                                     <input
+                                        data-test="signup-lastname"
                                         type="text"
                                         {...register('lastName')}
                                         placeholder="Last name"
@@ -132,6 +134,7 @@ function Register() {
                                     Email Address
                                 </label>
                                 <input
+                                    data-test="signup-email"
                                     type="email"
                                     {...register('email')}
                                     placeholder="Enter your email address"
@@ -147,6 +150,7 @@ function Register() {
                                     Phone Number
                                 </label>
                                 <input
+                                    data-test="signup-phone"
                                     type="tel"
                                     {...register('contactPhone')}
                                     placeholder="Enter your phone number"
@@ -162,6 +166,7 @@ function Register() {
                                     Address
                                 </label>
                                 <input
+                                    data-test="signup-address"
                                     type="text"
                                     {...register('address')}
                                     placeholder="Enter your address"
@@ -177,6 +182,7 @@ function Register() {
                                     Password
                                 </label>
                                 <input
+                                    data-test="signup-password"
                                     type="password"
                                     {...register('password')}
                                     placeholder="Create password"
@@ -192,6 +198,7 @@ function Register() {
                                     Confirm Password
                                 </label>
                                 <input
+                                    data-test="signup-confirmpassword"
                                     type="password"
                                     {...register('confirmPassword')}
                                     placeholder="Confirm password"
@@ -203,6 +210,7 @@ function Register() {
                             </div>
 
                             <button 
+                                data-test="signup-submitbtn"
                                 type="submit" 
                                 disabled={isLoading}
                                 className="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white py-3 px-6 rounded-lg hover:from-pink-600 hover:to-pink-700 transition-all font-semibold text-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"

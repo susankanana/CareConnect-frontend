@@ -85,6 +85,7 @@ const DeleteDoctor = ({ doctor, refetch }: DeleteDoctorProps) => {
 
                 <div className="modal-action flex gap-4">
                     <button
+                        data-test="delete-doctor-confirm-button"
                         className="btn bg-red-600 hover:bg-red-700 text-white border-none"
                         onClick={handleDelete}
                         disabled={isLoading}
@@ -96,6 +97,7 @@ const DeleteDoctor = ({ doctor, refetch }: DeleteDoctorProps) => {
                         ) : "Yes, Delete"}
                     </button>
                     <button
+                        data-test="delete-doctor-cancel-button"
                         className="btn btn-ghost"
                         type="button"
                         onClick={() => (document.getElementById('delete_doctor_modal') as HTMLDialogElement)?.close()}

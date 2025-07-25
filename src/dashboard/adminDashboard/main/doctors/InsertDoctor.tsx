@@ -90,6 +90,7 @@ const InsertDoctor = ({ refetch }: InsertDoctorProps) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
               <input
+                data-test="doctor-firstname-input"
                 type="text"
                 {...register("firstName")}
                 placeholder="John"
@@ -101,6 +102,7 @@ const InsertDoctor = ({ refetch }: InsertDoctorProps) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
               <input
+                data-test="doctor-lastname-input"
                 type="text"
                 {...register("lastName")}
                 placeholder="Doe"
@@ -113,6 +115,7 @@ const InsertDoctor = ({ refetch }: InsertDoctorProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
+              data-test="doctor-email-input"
               type="email"
               {...register("email")}
               placeholder="doctor@careconnect.co.ke"
@@ -124,6 +127,7 @@ const InsertDoctor = ({ refetch }: InsertDoctorProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <input
+              data-test="doctor-password-input"
               type="password"
               {...register("password")}
               placeholder="Secure password"
@@ -135,6 +139,7 @@ const InsertDoctor = ({ refetch }: InsertDoctorProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
             <input
+              data-test="doctor-phone-input"
               type="tel"
               {...register("contactPhone")}
               placeholder="+254700123456"
@@ -146,6 +151,7 @@ const InsertDoctor = ({ refetch }: InsertDoctorProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <textarea
+              data-test="doctor-address-input"
               {...register("address")}
               placeholder="Doctor's address"
               className="textarea textarea-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
@@ -157,6 +163,7 @@ const InsertDoctor = ({ refetch }: InsertDoctorProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
             <input
+              data-test="doctor-specialization-input"
               type="text"
               {...register("specialization")}
               placeholder="e.g., Cardiology, Neurology"
@@ -171,6 +178,7 @@ const InsertDoctor = ({ refetch }: InsertDoctorProps) => {
               {daysOfWeek.map((day) => (
                 <label key={day} className="flex items-center gap-2 cursor-pointer">
                   <input
+                    data-test={`doctor-availableday-${day.toLowerCase()}`}
                     type="checkbox"
                     checked={watchedDays?.includes(day) || false}
                     onChange={() => handleDayToggle(day)}
@@ -185,6 +193,7 @@ const InsertDoctor = ({ refetch }: InsertDoctorProps) => {
 
           <div className="modal-action">
             <button 
+              data-test="create-doctor-submit-button"
               type="submit" 
               className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
               disabled={isLoading}
@@ -198,6 +207,7 @@ const InsertDoctor = ({ refetch }: InsertDoctorProps) => {
               )}
             </button>
             <button
+              data-test="create-doctor-cancel-button"
               type="button"
               className="btn btn-ghost"
               onClick={() => {

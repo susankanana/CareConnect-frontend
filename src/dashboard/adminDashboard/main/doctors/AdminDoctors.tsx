@@ -57,6 +57,7 @@ const AdminDoctors = () => {
                         </p>
                     </div>
                     <button
+                        data-test="create-doctor-button"
                         className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-md"
                         onClick={() => (document.getElementById('create_doctor_modal') as HTMLDialogElement)?.showModal()}
                     >
@@ -175,6 +176,7 @@ const AdminDoctors = () => {
                                 {/* Action Buttons */}
                                 <div className="flex gap-2">
                                     <button
+                                        data-test="edit-doctor-button"
                                         onClick={() => handleEdit(doctor)}
                                         className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-teal-200"
                                     >

@@ -38,7 +38,7 @@ const DeleteAppointment = ({ appointment, refetch }: DeleteAppointmentProps) => 
 
     return (
         <dialog id="delete_appointment_modal" className="modal sm:modal-middle">
-            <div className="modal-box bg-white w-full max-w-xs sm:max-w-lg mx-auto rounded-lg border border-gray-200">
+            <div data-test="delete-appointment-modal" className="modal-box bg-white w-full max-w-xs sm:max-w-lg mx-auto rounded-lg border border-gray-200">
                 <div className="bg-gradient-to-r from-red-500 to-pink-500 -m-6 mb-6 p-6 rounded-t-lg">
                     <div className="flex items-center gap-3">
                         <AlertTriangle className="h-6 w-6 text-white" />
@@ -85,6 +85,7 @@ const DeleteAppointment = ({ appointment, refetch }: DeleteAppointmentProps) => 
 
                 <div className="modal-action flex gap-4">
                     <button
+                        data-test="confirm-delete-appointment"
                         className="btn bg-red-600 hover:bg-red-700 text-white border-none"
                         onClick={handleDelete}
                         disabled={isLoading}
@@ -96,6 +97,7 @@ const DeleteAppointment = ({ appointment, refetch }: DeleteAppointmentProps) => 
                         ) : "Yes, Delete"}
                     </button>
                     <button
+                        data-test="cancel-delete-appointment"
                         className="btn btn-ghost"
                         type="button"
                         onClick={() => (document.getElementById('delete_appointment_modal') as HTMLDialogElement)?.close()}

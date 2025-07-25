@@ -88,6 +88,7 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
               Prescription Notes
             </label>
             <textarea
+              data-test="update-notes"
               {...register("notes")}
               placeholder="Enter detailed prescription notes, medications, dosage, etc."
               className="textarea textarea-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
@@ -103,6 +104,7 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
               Amount (KSh)
             </label>
             <input
+              data-test="update-amount"
               type="number"
               step="0.01"
               {...register("amount")}
@@ -116,6 +118,7 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
 
           <div className="modal-action">
             <button 
+              data-test="submit-update-prescription"
               type="submit" 
               className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
               disabled={isLoading}
@@ -129,6 +132,7 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
               )}
             </button>
             <button
+              data-test="cancel-update-prescription"
               className="btn btn-ghost"
               type="button"
               onClick={() => {

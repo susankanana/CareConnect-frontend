@@ -53,6 +53,7 @@ const AdminProfile = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
+              data-test="update-profile-btn"
               onClick={() => (document.getElementById("update_profile_modal") as HTMLDialogElement)?.showModal()}
               className="flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold"
             >
@@ -61,6 +62,7 @@ const AdminProfile = () => {
             </button>
 
             <button
+              data-test="logout-btn"
               onClick={() => {
                 dispatch(logout());
                 navigate("/");

@@ -69,7 +69,7 @@ const Hero = () => {
                   <span className="text-gray-600 font-medium">5.0 Rating • 50,000+ Patients Served</span>
                 </div>
 
-                <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                <h1 data-test="careconnect-welcome-header" className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   Your Health is Our
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-pink-600 block">
                     Priority

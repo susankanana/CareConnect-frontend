@@ -82,7 +82,7 @@ const UpdateProfile = ({ user, refetch }: UpdateProfileProps) => {
     };
 
     return (
-        <dialog id="update_profile_modal" className="modal sm:modal-middle">
+        <dialog id="update_profile_modal" data-test="update-profile-modal" className="modal sm:modal-middle">
             <div className="modal-box bg-white text-gray-900 w-full max-w-xs sm:max-w-lg mx-auto rounded-2xl p-6 shadow-2xl">
                 <h3 className="font-bold text-2xl mb-6 text-center">Update Profile</h3>
 
@@ -105,6 +105,7 @@ const UpdateProfile = ({ user, refetch }: UpdateProfileProps) => {
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
                     <div>
                         <input
+                            data-test="first-name-input"
                             type="text"
                             {...register("firstName")}
                             placeholder="First Name"
@@ -117,6 +118,7 @@ const UpdateProfile = ({ user, refetch }: UpdateProfileProps) => {
 
                     <div>
                         <input
+                            data-test="last-name-input"
                             type="text"
                             {...register("lastName")}
                             placeholder="Last Name"
@@ -129,6 +131,7 @@ const UpdateProfile = ({ user, refetch }: UpdateProfileProps) => {
 
                     <div>
                         <input
+                            data-test="image-url-input"
                             type="text"
                             {...register("image_url")}
                             placeholder="Image URL"
@@ -141,6 +144,7 @@ const UpdateProfile = ({ user, refetch }: UpdateProfileProps) => {
 
                     <div className="modal-action flex flex-col sm:flex-row gap-3 mt-4">
                         <button
+                            data-test="confirm-update-btn"
                             type="submit"
                             className="w-full sm:w-auto bg-gradient-to-r from-teal-500 to-pink-500 text-white py-3 px-6 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold text-lg flex items-center justify-center gap-2"
                             disabled={isLoading}
@@ -154,6 +158,7 @@ const UpdateProfile = ({ user, refetch }: UpdateProfileProps) => {
                             )}
                         </button>
                         <button
+                            data-test="cancel-update-btn"
                             className="w-full sm:w-auto border-2 border-teal-600 text-teal-600 px-6 py-3 rounded-lg hover:bg-teal-50 transition-colors font-semibold text-lg"
                             type="button"
                             onClick={() => {

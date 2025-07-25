@@ -16,13 +16,14 @@ const Navbar = () => {
   const firstName = user?.first_name;
   const role = user?.role;
 
-  const dashboardPath = role === 'admin'
-    ? '/admin/dashboard/users'
-    : role === 'doctor'
-    ? '/doctor/dashboard/appointments'
-    : role === 'user'
-    ? '/user/dashboard/appointments'
-    : '/login';
+  const dashboardPath =
+    role === 'admin'
+      ? '/admin/dashboard/users'
+      : role === 'doctor'
+      ? '/doctor/dashboard/appointments'
+      : role === 'user'
+      ? '/user/dashboard/appointments'
+      : '/login';
 
   const handleLogout = () => {
     dispatch(logout());
@@ -36,16 +37,13 @@ const Navbar = () => {
   };
 
   const navigateAndScroll = (sectionId: string) => {
-    setIsMenuOpen(false); // Close menu regardless of navigation
+    setIsMenuOpen(false);
     if (window.location.pathname === '/') {
-      // If already on the homepage, scroll directly
       const element = document.getElementById(sectionId);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
-      // If on a different page, navigate to homepage with hash
-      // The scroll will be handled by the HomePage component after rendering
       navigate(`/#${sectionId}`);
     }
   };
@@ -93,36 +91,21 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a
-              onClick={() => navigateTo('/')}
-              className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-            >
+            <a onClick={() => navigateTo('/')} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
               Home
             </a>
-            <a
-              onClick={() => navigateTo('/about')}
-              className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-            >
+            <a onClick={() => navigateTo('/about')} data-test="desktop-nav-about" className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
               About
             </a>
-            <a
-              onClick={() => navigateAndScroll('services')}
-              className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-            >
+            <a onClick={() => navigateAndScroll('services')} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
               Services
             </a>
-            <a
-              onClick={() => navigateAndScroll('doctors')}
-              className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-            >
+            <a onClick={() => navigateAndScroll('doctors')} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
               Doctors
             </a>
 
             {isLoggedIn && (
-              <a
-                onClick={() => navigateTo(dashboardPath)}
-                className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors flex items-center gap-1"
-              >
+              <a onClick={() => navigateTo(dashboardPath)} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors flex items-center gap-1">
                 <User className="h-4 w-4" />
                 Dashboard
               </a>
@@ -133,34 +116,22 @@ const Navbar = () => {
                 <span className="text-gray-700 font-medium">
                   Welcome, {firstName || 'User'}!
                 </span>
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-700 hover:text-red-600 font-medium transition-colors"
-                >
+                <button onClick={handleLogout} className="text-gray-700 hover:text-red-600 font-medium transition-colors">
                   Logout
                 </button>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <a
-                  onClick={() => navigateTo('/login')}
-                  className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-                >
+                <a onClick={() => navigateTo('/login')} data-test="desktop-nav-login" className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
                   Login
                 </a>
-                <a
-                  onClick={() => navigateTo('/register')}
-                  className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-                >
+                <a onClick={() => navigateTo('/register')} data-test="desktop-nav-register" className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
                   Register
                 </a>
               </div>
             )}
 
-            <button
-              onClick={() => navigateTo('/appointments')}
-              className="bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-medium flex items-center gap-2"
-            >
+            <button onClick={() => navigateTo('/appointments')} className="bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-medium flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Book Appointment
             </button>
@@ -173,82 +144,52 @@ const Navbar = () => {
                 Hi, {firstName || 'User'}!
               </span>
             )}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-teal-600 transition-colors"
-            >
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-700 hover:text-teal-600 transition-colors">
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Navigation Panel */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4">
-              <a
-                onClick={() => navigateTo('/')}
-                className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-              >
+              <a onClick={() => navigateTo('/')} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
                 Home
               </a>
-              <a
-                onClick={() => navigateAndScroll('about')}
-                className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-              >
+              <a onClick={() => navigateAndScroll('about')} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
                 About
               </a>
-              <a
-                onClick={() => navigateAndScroll('services')}
-                className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-              >
+              <a onClick={() => navigateAndScroll('services')} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
                 Services
               </a>
-              <a
-                onClick={() => navigateAndScroll('doctors')}
-                className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-              >
+              <a onClick={() => navigateAndScroll('doctors')} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
                 Doctors
               </a>
 
               {isLoggedIn && (
-                <a
-                  onClick={() => navigateTo(dashboardPath)}
-                  className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors flex items-center gap-1"
-                >
+                <a onClick={() => navigateTo(dashboardPath)} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors flex items-center gap-1">
                   <User className="h-4 w-4" />
                   Dashboard
                 </a>
               )}
 
               {isLoggedIn ? (
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-700 hover:text-red-600 font-medium text-left transition-colors"
-                >
+                <button onClick={handleLogout} className="text-gray-700 hover:text-red-600 font-medium text-left transition-colors">
                   Logout
                 </button>
               ) : (
                 <>
-                  <a
-                    onClick={() => navigateTo('/login')}
-                    className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-                  >
+                  <a onClick={() => navigateTo('/login')} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
                     Login
                   </a>
-                  <a
-                    onClick={() => navigateTo('/register')}
-                    className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors"
-                  >
+                  <a onClick={() => navigateTo('/register')} className="text-gray-700 hover:text-teal-600 font-medium cursor-pointer transition-colors">
                     Register
                   </a>
                 </>
               )}
 
-              <button
-                onClick={() => navigateTo('/appointments')}
-                className="bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-medium flex items-center gap-2 w-fit"
-              >
+              <button onClick={() => navigateTo('/appointments')} className="bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-medium flex items-center gap-2 w-fit">
                 <Calendar className="h-4 w-4" />
                 Book Appointment
               </button>

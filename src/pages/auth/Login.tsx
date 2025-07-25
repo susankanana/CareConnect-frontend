@@ -101,6 +101,7 @@ function Login() {
                                     Username
                                 </label>
                                 <input
+                                    data-test="login-email-input"
                                     type="email"
                                     {...register('email')}
                                     placeholder="Enter your email address"
@@ -117,7 +118,8 @@ function Login() {
                                     Password
                                 </label>
                                 <div className="relative">
-                                    <input
+                                    <input  
+                                        data-test="login-password-input"
                                         type={showPassword ? "text" : "password"}
                                         {...register('password')}
                                         placeholder="Enter your password"
@@ -143,6 +145,7 @@ function Login() {
                             </div>
 
                             <button 
+                                data-test="login-submit-button"
                                 type="submit" 
                                 disabled={isLoading}
                                 className="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white py-3 px-6 rounded-lg hover:from-pink-600 hover:to-pink-700 transition-all font-semibold text-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"

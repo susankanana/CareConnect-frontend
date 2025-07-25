@@ -90,6 +90,7 @@ const DeletePrescription = ({ prescription, refetch }: DeletePrescriptionProps) 
 
                 <div className="modal-action flex gap-4">
                     <button
+                        data-test="confirm-delete-prescription"
                         className="btn bg-red-600 hover:bg-red-700 text-white border-none"
                         onClick={handleDelete}
                         disabled={isLoading}
@@ -101,6 +102,7 @@ const DeletePrescription = ({ prescription, refetch }: DeletePrescriptionProps) 
                         ) : "Yes, Delete"}
                     </button>
                     <button
+                        data-test="cancel-delete-prescription"
                         className="btn btn-ghost"
                         type="button"
                         onClick={() => (document.getElementById('delete_prescription_modal') as HTMLDialogElement)?.close()}

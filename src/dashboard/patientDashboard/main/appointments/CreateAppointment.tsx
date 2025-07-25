@@ -120,7 +120,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
           <p className="text-teal-100 text-sm mt-1">Schedule your consultation with our doctors</p>
         </div>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+        <form onSubmit={handleSubmit(onSubmit)} data-test="create-appointment-form" className="flex flex-col gap-6">
           {/* Doctor Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
@@ -128,6 +128,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
               <p className="text-gray-500">Loading doctors...</p>
             ) : (
               <select
+                data-test="doctor-select"
                 {...register("doctorId", { valueAsNumber: true })}
                 className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               >
@@ -169,6 +170,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
             <input
+              data-test="appointment-date-input"
               type="date"
               {...register("appointmentDate")}
               min={new Date().toISOString().split('T')[0]}
@@ -187,6 +189,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
             <select
+              data-test="appointment-time-slot-select"
               {...register("timeSlot")}
               className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               disabled={!selectedDoctor || !watchedValues.appointmentDate}
@@ -214,6 +217,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
 
           <div className="modal-action">
             <button 
+              data-test="submit-appointment-btn"
               type="submit" 
               className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
               disabled={isLoading}
@@ -227,6 +231,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
               )}
             </button>
             <button
+              data-test="cancel-appointment-btn"
               type="button"
               className="btn btn-ghost"
               onClick={() => {

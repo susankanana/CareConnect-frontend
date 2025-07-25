@@ -195,6 +195,7 @@ const PatientAppointments = () => {
                         {/* Action Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4">
                             <button
+                                data-test="back-to-appointments-btn"
                                 onClick={() => {
                                     setShowCheckout(false);
                                     setSelectedAppointment(null);
@@ -205,6 +206,7 @@ const PatientAppointments = () => {
                                 Back to Appointments
                             </button>
                             <button
+                                data-test="proceed-to-checkout-btn"
                                 onClick={handleProceedToCheckout}
                                 disabled={isCreatingSession}
                                 className="flex-1 bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -252,6 +254,7 @@ const PatientAppointments = () => {
                         </p>
                     </div>
                     <button
+                        data-test="book-appointment-btn"
                         className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-md"
                         onClick={() => (document.getElementById('create_appointment_modal') as HTMLDialogElement)?.showModal()}
                     >
@@ -334,6 +337,7 @@ const PatientAppointments = () => {
                                 {/* Action Section */}
                                 {needsPayment(appointment) ? (
                                     <button
+                                        data-test="pay-now-btn"
                                         onClick={() => handlePayNow(appointment)}
                                         className="w-full bg-gradient-to-r from-teal-500 to-pink-500 text-white px-4 py-3 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2"
                                     >

@@ -111,6 +111,7 @@ const UpdateDoctor = ({ doctor, refetch }: UpdateDoctorProps) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
               <input
+                data-test="update-doctor-firstname-input"
                 type="text"
                 {...register("firstName")}
                 placeholder="John"
@@ -122,6 +123,7 @@ const UpdateDoctor = ({ doctor, refetch }: UpdateDoctorProps) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
               <input
+                data-test="update-doctor-lastname-input"
                 type="text"
                 {...register("lastName")}
                 placeholder="Doe"
@@ -134,6 +136,7 @@ const UpdateDoctor = ({ doctor, refetch }: UpdateDoctorProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
+              data-test="update-doctor-email-input"
               type="email"
               {...register("email")}
               placeholder="doctor@careconnect.co.ke"
@@ -145,6 +148,7 @@ const UpdateDoctor = ({ doctor, refetch }: UpdateDoctorProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
             <input
+              data-test="update-doctor-phone-input"
               type="tel"
               {...register("contactPhone")}
               placeholder="+254700123456"
@@ -156,6 +160,7 @@ const UpdateDoctor = ({ doctor, refetch }: UpdateDoctorProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <textarea
+              data-test="update-doctor-address-input"
               {...register("address")}
               placeholder="Doctor's address"
               className="textarea textarea-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
@@ -167,6 +172,7 @@ const UpdateDoctor = ({ doctor, refetch }: UpdateDoctorProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
             <input
+              data-test="update-doctor-specialization-input"
               type="text"
               {...register("specialization")}
               placeholder="e.g., Cardiology, Neurology"
@@ -181,6 +187,7 @@ const UpdateDoctor = ({ doctor, refetch }: UpdateDoctorProps) => {
               {daysOfWeek.map((day) => (
                 <label key={day} className="flex items-center gap-2 cursor-pointer">
                   <input
+                    data-test={`update-doctor-availableday-${day.toLowerCase()}`}
                     type="checkbox"
                     checked={watchedDays?.includes(day) || false}
                     onChange={() => handleDayToggle(day)}
@@ -195,6 +202,7 @@ const UpdateDoctor = ({ doctor, refetch }: UpdateDoctorProps) => {
 
           <div className="modal-action">
             <button 
+              data-test="update-doctor-submit-button"
               type="submit" 
               className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
               disabled={isLoading}
@@ -208,6 +216,7 @@ const UpdateDoctor = ({ doctor, refetch }: UpdateDoctorProps) => {
               )}
             </button>
             <button
+              data-test="update-doctor-cancel-button"
               className="btn btn-ghost"
               type="button"
               onClick={() => {

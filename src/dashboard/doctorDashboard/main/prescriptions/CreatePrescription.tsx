@@ -79,6 +79,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Appointment ID</label>
             <input
+              data-test="create-appointment-id"
               type="number"
               {...register("appointmentId")}
               placeholder="Enter appointment ID"
@@ -90,6 +91,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Patient ID</label>
             <input
+              data-test="create-patient-id"
               type="number"
               {...register("patientId")}
               placeholder="Enter patient ID"
@@ -101,6 +103,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Prescription Notes</label>
             <textarea
+              data-test="create-notes"
               {...register("notes")}
               placeholder="Enter detailed prescription notes, medications, dosage, etc."
               className="textarea textarea-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
@@ -112,6 +115,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Amount (KSh)</label>
             <input
+              data-test="create-amount"
               type="number"
               step="0.01"
               {...register("amount")}
@@ -122,7 +126,8 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
           </div>
 
           <div className="modal-action">
-            <button 
+            <button
+              data-test="submit-create-prescription" 
               type="submit" 
               className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
               disabled={isLoading}
@@ -136,6 +141,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               )}
             </button>
             <button
+              data-test="cancel-create-prescription"
               type="button"
               className="btn btn-ghost"
               onClick={() => {

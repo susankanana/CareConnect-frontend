@@ -75,6 +75,7 @@ const PatientDoctors = () => {
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                             <input
+                                data-test="search-doctor-input"
                                 type="text"
                                 placeholder="Search by doctor name or specialization..."
                                 value={searchTerm}
@@ -86,6 +87,7 @@ const PatientDoctors = () => {
                         {/* Specialization Filter */}
                         <div className="sm:w-64">
                             <select
+                                data-test="specialization-filter"
                                 value={selectedSpecialization}
                                 onChange={(e) => setSelectedSpecialization(e.target.value)}
                                 className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
@@ -107,6 +109,7 @@ const PatientDoctors = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredDoctors().map((doctor: TDoctor) => (
                         <div
+                            data-test="doctor-card"
                             key={doctor.doctor?.doctorId}
                             className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden group"
                         >
@@ -134,7 +137,7 @@ const PatientDoctors = () => {
                             <div className="p-6">
                                 {/* Doctor Name & Specialization */}
                                 <div className="text-center mb-4">
-                                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-teal-600 transition-colors">
+                                    <h3 data-test="doctor-name" className="text-xl font-bold text-gray-900 group-hover:text-teal-600 transition-colors">
                                         Dr. {doctor.user?.firstName} {doctor.user?.lastName}
                                     </h3>
                                     <p className="text-teal-600 font-semibold">{doctor.doctor?.specialization}</p>
@@ -199,7 +202,7 @@ const PatientDoctors = () => {
                                 </div>
 
                                 {/* Book Appointment Button */}
-                                <button className="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
+                                <button data-test="book-appointment-btn" className="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
                                     <Calendar className="h-4 w-4" />
                                     Book Appointment
                                 </button>
@@ -219,6 +222,7 @@ const PatientDoctors = () => {
                     </p>
                     {(searchTerm || selectedSpecialization) && (
                         <button
+                            data-test="clear-filters-btn"
                             onClick={() => {
                                 setSearchTerm("");
                                 setSelectedSpecialization("");
@@ -236,25 +240,25 @@ const PatientDoctors = () => {
                 <div className="bg-white rounded-lg shadow-sm border p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Medical Staff Overview</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-4 bg-teal-50 rounded-lg">
+                        <div data-test="summary-total-doctors" className="text-center p-4 bg-teal-50 rounded-lg">
                             <div className="text-2xl font-bold text-teal-600">
                                 {doctorsData.data.length}
                             </div>
                             <div className="text-sm text-gray-600">Total Doctors</div>
                         </div>
-                        <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div data-test="summary-specializations" className="text-center p-4 bg-blue-50 rounded-lg">
                             <div className="text-2xl font-bold text-blue-600">
                                 {specializations.length}
                             </div>
                             <div className="text-sm text-gray-600">Specializations</div>
                         </div>
-                        <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <div data-test="summary-verified" className="text-center p-4 bg-green-50 rounded-lg">
                             <div className="text-2xl font-bold text-green-600">
                                 {doctorsData.data.filter((doctor: TDoctor) => doctor.user?.isVerified).length}
                             </div>
                             <div className="text-sm text-gray-600">Verified</div>
                         </div>
-                        <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <div data-test="summary-showing" className="text-center p-4 bg-gray-50 rounded-lg">
                             <div className="text-2xl font-bold text-gray-600">
                                 {filteredDoctors().length}
                             </div>
