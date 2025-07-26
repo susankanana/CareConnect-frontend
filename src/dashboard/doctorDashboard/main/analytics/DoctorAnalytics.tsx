@@ -367,7 +367,7 @@ const DoctorAnalytics = () => {
                 ))}
               </Pie>
               <Tooltip
-            formatter={(value: any, name: any, props: any) => { // Recharts provides 'name' directly for PieChart
+            formatter={(value: any, props: any) => { // Recharts provides 'name' directly for PieChart
              // Ensure payload and payload[0] exist before accessing properties
               if (props.payload && props.payload.name) {
                   return [
