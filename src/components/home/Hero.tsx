@@ -237,10 +237,6 @@ const Hero = () => {
                       <Users className="h-4 w-4 inline mr-1" />
                       {doctor.doctor?.patients || 'N/A'} patients treated
                     </div>
-
-                    <button className="w-full bg-gradient-to-r from-teal-500 to-pink-500 text-white py-2 px-4 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold">
-                      Book Appointment
-                    </button>
                   </div>
                 </div>
               ))}
