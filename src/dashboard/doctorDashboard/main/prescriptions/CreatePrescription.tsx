@@ -4,7 +4,9 @@ import * as yup from "yup";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../../app/store";
 import { prescriptionsAPI } from "../../../../reducers/prescriptions/prescriptionsAPI";
+import { appointmentsAPI, type TDetailedAppointment } from "../../../../reducers/appointments/appointmentsAPI"; // Import appointmentsAPI and TAppointment type
 import { toast } from "sonner";
+import { useEffect, useState } from "react"; // Import useEffect and useState
 
 type CreatePrescriptionInputs = {
   appointmentId: number;
@@ -32,21 +34,71 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   const user = useSelector((state: RootState) => state.user.user);
   const doctorId = user?.user_id;
 
-  const [createPrescription, { isLoading }] = prescriptionsAPI.useCreatePrescriptionMutation();
+  const [createPrescription, { isLoading: isCreating }] = prescriptionsAPI.useCreatePrescriptionMutation();
+
+  // State to hold a custom error for appointment ID ownership
+  const [appointmentOwnershipError, setAppointmentOwnershipError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     reset,
+    watch, // Use watch to get real-time value of appointmentId
+    setError, // Use setError to set form errors manually
+    clearErrors, // Use clearErrors to clear form errors manually
     formState: { errors },
   } = useForm<CreatePrescriptionInputs>({
     resolver: yupResolver(schema),
   });
 
+  const watchedAppointmentId = watch("appointmentId");
+
+  // Fetch appointments for the current doctor
+  const { data: doctorAppointments, isLoading: isLoadingAppointments } = appointmentsAPI.useGetAppointmentsByDoctorIdQuery(
+    doctorId!, // Ensure doctorId is not undefined before making the call
+    { skip: !doctorId } // Skip if doctorId is not available
+  );
+
+  // Effect to validate appointment ownership whenever watchedAppointmentId or doctorAppointments changes
+  useEffect(() => {
+    if (watchedAppointmentId && doctorAppointments?.data) {
+      const isOwned = doctorAppointments.data.some(
+        (appointment: TDetailedAppointment) => appointment.appointmentId === watchedAppointmentId
+      );
+
+      if (!isOwned) {
+        setAppointmentOwnershipError("This appointment ID does not belong to you.");
+        setError("appointmentId", { type: "manual", message: "This appointment ID does not belong to you." });
+      } else {
+        setAppointmentOwnershipError(null);
+        clearErrors("appointmentId"); // Clear the yup error if it was set due to ownership
+      }
+    } else if (!watchedAppointmentId) {
+      setAppointmentOwnershipError(null); // Clear error if appointment ID is empty
+      clearErrors("appointmentId");
+    }
+  }, [watchedAppointmentId, doctorAppointments, setError, clearErrors]);
+
+
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
     try {
       if (!doctorId) {
         toast.error("Doctor ID not found. Please login again.");
+        return;
+      }
+
+      // Re-check ownership before submitting to prevent race conditions
+      if (doctorAppointments?.data) {
+        const isOwned = doctorAppointments.data.some(
+          (appointment: TDetailedAppointment) => appointment.appointmentId === data.appointmentId
+        );
+        if (!isOwned) {
+          toast.error("Error: The appointment ID does not belong to you.");
+          setError("appointmentId", { type: "manual", message: "This appointment ID does not belong to you." });
+          return;
+        }
+      } else {
+        toast.error("Could not verify appointment ownership. Please try again.");
         return;
       }
 
@@ -74,7 +126,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
           <h3 className="font-bold text-lg text-white">Create New Prescription</h3>
           <p className="text-teal-100 text-sm mt-1">Add a prescription for your patient</p>
         </div>
-        
+
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Appointment ID</label>
@@ -86,6 +138,14 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
             {errors.appointmentId && <span className="text-sm text-red-600">{errors.appointmentId.message}</span>}
+            {appointmentOwnershipError && (
+              <span className="text-sm text-red-600">{appointmentOwnershipError}</span>
+            )}
+            {isLoadingAppointments && (
+              <span className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                <span className="loading loading-spinner loading-xs" /> Verifying appointment...
+              </span>
+            )}
           </div>
 
           <div>
@@ -127,12 +187,12 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
 
           <div className="modal-action">
             <button
-              data-test="submit-create-prescription" 
-              type="submit" 
-              className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
-              disabled={isLoading}
+              data-test="submit-create-prescription"
+              type="submit"
+              className="btn bg-teal-600 hover:bg-teal-700 text-white border-none"
+              disabled={isCreating || !!appointmentOwnershipError || isLoadingAppointments}
             >
-              {isLoading ? (
+              {isCreating ? (
                 <>
                   <span className="loading loading-spinner loading-sm" /> Creating...
                 </>
@@ -147,6 +207,8 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               onClick={() => {
                 (document.getElementById("create_prescription_modal") as HTMLDialogElement)?.close();
                 reset();
+                setAppointmentOwnershipError(null); // Clear custom error on close
+                clearErrors("appointmentId"); // Clear react-hook-form error on close
               }}
             >
               Cancel
