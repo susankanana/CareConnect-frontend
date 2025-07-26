@@ -1,9 +1,9 @@
 import { toast } from "sonner";
-import { appointmentsAPI } from "../../../../reducers/appointments/appointmentsAPI";
+import { appointmentsAPI, type TDetailedAppointment } from "../../../../reducers/appointments/appointmentsAPI";
 import { Calendar, User, Stethoscope, AlertTriangle } from "lucide-react";
 
 type DeleteAppointmentProps = {
-    appointment: any | null;
+    appointment: TDetailedAppointment | null;
     refetch: () => void;
 };
 
@@ -63,14 +63,14 @@ const DeleteAppointment = ({ appointment, refetch }: DeleteAppointmentProps) => 
                             <div className="flex items-center gap-3">
                                 <User className="h-4 w-4 text-teal-600" />
                                 <span className="text-sm">
-                                    <span className="font-medium">Patient:</span> {appointment.user?.firstName} {appointment.user?.lastName}
+                                    <span className="font-medium">Patient:</span> {appointment.patient?.name} {appointment.patient?.lastName}
                                 </span>
                             </div>
                             
                             <div className="flex items-center gap-3">
                                 <Stethoscope className="h-4 w-4 text-teal-600" />
                                 <span className="text-sm">
-                                    <span className="font-medium">Doctor:</span> Dr. {appointment.doctor?.user?.firstName} {appointment.doctor?.user?.lastName}
+                                    <span className="font-medium">Doctor:</span> Dr. {appointment.doctor?.name} {appointment.doctor?.lastName}
                                 </span>
                             </div>
                             
