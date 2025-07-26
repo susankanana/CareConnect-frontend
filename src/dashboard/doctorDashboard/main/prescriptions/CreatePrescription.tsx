@@ -4,9 +4,9 @@ import * as yup from "yup";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../../app/store";
 import { prescriptionsAPI } from "../../../../reducers/prescriptions/prescriptionsAPI";
-import { appointmentsAPI, type TDetailedAppointment } from "../../../../reducers/appointments/appointmentsAPI"; // Import appointmentsAPI and TAppointment type
+import { appointmentsAPI, type TDetailedAppointment } from "../../../../reducers/appointments/appointmentsAPI";
 import { toast } from "sonner";
-import { useEffect, useState } from "react"; // Import useEffect and useState
+import { useEffect } from "react"; // Removed useState for appointmentOwnershipError
 
 type CreatePrescriptionInputs = {
   appointmentId: number;
@@ -36,48 +36,56 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
 
   const [createPrescription, { isLoading: isCreating }] = prescriptionsAPI.useCreatePrescriptionMutation();
 
-  // State to hold a custom error for appointment ID ownership
-  const [appointmentOwnershipError, setAppointmentOwnershipError] = useState<string | null>(null);
-
   const {
     register,
     handleSubmit,
     reset,
-    watch, // Use watch to get real-time value of appointmentId
-    setError, // Use setError to set form errors manually
-    clearErrors, // Use clearErrors to clear form errors manually
+    watch,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<CreatePrescriptionInputs>({
     resolver: yupResolver(schema),
+    mode: "onChange", // Validate on change for immediate feedback
   });
 
   const watchedAppointmentId = watch("appointmentId");
 
   // Fetch appointments for the current doctor
-  const { data: doctorAppointments, isLoading: isLoadingAppointments } = appointmentsAPI.useGetAppointmentsByDoctorIdQuery(
-    doctorId!, // Ensure doctorId is not undefined before making the call
-    { skip: !doctorId } // Skip if doctorId is not available
+  const {
+    data: doctorAppointments,
+    isLoading: isLoadingAppointments,
+    isFetching: isFetchingAppointments, // Use isFetching to indicate ongoing background fetch
+  } = appointmentsAPI.useGetAppointmentsByDoctorIdQuery(
+    doctorId!,
+    { skip: !doctorId }
   );
 
   // Effect to validate appointment ownership whenever watchedAppointmentId or doctorAppointments changes
   useEffect(() => {
-    if (watchedAppointmentId && doctorAppointments?.data) {
+    // Only proceed if doctorId is available, watchedAppointmentId has a value,
+    // and doctorAppointments data is loaded (not undefined/null and not currently fetching)
+    if (doctorId && watchedAppointmentId && doctorAppointments?.data && !isFetchingAppointments) {
       const isOwned = doctorAppointments.data.some(
         (appointment: TDetailedAppointment) => appointment.appointmentId === watchedAppointmentId
       );
 
       if (!isOwned) {
-        setAppointmentOwnershipError("This appointment ID does not belong to you.");
-        setError("appointmentId", { type: "manual", message: "This appointment ID does not belong to you." });
+        setError("appointmentId", {
+          type: "custom", // Use a custom type for this specific error
+          message: "This appointment ID does not belong to you.",
+        });
       } else {
-        setAppointmentOwnershipError(null);
-        clearErrors("appointmentId"); // Clear the yup error if it was set due to ownership
+        // Only clear if the error was due to ownership, not a yup validation error
+        if (errors.appointmentId?.type === "custom") {
+          clearErrors("appointmentId");
+        }
       }
-    } else if (!watchedAppointmentId) {
-      setAppointmentOwnershipError(null); // Clear error if appointment ID is empty
+    } else if (!watchedAppointmentId && errors.appointmentId?.type === "custom") {
+      // Clear custom error if appointment ID input is cleared
       clearErrors("appointmentId");
     }
-  }, [watchedAppointmentId, doctorAppointments, setError, clearErrors]);
+  }, [watchedAppointmentId, doctorAppointments, isFetchingAppointments, doctorId, setError, clearErrors, errors.appointmentId]);
 
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
@@ -87,18 +95,19 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
         return;
       }
 
-      // Re-check ownership before submitting to prevent race conditions
-      if (doctorAppointments?.data) {
-        const isOwned = doctorAppointments.data.some(
-          (appointment: TDetailedAppointment) => appointment.appointmentId === data.appointmentId
-        );
-        if (!isOwned) {
-          toast.error("Error: The appointment ID does not belong to you.");
-          setError("appointmentId", { type: "manual", message: "This appointment ID does not belong to you." });
-          return;
-        }
-      } else {
-        toast.error("Could not verify appointment ownership. Please try again.");
+      // Final check for ownership just before submission
+      if (!doctorAppointments?.data) {
+        toast.error("Appointments data not loaded. Cannot verify ownership. Please try again.");
+        return;
+      }
+
+      const isOwned = doctorAppointments.data.some(
+        (appointment: TDetailedAppointment) => appointment.appointmentId === data.appointmentId
+      );
+
+      if (!isOwned) {
+        toast.error("Error: The appointment ID does not belong to you.");
+        setError("appointmentId", { type: "manual", message: "This appointment ID does not belong to you." });
         return;
       }
 
@@ -119,6 +128,12 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     }
   };
 
+  const isFormDisabled =
+    isCreating ||
+    isLoadingAppointments || // Still loading initial appointments data
+    isFetchingAppointments || // Background fetching (e.g., re-fetching on focus)
+    !!errors.appointmentId?.message; // Disable if there's any appointmentId error, including ownership
+
   return (
     <dialog id="create_prescription_modal" className="modal sm:modal-middle">
       <div className="modal-box bg-white w-full max-w-xs sm:max-w-lg mx-auto rounded-lg border border-gray-200">
@@ -133,17 +148,17 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
             <input
               data-test="create-appointment-id"
               type="number"
-              {...register("appointmentId")}
+              {...register("appointmentId", { valueAsNumber: true })} // Ensure it's treated as a number
               placeholder="Enter appointment ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
+            {/* Show error message only once, from react-hook-form's errors */}
             {errors.appointmentId && <span className="text-sm text-red-600">{errors.appointmentId.message}</span>}
-            {appointmentOwnershipError && (
-              <span className="text-sm text-red-600">{appointmentOwnershipError}</span>
-            )}
-            {isLoadingAppointments && (
+
+            {/* Show a loading indicator specifically for the ownership check */}
+            {watchedAppointmentId && (isLoadingAppointments || isFetchingAppointments) && !errors.appointmentId?.message && (
               <span className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-                <span className="loading loading-spinner loading-xs" /> Verifying appointment...
+                <span className="loading loading-spinner loading-xs" /> Verifying appointment ownership...
               </span>
             )}
           </div>
@@ -153,7 +168,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
             <input
               data-test="create-patient-id"
               type="number"
-              {...register("patientId")}
+              {...register("patientId", { valueAsNumber: true })}
               placeholder="Enter patient ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
@@ -178,7 +193,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               data-test="create-amount"
               type="number"
               step="0.01"
-              {...register("amount")}
+              {...register("amount", { valueAsNumber: true })}
               placeholder="0.00"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
@@ -190,7 +205,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               data-test="submit-create-prescription"
               type="submit"
               className="btn bg-teal-600 hover:bg-teal-700 text-white border-none"
-              disabled={isCreating || !!appointmentOwnershipError || isLoadingAppointments}
+              disabled={isFormDisabled}
             >
               {isCreating ? (
                 <>
@@ -207,7 +222,6 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               onClick={() => {
                 (document.getElementById("create_prescription_modal") as HTMLDialogElement)?.close();
                 reset();
-                setAppointmentOwnershipError(null); // Clear custom error on close
                 clearErrors("appointmentId"); // Clear react-hook-form error on close
               }}
             >
