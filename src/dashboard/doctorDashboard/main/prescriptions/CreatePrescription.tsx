@@ -6,7 +6,7 @@ import type { RootState } from "../../../../app/store";
 import { prescriptionsAPI } from "../../../../reducers/prescriptions/prescriptionsAPI";
 import { appointmentsAPI, type TDetailedAppointment } from "../../../../reducers/appointments/appointmentsAPI";
 import { toast } from "sonner";
-import { useEffect } from "react"; // Removed useState for appointmentOwnershipError
+import { useEffect } from "react";
 
 type CreatePrescriptionInputs = {
   appointmentId: number;
@@ -41,51 +41,59 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     handleSubmit,
     reset,
     watch,
+    setValue,
     setError,
     clearErrors,
     formState: { errors },
   } = useForm<CreatePrescriptionInputs>({
     resolver: yupResolver(schema),
-    mode: "onChange", // Validate on change for immediate feedback
+    mode: "onChange",
   });
 
   const watchedAppointmentId = watch("appointmentId");
 
-  // Fetch appointments for the current doctor
   const {
     data: doctorAppointments,
     isLoading: isLoadingAppointments,
-    isFetching: isFetchingAppointments, // Use isFetching to indicate ongoing background fetch
+    isFetching: isFetchingAppointments,
   } = appointmentsAPI.useGetAppointmentsByDoctorIdQuery(
     doctorId!,
     { skip: !doctorId }
   );
 
-  // Effect to validate appointment ownership whenever watchedAppointmentId or doctorAppointments changes
+  // Effect to validate appointment ownership and prepopulate patientId
   useEffect(() => {
-    // Only proceed if doctorId is available, watchedAppointmentId has a value,
-    // and doctorAppointments data is loaded (not undefined/null and not currently fetching)
+    // Clear patientId and any custom appointmentId errors when watchedAppointmentId changes
+    setValue("patientId", 0); // Reset patientId
+    if (errors.appointmentId?.type === "custom") {
+      clearErrors("appointmentId");
+    }
+
     if (doctorId && watchedAppointmentId && doctorAppointments?.data && !isFetchingAppointments) {
-      const isOwned = doctorAppointments.data.some(
+      const foundAppointment = doctorAppointments.data.find(
         (appointment: TDetailedAppointment) => appointment.appointmentId === watchedAppointmentId
       );
 
-      if (!isOwned) {
+      if (!foundAppointment) {
         setError("appointmentId", {
-          type: "custom", // Use a custom type for this specific error
-          message: "This appointment ID does not belong to you.",
+          type: "custom",
+          message: "This appointment ID does not belong to you or does not exist.",
         });
+        setValue("patientId", 0); // Ensure patientId is cleared if invalid appointment
       } else {
-        // Only clear if the error was due to ownership, not a yup validation error
+        // If owned and found, clear any previous custom error
         if (errors.appointmentId?.type === "custom") {
           clearErrors("appointmentId");
         }
+        // Prepopulate patientId field
+        setValue("patientId", foundAppointment.patient.id);
       }
-    } else if (!watchedAppointmentId && errors.appointmentId?.type === "custom") {
-      // Clear custom error if appointment ID input is cleared
+    } else if (!watchedAppointmentId) {
+      // Clear custom error and patientId if appointment ID input is empty
       clearErrors("appointmentId");
+      setValue("patientId", 0);
     }
-  }, [watchedAppointmentId, doctorAppointments, isFetchingAppointments, doctorId, setError, clearErrors, errors.appointmentId]);
+  }, [watchedAppointmentId, doctorAppointments, isFetchingAppointments, doctorId, setError, clearErrors, setValue, errors.appointmentId]);
 
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
@@ -95,7 +103,6 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
         return;
       }
 
-      // Final check for ownership just before submission
       if (!doctorAppointments?.data) {
         toast.error("Appointments data not loaded. Cannot verify ownership. Please try again.");
         return;
@@ -130,9 +137,9 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
 
   const isFormDisabled =
     isCreating ||
-    isLoadingAppointments || // Still loading initial appointments data
-    isFetchingAppointments || // Background fetching (e.g., re-fetching on focus)
-    !!errors.appointmentId?.message; // Disable if there's any appointmentId error, including ownership
+    isLoadingAppointments ||
+    isFetchingAppointments ||
+    !!errors.appointmentId?.message;
 
   return (
     <dialog id="create_prescription_modal" className="modal sm:modal-middle">
@@ -148,14 +155,12 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
             <input
               data-test="create-appointment-id"
               type="number"
-              {...register("appointmentId", { valueAsNumber: true })} // Ensure it's treated as a number
+              {...register("appointmentId", { valueAsNumber: true })}
               placeholder="Enter appointment ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
-            {/* Show error message only once, from react-hook-form's errors */}
             {errors.appointmentId && <span className="text-sm text-red-600">{errors.appointmentId.message}</span>}
 
-            {/* Show a loading indicator specifically for the ownership check */}
             {watchedAppointmentId && (isLoadingAppointments || isFetchingAppointments) && !errors.appointmentId?.message && (
               <span className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                 <span className="loading loading-spinner loading-xs" /> Verifying appointment ownership...
@@ -171,6 +176,8 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               {...register("patientId", { valueAsNumber: true })}
               placeholder="Enter patient ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
+              readOnly // Make it read-only since it's pre-populated
+              disabled={watchedAppointmentId === 0 || errors.appointmentId?.message !== undefined} // Disable if no valid appointment ID or if there's an error
             />
             {errors.patientId && <span className="text-sm text-red-600">{errors.patientId.message}</span>}
           </div>
@@ -222,7 +229,8 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               onClick={() => {
                 (document.getElementById("create_prescription_modal") as HTMLDialogElement)?.close();
                 reset();
-                clearErrors("appointmentId"); // Clear react-hook-form error on close
+                clearErrors("appointmentId");
+                // Note: reset() should clear patientId too if it's part of the form state
               }}
             >
               Cancel
