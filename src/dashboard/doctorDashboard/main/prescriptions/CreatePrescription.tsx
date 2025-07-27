@@ -1,12 +1,16 @@
+import { useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useSelector } from "react-redux";
+import { toast } from "sonner";
+
 import type { RootState } from "../../../../app/store";
 import { prescriptionsAPI } from "../../../../reducers/prescriptions/prescriptionsAPI";
-import { appointmentsAPI, type TDetailedAppointment } from "../../../../reducers/appointments/appointmentsAPI";
-import { toast } from "sonner";
-import { useEffect } from "react";
+import {
+  appointmentsAPI,
+  type TDetailedAppointment,
+} from "../../../../reducers/appointments/appointmentsAPI";
 
 type CreatePrescriptionInputs = {
   appointmentId: number;
@@ -16,8 +20,14 @@ type CreatePrescriptionInputs = {
 };
 
 const schema: yup.ObjectSchema<CreatePrescriptionInputs> = yup.object({
-  appointmentId: yup.number().positive("Appointment ID must be positive").required("Appointment ID is required"),
-  patientId: yup.number().positive("Patient ID must be positive").required("Patient ID is required"),
+  appointmentId: yup
+    .number()
+    .positive("Appointment ID must be positive")
+    .required("Appointment ID is required"),
+  patientId: yup
+    .number()
+    .positive("Patient ID must be positive")
+    .required("Patient ID is required"),
   notes: yup.string().required("Prescription notes are required"),
   amount: yup
     .number()
@@ -30,11 +40,13 @@ type CreatePrescriptionProps = {
   refetch: () => void;
 };
 
+
 const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   const user = useSelector((state: RootState) => state.user.user);
   const doctorId = user?.user_id;
 
-  const [createPrescription, { isLoading: isCreating }] = prescriptionsAPI.useCreatePrescriptionMutation();
+  const [createPrescription, { isLoading: isCreating }] =
+    prescriptionsAPI.useCreatePrescriptionMutation();
 
   const {
     register,
@@ -47,57 +59,77 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     formState: { errors },
   } = useForm<CreatePrescriptionInputs>({
     resolver: yupResolver(schema),
-    mode: "onChange", // Validate on change for immediate feedback
+    mode: "onChange",
   });
 
   const watchedAppointmentId = watch("appointmentId");
 
-  // Fetch appointments for the current doctor
   const {
     data: doctorAppointments,
     isLoading: isLoadingAppointments,
     isFetching: isFetchingAppointments,
-  } = appointmentsAPI.useGetAppointmentsByDoctorIdQuery(
-    doctorId!,
-    { skip: !doctorId }
-  );
+  } = appointmentsAPI.useGetAppointmentsByDoctorIdQuery(doctorId!, {
+    skip: !doctorId,
+  });
 
-  // Effect to validate appointment ownership and prepopulate patientId
- useEffect(() => {
-  // Reset patientId always when appointmentId changes
-  setValue("patientId", 0);
 
-  // If appointments are still loading, don’t validate yet
-  if (isLoadingAppointments || isFetchingAppointments || !doctorAppointments?.data) {
-    return;
-  }
+  useEffect(() => {
+    setValue("patientId", 0);
+    if (!doctorId) return;
 
-  // Try to find the appointment from the doctor's list
-  const foundAppointment = doctorAppointments.data.find(
-    (appointment: TDetailedAppointment) =>
-      appointment.appointmentId === watchedAppointmentId
-  );
+    if (!watchedAppointmentId && watchedAppointmentId !== 0) {
+      clearErrors("appointmentId");
+      return;
+    }
 
-  if (!foundAppointment) {
-    setError("appointmentId", {
-      type: "custom",
-      message: "This appointment ID does not belong to you or does not exist.",
-    });
-  } else {
-    clearErrors("appointmentId");
-    setValue("patientId", foundAppointment.patient.id);
-  }
-}, [
-  watchedAppointmentId,
-  doctorAppointments,
-  isFetchingAppointments,
-  isLoadingAppointments,
-  doctorId,
-  setValue,
-  setError,
-  clearErrors,
-]);
+    if (watchedAppointmentId <= 0) {
+      setError("appointmentId", {
+        type: "custom",
+        message: "Appointment ID must be a positive number.",
+      });
+      return;
+    }
 
+    if (isLoadingAppointments || isFetchingAppointments) {
+      if (errors.appointmentId?.message?.includes("does not belong")) {
+        clearErrors("appointmentId");
+      }
+      return;
+    }
+
+    if (!doctorAppointments?.data) {
+      setError("appointmentId", {
+        type: "custom",
+        message: "Unable to load appointments. Please refresh and try again.",
+      });
+      return;
+    }
+
+    const foundAppointment = doctorAppointments.data.find(
+      (appointment: TDetailedAppointment) =>
+        appointment.appointmentId === watchedAppointmentId
+    );
+
+    if (!foundAppointment) {
+      setError("appointmentId", {
+        type: "custom",
+        message: "This appointment ID does not belong to you or does not exist.",
+      });
+    } else {
+      clearErrors("appointmentId");
+      setValue("patientId", foundAppointment.patient.id);
+    }
+  }, [
+    watchedAppointmentId,
+    doctorAppointments?.data,
+    isFetchingAppointments,
+    isLoadingAppointments,
+    doctorId,
+    setValue,
+    setError,
+    clearErrors,
+    errors.appointmentId?.message,
+  ]);
 
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
@@ -107,24 +139,24 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
         return;
       }
 
-      // Final check for ownership just before submission
       if (!doctorAppointments?.data) {
         toast.error("Appointments data not loaded. Cannot verify ownership. Please try again.");
         return;
       }
 
-      // Use `find` to get the actual appointment object, not just check existence
       const foundAppointment = doctorAppointments.data.find(
-        (appointment: TDetailedAppointment) => appointment.appointmentId === data.appointmentId
+        (appointment: TDetailedAppointment) =>
+          appointment.appointmentId === data.appointmentId
       );
 
-      if (!foundAppointment) { // If `foundAppointment` is null or undefined, it's not owned/found
+      if (!foundAppointment) {
         toast.error("Error: The appointment ID does not belong to you or does not exist.");
-        setError("appointmentId", { type: "manual", message: "This appointment ID does not belong to you or does not exist." });
+        setError("appointmentId", {
+          type: "manual",
+          message: "This appointment ID does not belong to you or does not exist.",
+        });
         return;
       }
-      // At this point, `foundAppointment` exists and belongs to the doctor.
-      // The `patientId` field should also be correctly prepopulated from `useEffect`.
 
       const payload = {
         ...data,
@@ -143,11 +175,16 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     }
   };
 
-  const isFormDisabled =
-    isCreating ||
-    isLoadingAppointments || // Still loading initial appointments data
-    isFetchingAppointments || // Background fetching (e.g., re-fetching on focus)
-    !!errors.appointmentId?.message; // Disable if there's any appointmentId error, including ownership
+  // Derived UI States
+
+  const hasAppointmentError = !!errors.appointmentId?.message;
+  const isValidatingAppointment =
+    watchedAppointmentId > 0 &&
+    (isLoadingAppointments || isFetchingAppointments) &&
+    !hasAppointmentError;
+
+  const isFormDisabled = isCreating || hasAppointmentError;
+
 
   return (
     <dialog id="create_prescription_modal" className="modal sm:modal-middle">
@@ -158,26 +195,34 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          {/* Appointment ID */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Appointment ID</label>
             <input
               data-test="create-appointment-id"
               type="number"
-              {...register("appointmentId", { valueAsNumber: true })} // Ensure it's treated as a number
+              {...register("appointmentId", { valueAsNumber: true })}
               placeholder="Enter appointment ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
-            {/* Show error message only once, from react-hook-form's errors */}
-            {errors.appointmentId && <span className="text-sm text-red-600">{errors.appointmentId.message}</span>}
-
-            {/* Show a loading indicator specifically for the ownership check */}
-            {watchedAppointmentId > 0 && (isLoadingAppointments || isFetchingAppointments) && !errors.appointmentId?.message && (
+            {errors.appointmentId && (
+              <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                <span>⚠️</span> {errors.appointmentId.message}
+              </span>
+            )}
+            {isValidatingAppointment && (
               <span className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                 <span className="loading loading-spinner loading-xs" /> Verifying appointment ownership...
               </span>
             )}
+            {!errors.appointmentId && !isValidatingAppointment && watchedAppointmentId > 0 && (
+              <span className="text-sm text-green-600 flex items-center gap-1 mt-1">
+                <span>✅</span> Valid appointment
+              </span>
+            )}
           </div>
 
+          {/* Patient ID */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Patient ID</label>
             <input
@@ -186,17 +231,20 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               {...register("patientId", { valueAsNumber: true })}
               placeholder="Enter patient ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
-              readOnly // Make it read-only since it's pre-populated
-              // Disable if no valid appointment ID or if there's an error on appointmentId field
+              readOnly
               disabled={
-                watchedAppointmentId === 0 || // No appointment ID entered
-                !!errors.appointmentId?.message || // There's an error on appointment ID
-                isLoadingAppointments || isFetchingAppointments // Appointments are still loading/fetching
+                watchedAppointmentId === 0 ||
+                !!errors.appointmentId?.message ||
+                isLoadingAppointments ||
+                isFetchingAppointments
               }
             />
-            {errors.patientId && <span className="text-sm text-red-600">{errors.patientId.message}</span>}
+            {errors.patientId && (
+              <span className="text-sm text-red-600">{errors.patientId.message}</span>
+            )}
           </div>
 
+          {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Prescription Notes</label>
             <textarea
@@ -206,9 +254,12 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               className="textarea textarea-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               rows={4}
             />
-            {errors.notes && <span className="text-sm text-red-600">{errors.notes.message}</span>}
+            {errors.notes && (
+              <span className="text-sm text-red-600">{errors.notes.message}</span>
+            )}
           </div>
 
+          {/* Amount */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Amount (KSh)</label>
             <input
@@ -219,9 +270,12 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               placeholder="0.00"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
-            {errors.amount && <span className="text-sm text-red-600">{errors.amount.message}</span>}
+            {errors.amount && (
+              <span className="text-sm text-red-600">{errors.amount.message}</span>
+            )}
           </div>
 
+          {/* Buttons */}
           <div className="modal-action">
             <button
               data-test="submit-create-prescription"
