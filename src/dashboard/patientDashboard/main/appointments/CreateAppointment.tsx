@@ -1,3 +1,4 @@
+// [imports stay unchanged]
 import { useState, useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -177,10 +178,17 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
             {errors.appointmentDate && <span className="text-sm text-red-600">{errors.appointmentDate.message}</span>}
-            
+
+            {/* Inserted guidance block here */}
+            {selectedDoctor && (
+              <div className="mt-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
+                <strong>Doctor Availability:</strong> {selectedDoctor.doctor?.availableDays?.join(', ') || 'Not specified'}
+              </div>
+            )}
+
             {selectedDoctor && watchedValues.appointmentDate && !isDateAvailable(watchedValues.appointmentDate, selectedDoctor) && (
               <p className="text-sm text-red-600 mt-1">
-                Doctor is not available on {getDayName(watchedValues.appointmentDate)}
+                Doctor is not available on {getDayName(watchedValues.appointmentDate)}.
               </p>
             )}
           </div>
@@ -215,6 +223,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
             <p className="text-sm text-gray-600 mt-1">Payment due at appointment</p>
           </div>
 
+          {/* Actions */}
           <div className="modal-action">
             <button 
               data-test="submit-appointment-btn"
