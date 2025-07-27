@@ -67,12 +67,6 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   // Reset patientId always when appointmentId changes
   setValue("patientId", 0);
 
-  // Don't do anything until user types a valid number
-  if (!doctorId || !watchedAppointmentId || watchedAppointmentId <= 0) {
-    clearErrors("appointmentId");
-    return;
-  }
-
   // If appointments are still loading, don’t validate yet
   if (isLoadingAppointments || isFetchingAppointments || !doctorAppointments?.data) {
     return;
