@@ -80,14 +80,6 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
 
   if (!doctorId) return;
 
-  if (!watchedAppointmentId && watchedAppointmentId !== 0) {
-    setError("appointmentId", {
-      type: "custom",
-      message: "Appointment ID is required.",
-    });
-    return;
-  }
-
   if (watchedAppointmentId <= 0) {
     setError("appointmentId", {
       type: "custom",
