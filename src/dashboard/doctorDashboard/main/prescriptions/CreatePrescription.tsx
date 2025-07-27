@@ -43,6 +43,7 @@ type CreatePrescriptionProps = {
 const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   const user = useSelector((state: RootState) => state.user.user);
   const [foundAppointment, setFoundAppointment] = useState<TDetailedAppointment | null>(null);
+  const [customAppointmentError, setCustomAppointmentError] = useState<string | null>(null);
   const doctorId = user?.user_id;
 
   const [createPrescription, { isLoading: isCreating }] =
@@ -54,9 +55,9 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     reset,
     watch,
     setValue,
-    setError,
-    clearErrors,
-    formState: { errors },
+    // setError, // We will manage custom error outside of RHF state for consistent display
+    clearErrors, 
+    formState: { errors: formErrors }, // Renamed to avoid collision with local state
   } = useForm<CreatePrescriptionInputs>({
     resolver: yupResolver(schema),
     mode: "onChange",
@@ -75,37 +76,28 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   useEffect(() => {
     setValue("patientId", 0);
     setFoundAppointment(null); // Reset foundAppointment each time ID changes
+    setCustomAppointmentError(null); //Clear custom error on ID change start
 
     if (!doctorId) {
-      clearErrors("appointmentId");
+      // clearErrors("appointmentId"); // Let Yup handle "required" for empty/null
       return;
     }
 
-    // Immediately clear "does not exist" error if input is empty or invalid for basic Yup validation
-    // This allows Yup's "required" or "positive" errors to show first.
     if (!watchedAppointmentId || watchedAppointmentId <= 0) {
-      if (errors.appointmentId?.type === "custom" &&
-          errors.appointmentId.message === "This appointment ID does not belong to you or does not exist.") {
-        clearErrors("appointmentId");
-      }
-      return; // Stop here if the input isn't a valid positive number yet for async check
+      // No need to clear errors.appointmentId via clearErrors() here directly as Yup's resolver will manage its own error state.
+      setCustomAppointmentError(null);
+      return;
     }
-    
-    // Clear the custom error to prevent a false negative during verification
+
+    // While fetching appointments, show verifying state, not a custom error.
     if (isLoadingAppointments || isFetchingAppointments) {
-      if (errors.appointmentId?.type === "custom" &&
-          errors.appointmentId.message === "This appointment ID does not belong to you or does not exist.") {
-        clearErrors("appointmentId");
-      }
+      setCustomAppointmentError(null); // Ensure no custom error while verifying
       return;
     }
 
     // If data hasn't loaded (e.g., query skipped or failed silently before data exists)
     if (!doctorAppointments?.data) {
-      setError("appointmentId", {
-        type: "custom",
-        message: "Unable to load appointments to verify ID. Please refresh.",
-      });
+      setCustomAppointmentError("Unable to load appointments to verify ID. Please refresh.");
       return;
     }
 
@@ -114,16 +106,12 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     );
 
     if (!matched) {
-      // If no match found after data is loaded, set the specific custom error.
-      // We explicitly set this error, it will override Yup's success for a number.
-      setError("appointmentId", {
-        type: "custom", // Use a distinct type for your custom error
-        message: "This appointment ID does not belong to you or does not exist.",
-      });
+      // If no match found, set the custom error
+      setCustomAppointmentError("This appointment ID does not belong to you or does not exist.");
       setFoundAppointment(null);
     } else {
-      // If a match is found, clear ALL errors for appointmentId to show success.
-      clearErrors("appointmentId");
+      // If a match is found, ensure no custom error is set
+      setCustomAppointmentError(null);
       setFoundAppointment(matched);
       setValue("patientId", matched.patient.id);
     }
@@ -133,11 +121,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     isFetchingAppointments,
     isLoadingAppointments,
     doctorId,
-    setValue,
-    setError,
-    clearErrors,
-    // React to any change in the appointmentId error object
-    errors.appointmentId,
+    setValue
   ]);
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
@@ -147,7 +131,6 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
         return;
       }
 
-      // Re-verify on submit to ensure the latest state before sending
       if (!doctorAppointments?.data) {
         toast.error("Appointments data not loaded. Cannot verify ownership. Please try again.");
         return;
@@ -159,12 +142,8 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
       );
 
       if (!foundAppointmentOnSubmit) {
-        // Double-check: if it's somehow not found here, set the error and stop.
         toast.error("Error: The appointment ID does not belong to you or does not exist.");
-        setError("appointmentId", {
-          type: "manual",
-          message: "This appointment ID does not belong to you or does not exist.",
-        });
+        setCustomAppointmentError("This appointment ID does not belong to you or does not exist.");
         return;
       }
 
@@ -186,13 +165,19 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   };
 
   // Derived UI States
-  const hasAppointmentError = !!errors.appointmentId?.message;
+  const hasYupError = !!formErrors.appointmentId?.message; // Check RHF's formErrors for Yup's messages
+  const hasCustomError = !!customAppointmentError; // Check your local state for the custom message
+
+  // An error exists if either Yup has one, OR your custom logic has one.
+  const hasOverallAppointmentError = hasYupError || hasCustomError;
+
   const isValidatingAppointment =
     watchedAppointmentId > 0 &&
     (isLoadingAppointments || isFetchingAppointments) &&
-    !hasAppointmentError; // Only show verifying if no error is currently displayed
+    !hasOverallAppointmentError; // Show verifying only if no error is currently displayed
 
-  const isFormDisabled = isCreating || hasAppointmentError;
+  // Form disabled if creating or if there's *any* appointment ID error.
+  const isFormDisabled = isCreating || hasOverallAppointmentError;
 
   return (
     <dialog id="create_prescription_modal" className="modal sm:modal-middle">
@@ -220,13 +205,15 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               </span>
             )}
 
-            {!isValidatingAppointment && errors.appointmentId && (
+            {/* Displaying error messages - prioritize custom error if present, then Yup's */}
+            {!isValidatingAppointment && hasOverallAppointmentError && (
               <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                {errors.appointmentId.message}
+                {customAppointmentError || formErrors.appointmentId?.message}
               </span>
             )}
 
-            {!isValidatingAppointment && !errors.appointmentId && foundAppointment && (
+            {/* Displaying success state (only if no errors and found) */}
+            {!isValidatingAppointment && !hasOverallAppointmentError && foundAppointment && (
               <span className="text-sm text-green-600 flex items-center gap-1 mt-1">
                 Valid appointment for {foundAppointment.patient.name}{" "}
                 {foundAppointment.patient.lastName}
@@ -246,13 +233,13 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               readOnly
               disabled={
                 watchedAppointmentId === 0 ||
-                !!errors.appointmentId?.message ||
+                hasOverallAppointmentError || // Use the overall error status here
                 isLoadingAppointments ||
                 isFetchingAppointments
               }
             />
-            {errors.patientId && (
-              <span className="text-sm text-red-600">{errors.patientId.message}</span>
+            {formErrors.patientId && (
+              <span className="text-sm text-red-600">{formErrors.patientId.message}</span>
             )}
           </div>
 
@@ -268,8 +255,8 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               className="textarea textarea-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               rows={4}
             />
-            {errors.notes && (
-              <span className="text-sm text-red-600">{errors.notes.message}</span>
+            {formErrors.notes && (
+              <span className="text-sm text-red-600">{formErrors.notes.message}</span>
             )}
           </div>
 
@@ -284,8 +271,8 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               placeholder="0.00"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
-            {errors.amount && (
-              <span className="text-sm text-red-600">{errors.amount.message}</span>
+            {formErrors.amount && (
+              <span className="text-sm text-red-600">{formErrors.amount.message}</span>
             )}
           </div>
 
@@ -314,8 +301,8 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
                   document.getElementById("create_prescription_modal") as HTMLDialogElement
                 )?.close();
                 reset();
-                // Clear all errors on cancel for a clean slate
-                clearErrors(); // Clears all form errors
+                clearErrors(); // Clears all RHF errors
+                setCustomAppointmentError(null); // Clear your local custom error
               }}
             >
               Cancel
