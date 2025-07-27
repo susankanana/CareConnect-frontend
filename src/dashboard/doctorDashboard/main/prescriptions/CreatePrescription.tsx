@@ -63,40 +63,47 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   );
 
   // Effect to validate appointment ownership and prepopulate patientId
-  useEffect(() => {
-    // Clear patientId and any custom appointmentId errors when watchedAppointmentId changes
-    setValue("patientId", 0); // Reset patientId to 0 (or null) to clear previous value
-    if (errors.appointmentId?.type === "custom") {
-      clearErrors("appointmentId");
-    }
+ useEffect(() => {
+  // Reset patientId always when appointmentId changes
+  setValue("patientId", 0);
 
-    if (doctorId && watchedAppointmentId && doctorAppointments?.data && !isFetchingAppointments) {
-      // Find the specific appointment from the doctor's list
-      const foundAppointment = doctorAppointments.data.find(
-        (appointment: TDetailedAppointment) => appointment.appointmentId === watchedAppointmentId
-      );
+  // Don't do anything until user types a valid number
+  if (!doctorId || !watchedAppointmentId || watchedAppointmentId <= 0) {
+    clearErrors("appointmentId");
+    return;
+  }
 
-      if (!foundAppointment) {
-        // If not found (either doesn't exist or doesn't belong to this doctor)
-        setError("appointmentId", {
-          type: "custom", // Use a custom type for this specific error
-          message: "This appointment ID does not belong to you or does not exist.",
-        });
-        setValue("patientId", 0); // Clear patientId if invalid appointment
-      } else {
-        // If owned and found, clear any previous custom error
-        if (errors.appointmentId?.type === "custom") {
-          clearErrors("appointmentId");
-        }
-        // Prepopulate patientId field with the patient's ID from the found appointment
-        setValue("patientId", foundAppointment.patient.id);
-      }
-    } else if (!watchedAppointmentId) {
-      // Clear custom error and patientId if appointment ID input is empty
-      clearErrors("appointmentId");
-      setValue("patientId", 0);
-    }
-  }, [watchedAppointmentId, doctorAppointments, isFetchingAppointments, doctorId, setError, clearErrors, setValue, errors.appointmentId]);
+  // If appointments are still loading, don’t validate yet
+  if (isLoadingAppointments || isFetchingAppointments || !doctorAppointments?.data) {
+    return;
+  }
+
+  // Try to find the appointment from the doctor's list
+  const foundAppointment = doctorAppointments.data.find(
+    (appointment: TDetailedAppointment) =>
+      appointment.appointmentId === watchedAppointmentId
+  );
+
+  if (!foundAppointment) {
+    setError("appointmentId", {
+      type: "custom",
+      message: "This appointment ID does not belong to you or does not exist.",
+    });
+  } else {
+    clearErrors("appointmentId");
+    setValue("patientId", foundAppointment.patient.id);
+  }
+}, [
+  watchedAppointmentId,
+  doctorAppointments,
+  isFetchingAppointments,
+  isLoadingAppointments,
+  doctorId,
+  setValue,
+  setError,
+  clearErrors,
+]);
+
 
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
