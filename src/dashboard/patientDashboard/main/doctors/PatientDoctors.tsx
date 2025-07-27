@@ -459,12 +459,6 @@ const PatientDoctors = () => {
               />
               {errors.appointmentDate && <span className="text-sm text-red-600">{errors.appointmentDate.message}</span>}
 
-              {doctorToBook && (
-                <div className="mt-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
-                  <strong>Doctor Availability:</strong> {doctorToBook.doctor?.availableDays?.join(', ') || 'Not specified'}
-                </div>
-              )}
-
               {doctorToBook && watchedValues.appointmentDate && !isDateAvailable(watchedValues.appointmentDate, doctorToBook) && (
                 <p className="text-sm text-red-600 mt-1">
                   Doctor is not available on {getDayName(watchedValues.appointmentDate)}.

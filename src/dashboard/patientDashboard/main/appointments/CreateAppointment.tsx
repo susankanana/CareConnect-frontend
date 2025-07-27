@@ -179,13 +179,6 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
             />
             {errors.appointmentDate && <span className="text-sm text-red-600">{errors.appointmentDate.message}</span>}
 
-            {/* Inserted guidance block here */}
-            {selectedDoctor && (
-              <div className="mt-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
-                <strong>Doctor Availability:</strong> {selectedDoctor.doctor?.availableDays?.join(', ') || 'Not specified'}
-              </div>
-            )}
-
             {selectedDoctor && watchedValues.appointmentDate && !isDateAvailable(watchedValues.appointmentDate, selectedDoctor) && (
               <p className="text-sm text-red-600 mt-1">
                 Doctor is not available on {getDayName(watchedValues.appointmentDate)}.
