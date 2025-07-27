@@ -77,19 +77,21 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     setFoundAppointment(null); // Reset foundAppointment each time ID changes
 
     if (!doctorId) {
-      clearErrors("appointmentId"); // No doctor, no validation
+      clearErrors("appointmentId");
       return;
     }
 
-    // Always clear the specific custom error related to ownership/existence if the ID becomes empty, zero, or negative, allowing Yup's errors to show.
+    // Immediately clear "does not exist" error if input is empty or invalid for basic Yup validation
+    // This allows Yup's "required" or "positive" errors to show first.
     if (!watchedAppointmentId || watchedAppointmentId <= 0) {
       if (errors.appointmentId?.type === "custom" &&
           errors.appointmentId.message === "This appointment ID does not belong to you or does not exist.") {
         clearErrors("appointmentId");
       }
-      return; // Exit if the ID isn't a valid number for async check
+      return; // Stop here if the input isn't a valid positive number yet for async check
     }
-
+    
+    // Clear the custom error to prevent a false negative during verification
     if (isLoadingAppointments || isFetchingAppointments) {
       if (errors.appointmentId?.type === "custom" &&
           errors.appointmentId.message === "This appointment ID does not belong to you or does not exist.") {
@@ -112,14 +114,15 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     );
 
     if (!matched) {
-      // If no match found after data is loaded and not verifying, set the specific error
+      // If no match found after data is loaded, set the specific custom error.
+      // We explicitly set this error, it will override Yup's success for a number.
       setError("appointmentId", {
-        type: "custom",
+        type: "custom", // Use a distinct type for your custom error
         message: "This appointment ID does not belong to you or does not exist.",
       });
       setFoundAppointment(null);
     } else {
-      // If a match is found, clear ALL errors for appointmentId, including Yup's and custom ones.
+      // If a match is found, clear ALL errors for appointmentId to show success.
       clearErrors("appointmentId");
       setFoundAppointment(matched);
       setValue("patientId", matched.patient.id);
@@ -133,7 +136,8 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     setValue,
     setError,
     clearErrors,
-    errors.appointmentId, 
+    // React to any change in the appointmentId error object
+    errors.appointmentId,
   ]);
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
@@ -143,17 +147,19 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
         return;
       }
 
+      // Re-verify on submit to ensure the latest state before sending
       if (!doctorAppointments?.data) {
         toast.error("Appointments data not loaded. Cannot verify ownership. Please try again.");
         return;
       }
 
-      const foundAppointment = doctorAppointments.data.find(
+      const foundAppointmentOnSubmit = doctorAppointments.data.find(
         (appointment: TDetailedAppointment) =>
           appointment.appointmentId === data.appointmentId
       );
 
-      if (!foundAppointment) {
+      if (!foundAppointmentOnSubmit) {
+        // Double-check: if it's somehow not found here, set the error and stop.
         toast.error("Error: The appointment ID does not belong to you or does not exist.");
         setError("appointmentId", {
           type: "manual",
@@ -180,17 +186,12 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   };
 
   // Derived UI States
-
-  // This should capture any error message for appointmentId, whether from Yup or custom
   const hasAppointmentError = !!errors.appointmentId?.message;
-
-  // This state determines if the "Verifying..." message should show.
   const isValidatingAppointment =
     watchedAppointmentId > 0 &&
     (isLoadingAppointments || isFetchingAppointments) &&
-    !hasAppointmentError;
+    !hasAppointmentError; // Only show verifying if no error is currently displayed
 
-  // The form should be disabled if creating or if there's *any* appointment ID error.
   const isFormDisabled = isCreating || hasAppointmentError;
 
   return (
@@ -212,7 +213,6 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               placeholder="Enter appointment ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
-            {/* Displaying validation state */}
             {isValidatingAppointment && (
               <span className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                 <span className="loading loading-spinner loading-xs" /> Verifying appointment
@@ -220,14 +220,12 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               </span>
             )}
 
-            {/* Displaying error messages */}
             {!isValidatingAppointment && errors.appointmentId && (
               <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
                 {errors.appointmentId.message}
               </span>
             )}
 
-            {/* Displaying success state */}
             {!isValidatingAppointment && !errors.appointmentId && foundAppointment && (
               <span className="text-sm text-green-600 flex items-center gap-1 mt-1">
                 Valid appointment for {foundAppointment.patient.name}{" "}
@@ -248,7 +246,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               readOnly
               disabled={
                 watchedAppointmentId === 0 ||
-                !!errors.appointmentId?.message || // Disabled if there's any error on appointmentId
+                !!errors.appointmentId?.message ||
                 isLoadingAppointments ||
                 isFetchingAppointments
               }
@@ -316,8 +314,8 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
                   document.getElementById("create_prescription_modal") as HTMLDialogElement
                 )?.close();
                 reset();
-                clearErrors("appointmentId");
-                clearErrors("patientId");
+                // Clear all errors on cancel for a clean slate
+                clearErrors(); // Clears all form errors
               }}
             >
               Cancel
