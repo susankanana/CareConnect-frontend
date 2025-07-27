@@ -73,55 +73,69 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   });
 
   useEffect(() => {
-    setValue("patientId", 0);
-    setFoundAppointment(null); // Reset foundAppointment each time ID changes
+  setValue("patientId", 0);
+  setFoundAppointment(null); // Reset foundAppointment each time ID changes
 
-    if (!doctorId) return;
+  if (!doctorId) {
+    // If no doctorId, ensure no related errors are shown
+    clearErrors("appointmentId");
+    return;
+  }
 
-    // Only proceed with validation if watchedAppointmentId is a positive number
-    if (!watchedAppointmentId || watchedAppointmentId <= 0) {
-      clearErrors("appointmentId"); // Clear any existing errors when the field is empty or invalid
-      return;
-    }
-
-    // If still fetching appointments, don’t clear error or show success yet
-    if (isLoadingAppointments || isFetchingAppointments) {
-      return;
-    }
-
-    if (!doctorAppointments?.data) {
-      setError("appointmentId", {
-        type: "custom",
-        message: "Unable to load appointments. Please refresh.",
-      });
-      return;
-    }
-
-    const matched = doctorAppointments.data.find(
-      (appointment) => appointment.appointmentId === watchedAppointmentId
-    );
-
-    if (!matched) {
-      setError("appointmentId", {
-        type: "custom",
-        message: "This appointment ID does not belong to you or does not exist.",
-      });
-      setFoundAppointment(null);
-    } else {
+  if (!watchedAppointmentId || watchedAppointmentId <= 0) {
+    // We want to clear any *previous* "does not belong to you" error if the user backspaces or enters an invalid number type.
+    if (errors.appointmentId?.type === "custom" && errors.appointmentId.message === "This appointment ID does not belong to you or does not exist.") {
       clearErrors("appointmentId");
-      setFoundAppointment(matched);
-      setValue("patientId", matched.patient.id);
     }
-  }, [
-    watchedAppointmentId,
-    doctorAppointments?.data,
-    isFetchingAppointments,
-    isLoadingAppointments,
-    doctorId,
-    setValue,
-    setError,
-    clearErrors,
-  ]);
+    return; // Stop here if the input isn't a valid positive number yet
+  }
+  
+  if (isLoadingAppointments || isFetchingAppointments) {
+    // Do not set or clear error here; let the UI reflect "Verifying"
+    return;
+  }
+
+  // If data hasn't loaded (e.g., query skipped or failed silently before data exists)
+  if (!doctorAppointments?.data) {
+    // This could be an error state for fetching appointments
+    setError("appointmentId", {
+      type: "custom",
+      message: "Unable to load appointments to verify ID. Please refresh.",
+    });
+    return;
+  }
+
+  const matched = doctorAppointments.data.find(
+    (appointment) => appointment.appointmentId === watchedAppointmentId
+  );
+
+  if (!matched) {
+    // If no match found after data is loaded and not verifying
+    setError("appointmentId", {
+      type: "custom",
+      message: "This appointment ID does not belong to you or does not exist.",
+    });
+    setFoundAppointment(null);
+  } else {
+    // Match found, clear any specific custom error related to ownership/existence
+    if (errors.appointmentId?.type === "custom" && errors.appointmentId.message === "This appointment ID does not belong to you or does not exist.") {
+      clearErrors("appointmentId");
+    }
+    setFoundAppointment(matched);
+    setValue("patientId", matched.patient.id);
+  }
+}, [
+  watchedAppointmentId,
+  doctorAppointments?.data,
+  isFetchingAppointments,
+  isLoadingAppointments,
+  doctorId,
+  setValue,
+  setError,
+  clearErrors,
+  errors.appointmentId?.type, // Add errors.appointmentId to dependencies to react to changes in error type/message
+  errors.appointmentId?.message,
+]);
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
     try {
