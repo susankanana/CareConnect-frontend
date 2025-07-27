@@ -40,7 +40,6 @@ type CreatePrescriptionProps = {
   refetch: () => void;
 };
 
-
 const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   const user = useSelector((state: RootState) => state.user.user);
   const [foundAppointment, setFoundAppointment] = useState<TDetailedAppointment | null>(null);
@@ -73,61 +72,56 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     skip: !doctorId,
   });
 
-
   useEffect(() => {
-  setValue("patientId", 0);
-  setFoundAppointment(null); // Reset foundAppointment each time ID changes
+    setValue("patientId", 0);
+    setFoundAppointment(null); // Reset foundAppointment each time ID changes
 
-  if (!doctorId) return;
+    if (!doctorId) return;
 
-  if (watchedAppointmentId <= 0) {
-    setError("appointmentId", {
-      type: "custom",
-      message: "Appointment ID must be a positive number.",
-    });
-    return;
-  }
+    // Only proceed with validation if watchedAppointmentId is a positive number
+    if (!watchedAppointmentId || watchedAppointmentId <= 0) {
+      clearErrors("appointmentId"); // Clear any existing errors when the field is empty or invalid
+      return;
+    }
 
-  // If still fetching appointments, don’t clear error or show success yet
-  if (isLoadingAppointments || isFetchingAppointments) {
-    return;
-  }
+    // If still fetching appointments, don’t clear error or show success yet
+    if (isLoadingAppointments || isFetchingAppointments) {
+      return;
+    }
 
-  if (!doctorAppointments?.data) {
-    setError("appointmentId", {
-      type: "custom",
-      message: "Unable to load appointments. Please refresh.",
-    });
-    return;
-  }
+    if (!doctorAppointments?.data) {
+      setError("appointmentId", {
+        type: "custom",
+        message: "Unable to load appointments. Please refresh.",
+      });
+      return;
+    }
 
-  const matched = doctorAppointments.data.find(
-    (appointment) => appointment.appointmentId === watchedAppointmentId
-  );
+    const matched = doctorAppointments.data.find(
+      (appointment) => appointment.appointmentId === watchedAppointmentId
+    );
 
-  if (!matched) {
-    setError("appointmentId", {
-      type: "custom",
-      message: "This appointment ID does not belong to you or does not exist.",
-    });
-    setFoundAppointment(null);
-  } else {
-    clearErrors("appointmentId");
-    setFoundAppointment(matched);
-    setValue("patientId", matched.patient.id);
-  }
-}, [
-  watchedAppointmentId,
-  doctorAppointments?.data,
-  isFetchingAppointments,
-  isLoadingAppointments,
-  doctorId,
-  setValue,
-  setError,
-  clearErrors,
-]);
-
-
+    if (!matched) {
+      setError("appointmentId", {
+        type: "custom",
+        message: "This appointment ID does not belong to you or does not exist.",
+      });
+      setFoundAppointment(null);
+    } else {
+      clearErrors("appointmentId");
+      setFoundAppointment(matched);
+      setValue("patientId", matched.patient.id);
+    }
+  }, [
+    watchedAppointmentId,
+    doctorAppointments?.data,
+    isFetchingAppointments,
+    isLoadingAppointments,
+    doctorId,
+    setValue,
+    setError,
+    clearErrors,
+  ]);
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
     try {
@@ -182,7 +176,6 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
 
   const isFormDisabled = isCreating || hasAppointmentError;
 
-
   return (
     <dialog id="create_prescription_modal" className="modal sm:modal-middle">
       <div className="modal-box bg-white w-full max-w-xs sm:max-w-lg mx-auto rounded-lg border border-gray-200">
@@ -204,22 +197,23 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
             />
             {isValidatingAppointment && (
               <span className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-              <span className="loading loading-spinner loading-xs" /> Verifying appointment ownership...
+                <span className="loading loading-spinner loading-xs" /> Verifying appointment
+                ownership...
               </span>
             )}
 
             {!isValidatingAppointment && errors.appointmentId && (
               <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
-              <span>⚠️</span> {errors.appointmentId.message}
+                <span>⚠️</span> {errors.appointmentId.message}
               </span>
             )}
 
             {!isValidatingAppointment && !errors.appointmentId && foundAppointment && (
               <span className="text-sm text-green-600 flex items-center gap-1 mt-1">
-              <span>✅</span> Valid appointment for {foundAppointment.patient.name} {foundAppointment.patient.lastName}
+                <span>✅</span> Valid appointment for {foundAppointment.patient.name}{" "}
+                {foundAppointment.patient.lastName}
               </span>
             )}
-
           </div>
 
           {/* Patient ID */}
@@ -246,7 +240,9 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Prescription Notes</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Prescription Notes
+            </label>
             <textarea
               data-test="create-notes"
               {...register("notes")}
@@ -296,7 +292,9 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               type="button"
               className="btn btn-ghost"
               onClick={() => {
-                (document.getElementById("create_prescription_modal") as HTMLDialogElement)?.close();
+                (
+                  document.getElementById("create_prescription_modal") as HTMLDialogElement
+                )?.close();
                 reset();
                 clearErrors("appointmentId");
                 clearErrors("patientId");
