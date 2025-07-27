@@ -73,69 +73,68 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   });
 
   useEffect(() => {
-  setValue("patientId", 0);
-  setFoundAppointment(null); // Reset foundAppointment each time ID changes
+    setValue("patientId", 0);
+    setFoundAppointment(null); // Reset foundAppointment each time ID changes
 
-  if (!doctorId) {
-    // If no doctorId, ensure no related errors are shown
-    clearErrors("appointmentId");
-    return;
-  }
-
-  if (!watchedAppointmentId || watchedAppointmentId <= 0) {
-    // We want to clear any *previous* "does not belong to you" error if the user backspaces or enters an invalid number type.
-    if (errors.appointmentId?.type === "custom" && errors.appointmentId.message === "This appointment ID does not belong to you or does not exist.") {
-      clearErrors("appointmentId");
+    if (!doctorId) {
+      clearErrors("appointmentId"); // No doctor, no validation
+      return;
     }
-    return; // Stop here if the input isn't a valid positive number yet
-  }
-  
-  if (isLoadingAppointments || isFetchingAppointments) {
-    // Do not set or clear error here; let the UI reflect "Verifying"
-    return;
-  }
 
-  // If data hasn't loaded (e.g., query skipped or failed silently before data exists)
-  if (!doctorAppointments?.data) {
-    // This could be an error state for fetching appointments
-    setError("appointmentId", {
-      type: "custom",
-      message: "Unable to load appointments to verify ID. Please refresh.",
-    });
-    return;
-  }
-
-  const matched = doctorAppointments.data.find(
-    (appointment) => appointment.appointmentId === watchedAppointmentId
-  );
-
-  if (!matched) {
-    // If no match found after data is loaded and not verifying
-    setError("appointmentId", {
-      type: "custom",
-      message: "This appointment ID does not belong to you or does not exist.",
-    });
-    setFoundAppointment(null);
-  } else {
-    // Match found, clear any specific custom error related to ownership/existence
-    if (errors.appointmentId?.type === "custom" && errors.appointmentId.message === "This appointment ID does not belong to you or does not exist.") {
-      clearErrors("appointmentId");
+    // Always clear the specific custom error related to ownership/existence if the ID becomes empty, zero, or negative, allowing Yup's errors to show.
+    if (!watchedAppointmentId || watchedAppointmentId <= 0) {
+      if (errors.appointmentId?.type === "custom" &&
+          errors.appointmentId.message === "This appointment ID does not belong to you or does not exist.") {
+        clearErrors("appointmentId");
+      }
+      return; // Exit if the ID isn't a valid number for async check
     }
-    setFoundAppointment(matched);
-    setValue("patientId", matched.patient.id);
-  }
-}, [
-  watchedAppointmentId,
-  doctorAppointments?.data,
-  isFetchingAppointments,
-  isLoadingAppointments,
-  doctorId,
-  setValue,
-  setError,
-  clearErrors,
-  errors.appointmentId?.type, // Add errors.appointmentId to dependencies to react to changes in error type/message
-  errors.appointmentId?.message,
-]);
+
+    if (isLoadingAppointments || isFetchingAppointments) {
+      if (errors.appointmentId?.type === "custom" &&
+          errors.appointmentId.message === "This appointment ID does not belong to you or does not exist.") {
+        clearErrors("appointmentId");
+      }
+      return;
+    }
+
+    // If data hasn't loaded (e.g., query skipped or failed silently before data exists)
+    if (!doctorAppointments?.data) {
+      setError("appointmentId", {
+        type: "custom",
+        message: "Unable to load appointments to verify ID. Please refresh.",
+      });
+      return;
+    }
+
+    const matched = doctorAppointments.data.find(
+      (appointment) => appointment.appointmentId === watchedAppointmentId
+    );
+
+    if (!matched) {
+      // If no match found after data is loaded and not verifying, set the specific error
+      setError("appointmentId", {
+        type: "custom",
+        message: "This appointment ID does not belong to you or does not exist.",
+      });
+      setFoundAppointment(null);
+    } else {
+      // If a match is found, clear ALL errors for appointmentId, including Yup's and custom ones.
+      clearErrors("appointmentId");
+      setFoundAppointment(matched);
+      setValue("patientId", matched.patient.id);
+    }
+  }, [
+    watchedAppointmentId,
+    doctorAppointments?.data,
+    isFetchingAppointments,
+    isLoadingAppointments,
+    doctorId,
+    setValue,
+    setError,
+    clearErrors,
+    errors.appointmentId, 
+  ]);
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
     try {
@@ -182,12 +181,16 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
 
   // Derived UI States
 
+  // This should capture any error message for appointmentId, whether from Yup or custom
   const hasAppointmentError = !!errors.appointmentId?.message;
+
+  // This state determines if the "Verifying..." message should show.
   const isValidatingAppointment =
     watchedAppointmentId > 0 &&
     (isLoadingAppointments || isFetchingAppointments) &&
     !hasAppointmentError;
 
+  // The form should be disabled if creating or if there's *any* appointment ID error.
   const isFormDisabled = isCreating || hasAppointmentError;
 
   return (
@@ -209,6 +212,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               placeholder="Enter appointment ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
+            {/* Displaying validation state */}
             {isValidatingAppointment && (
               <span className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                 <span className="loading loading-spinner loading-xs" /> Verifying appointment
@@ -216,15 +220,17 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               </span>
             )}
 
+            {/* Displaying error messages */}
             {!isValidatingAppointment && errors.appointmentId && (
               <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                <span>⚠️</span> {errors.appointmentId.message}
+                {errors.appointmentId.message}
               </span>
             )}
 
+            {/* Displaying success state */}
             {!isValidatingAppointment && !errors.appointmentId && foundAppointment && (
               <span className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                <span>✅</span> Valid appointment for {foundAppointment.patient.name}{" "}
+                Valid appointment for {foundAppointment.patient.name}{" "}
                 {foundAppointment.patient.lastName}
               </span>
             )}
@@ -242,7 +248,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               readOnly
               disabled={
                 watchedAppointmentId === 0 ||
-                !!errors.appointmentId?.message ||
+                !!errors.appointmentId?.message || // Disabled if there's any error on appointmentId
                 isLoadingAppointments ||
                 isFetchingAppointments
               }
