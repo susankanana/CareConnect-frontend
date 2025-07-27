@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -43,6 +43,7 @@ type CreatePrescriptionProps = {
 
 const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   const user = useSelector((state: RootState) => state.user.user);
+  const [foundAppointment, setFoundAppointment] = useState<TDetailedAppointment | null>(null);
   const doctorId = user?.user_id;
 
   const [createPrescription, { isLoading: isCreating }] =
@@ -74,62 +75,66 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
 
 
   useEffect(() => {
-    setValue("patientId", 0);
-    if (!doctorId) return;
+  setValue("patientId", 0);
+  setFoundAppointment(null); // Reset foundAppointment each time ID changes
 
-    if (!watchedAppointmentId && watchedAppointmentId !== 0) {
-      clearErrors("appointmentId");
-      return;
-    }
+  if (!doctorId) return;
 
-    if (watchedAppointmentId <= 0) {
-      setError("appointmentId", {
-        type: "custom",
-        message: "Appointment ID must be a positive number.",
-      });
-      return;
-    }
+  if (!watchedAppointmentId && watchedAppointmentId !== 0) {
+    setError("appointmentId", {
+      type: "custom",
+      message: "Appointment ID is required.",
+    });
+    return;
+  }
 
-    if (isLoadingAppointments || isFetchingAppointments) {
-      if (errors.appointmentId?.message?.includes("does not belong")) {
-        clearErrors("appointmentId");
-      }
-      return;
-    }
+  if (watchedAppointmentId <= 0) {
+    setError("appointmentId", {
+      type: "custom",
+      message: "Appointment ID must be a positive number.",
+    });
+    return;
+  }
 
-    if (!doctorAppointments?.data) {
-      setError("appointmentId", {
-        type: "custom",
-        message: "Unable to load appointments. Please refresh and try again.",
-      });
-      return;
-    }
+  // If still fetching appointments, don’t clear error or show success yet
+  if (isLoadingAppointments || isFetchingAppointments) {
+    return;
+  }
 
-    const foundAppointment = doctorAppointments.data.find(
-      (appointment: TDetailedAppointment) =>
-        appointment.appointmentId === watchedAppointmentId
-    );
+  if (!doctorAppointments?.data) {
+    setError("appointmentId", {
+      type: "custom",
+      message: "Unable to load appointments. Please refresh.",
+    });
+    return;
+  }
 
-    if (!foundAppointment) {
-      setError("appointmentId", {
-        type: "custom",
-        message: "This appointment ID does not belong to you or does not exist.",
-      });
-    } else {
-      clearErrors("appointmentId");
-      setValue("patientId", foundAppointment.patient.id);
-    }
-  }, [
-    watchedAppointmentId,
-    doctorAppointments?.data,
-    isFetchingAppointments,
-    isLoadingAppointments,
-    doctorId,
-    setValue,
-    setError,
-    clearErrors,
-    errors.appointmentId?.message,
-  ]);
+  const matched = doctorAppointments.data.find(
+    (appointment) => appointment.appointmentId === watchedAppointmentId
+  );
+
+  if (!matched) {
+    setError("appointmentId", {
+      type: "custom",
+      message: "This appointment ID does not belong to you or does not exist.",
+    });
+    setFoundAppointment(null);
+  } else {
+    clearErrors("appointmentId");
+    setFoundAppointment(matched);
+    setValue("patientId", matched.patient.id);
+  }
+}, [
+  watchedAppointmentId,
+  doctorAppointments?.data,
+  isFetchingAppointments,
+  isLoadingAppointments,
+  doctorId,
+  setValue,
+  setError,
+  clearErrors,
+]);
+
 
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
@@ -205,21 +210,24 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               placeholder="Enter appointment ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
-            {errors.appointmentId && (
-              <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
-                <span>⚠️</span> {errors.appointmentId.message}
-              </span>
-            )}
             {isValidatingAppointment && (
               <span className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-                <span className="loading loading-spinner loading-xs" /> Verifying appointment ownership...
+              <span className="loading loading-spinner loading-xs" /> Verifying appointment ownership...
               </span>
             )}
-            {!errors.appointmentId && !isValidatingAppointment && watchedAppointmentId > 0 && (
+
+            {!isValidatingAppointment && errors.appointmentId && (
+              <span className="text-sm text-red-600 flex items-center gap-1 mt-1">
+              <span>⚠️</span> {errors.appointmentId.message}
+              </span>
+            )}
+
+            {!isValidatingAppointment && !errors.appointmentId && foundAppointment && (
               <span className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                <span>✅</span> Valid appointment
+              <span>✅</span> Valid appointment for {foundAppointment.patient.name} {foundAppointment.patient.lastName}
               </span>
             )}
+
           </div>
 
           {/* Patient ID */}
