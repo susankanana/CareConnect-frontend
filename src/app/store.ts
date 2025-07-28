@@ -10,6 +10,7 @@ import { complaintsAPI } from '../reducers/complaints/complaintsAPI';
 import { prescriptionsAPI } from '../reducers/prescriptions/prescriptionsAPI';
 import { paymentsAPI } from '../reducers/payments/paymentsAPI';
 import tokenExpirationMiddleware from '../utils/tokenExpiryMiddleware';
+import { servicesAPI } from '../reducers/services/servicesAPI';
 
 const persistConfig = {
   key: 'root',
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
   [complaintsAPI.reducerPath]: complaintsAPI.reducer,
   [prescriptionsAPI.reducerPath]: prescriptionsAPI.reducer,
   [paymentsAPI.reducerPath]: paymentsAPI.reducer,
+  [servicesAPI.reducerPath]: servicesAPI.reducer,
   user: userSlice
 });
 
@@ -44,6 +46,7 @@ export const store = configureStore({
       .concat(complaintsAPI.middleware)
       .concat(prescriptionsAPI.middleware)
       .concat(paymentsAPI.middleware)
+      .concat(servicesAPI.middleware)
       .concat(tokenExpirationMiddleware), // add the token expiration middleware to check if the token is expired before dispatching any action
 });
 

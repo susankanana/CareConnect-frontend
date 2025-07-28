@@ -13,7 +13,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 
-import { services } from './data/services';
+import { useGetAllServicesQuery, type TService } from '../../../src/reducers/services/servicesAPI';
 import { testimonials } from './data/testimonials';
 import { useGetDoctorsQuery, type TDoctor } from '../../../src/reducers/doctors/doctorsAPI';
 import { useNavigate, useLocation } from 'react-router'; 
@@ -32,6 +32,12 @@ const Hero = () => {
       pollingInterval: 60000,
     }
   );
+
+  // Fetch services data using the Redux Toolkit Query hook
+  const { data: servicesData, isLoading: servicesLoading, error: servicesError } = useGetAllServicesQuery(undefined, {
+  refetchOnMountOrArgChange: true,
+  pollingInterval: 60000,
+});
 
   const navigateTo = (path: string) => {
     navigate(path);
@@ -159,31 +165,40 @@ const Hero = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service, index) => (
+            {servicesLoading && <p className="text-center text-gray-700">Loading services...</p>}
+            {servicesError && <p className="text-center text-red-500">Error loading services.</p>}
+
+            {servicesData && servicesData.length > 0 && (servicesData.map((service: TService, index: number) => (
               <div key={index} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-8 border border-gray-100">
                 <div className="text-center mb-6">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-teal-100 to-pink-100 rounded-full mb-4">
-                    <service.icon className="h-8 w-8 text-teal-600" />
+                    <Heart className="h-8 w-8 text-teal-600" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">{service.title}</h3>
                   <p className="text-gray-600">{service.description}</p>
                 </div>
 
                 <div className="space-y-3 mb-6">
-                  {service.features.map((feature, featureIndex) => (
-                    <div key={featureIndex} className="flex items-center space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
-                    </div>
+                  {service.features.map((feature: string, featureIndex: number) => (
+                  <div key={featureIndex} className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                    <span className="text-gray-700">{feature}</span>
+                  </div>
                   ))}
                 </div>
 
-                <button className="w-full bg-gradient-to-r from-teal-500 to-pink-500 text-white py-3 px-6 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2">
+                <button
+                  onClick={() => navigate(`/services/${service.title}`)}
+                  className="w-full bg-gradient-to-r from-teal-500 to-pink-500 text-white py-3 px-6 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2"
+                >
                   Learn More
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
-            ))}
+            ))
+            )}
+
+
           </div>
         </div>
       </section>
