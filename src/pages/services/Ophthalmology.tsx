@@ -2,13 +2,19 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { useGetServiceByTitleQuery } from '../../../src/reducers/services/servicesAPI';
 import { CheckCircle } from 'lucide-react';
+import { slugToTitleMap } from './slug';
 
 const Ophthalmology = () => {
   const location = useLocation();
 
-  const title = decodeURIComponent(location.pathname.split('/services/')[1]);
+  // Extract the slug from the URL (e.g., "emergencycare")
+  const slug = decodeURIComponent(location.pathname.split('/service/')[1]);
+
+  // Convert slug to the proper title (e.g., "Emergency Care")
+  const title = slugToTitleMap[slug];
 
   const { data: service, isLoading, isError } = useGetServiceByTitleQuery(title, {
+    skip: !title, //skip query if title is undefined
     refetchOnMountOrArgChange: true,
   });
 
@@ -16,8 +22,17 @@ const Ophthalmology = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  if (isLoading) return <div className="text-center mt-10 text-gray-600">Loading service...</div>;
-  if (isError || !service) return <div className="text-center mt-10 text-red-500">Service not found.</div>;
+  if (!title) {
+    return <div className="text-center mt-10 text-red-500">Invalid service URL.</div>;
+  }
+
+  if (isLoading) {
+    return <div className="text-center mt-10 text-gray-600">Loading service...</div>;
+  }
+
+  if (isError || !service) {
+    return <div className="text-center mt-10 text-red-500">Service not found.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-white py-20 px-4 sm:px-6 lg:px-8">
