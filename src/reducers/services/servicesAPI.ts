@@ -50,6 +50,7 @@ export const servicesAPI = createApi({
     // GET /service/:title
     getServiceByTitle: builder.query<TService, string>({
         query: (title) => `/service/${title}`,
+        transformResponse: (response: { data: TService }) => response.data,
     }),
     
     // PUT /services/:id
