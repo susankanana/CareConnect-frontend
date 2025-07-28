@@ -69,27 +69,27 @@ function App() {
       element: <Appointment />
     },
     {
-      path: '/cardiology',
+      path: '/service/cardiology',
       element: <Cardiology />
     },
     {
-      path: '/emergencycare',
+      path: '/service/emergencycare',
       element: <EmergencyCare />
     },
     {
-      path: '/neurology',
+      path: '/service/neurology',
       element: <Neurology />
     },
     {
-      path: '/ophthalmology',
+      path: '/service/ophthalmology',
       element: <Ophthalmology />
     },
     {
-      path: '/orthopedics',
+      path: '/service/orthopedics',
       element: <Orthopedics />
     },
     {
-      path: '/pediatrics',
+      path: '/service/pediatrics',
       element: <Pediatrics />
     },
     // Admin Dashboard Routes
