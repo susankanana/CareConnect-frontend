@@ -30,6 +30,12 @@ import PatientAnalytics from './dashboard/patientDashboard/main/analytics/Patien
 import PatientAppointments from './dashboard/patientDashboard/main/appointments/PatientAppointments'
 import PatientDoctors from './dashboard/patientDashboard/main/doctors/PatientDoctors'
 import PatientComplaints from './dashboard/patientDashboard/main/complaints/PatientComplaints'
+import Cardiology from './pages/services/Cardiology'
+import EmergencyCare from './pages/services/EmergencyCare'
+import Neurology from './pages/services/Neurology'
+import Ophthalmology from './pages/services/Ophthalmology'
+import Orthopedics from './pages/services/Orthopedics'
+import Pediatrics from './pages/services/Pediatrics'
 
 
 function App() {
@@ -61,6 +67,30 @@ function App() {
     {
       path: '/appointments',
       element: <Appointment />
+    },
+    {
+      path: '/cardiology',
+      element: <Cardiology />
+    },
+    {
+      path: '/emergencycare',
+      element: <EmergencyCare />
+    },
+    {
+      path: '/neurology',
+      element: <Neurology />
+    },
+    {
+      path: '/ophthalmology',
+      element: <Ophthalmology />
+    },
+    {
+      path: '/orthopedics',
+      element: <Orthopedics />
+    },
+    {
+      path: '/pediatrics',
+      element: <Pediatrics />
     },
     // Admin Dashboard Routes
     {
