@@ -188,7 +188,7 @@ const Hero = () => {
                 </div>
 
                 <button
-                  onClick={() => navigate(`/services/${service.title.toLowerCase().replace(/\s+/g, '')}`)}
+                  onClick={() => navigate(`/service/${service.title.toLowerCase().replace(/\s+/g, '')}`)}
                   className="w-full bg-gradient-to-r from-teal-500 to-pink-500 text-white py-3 px-6 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2"
                 >
                   Learn More
