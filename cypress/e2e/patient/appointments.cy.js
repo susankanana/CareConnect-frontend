@@ -12,7 +12,7 @@ describe('Appointments CRUD E2E Test', () => {
     cy.get('[data-test="create-appointment-form"]').should('exist');
 
     cy.get('[data-test="doctor-select"]').select('404');
-    const tomorrow = dayjs().add(2, 'day').format('YYYY-MM-DD');
+    const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
     cy.get('[data-test="appointment-date-input"]').should('not.be.disabled').type(tomorrow);
     cy.get('[data-test="appointment-time-slot-select"]').select('09:00:00');
     cy.get('[data-test="submit-appointment-btn"]').click();
