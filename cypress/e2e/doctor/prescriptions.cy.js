@@ -12,7 +12,7 @@ describe('Prescriptions CRUD E2E Test', () => {
     cy.get('[data-test="create-appointment-id"]').type('45');
     cy.get('[data-test="create-patient-id"]')
       .should('be.disabled')
-      .invoke('value')
+      .invoke('val') //Calls the jQuery .val() method, which retrieves the value of an <input>.
       .should('not.be.empty');
 
     cy.get('[data-test="create-notes"]').type('Take 1 tablet twice a day');
