@@ -10,7 +10,13 @@ describe('Prescriptions CRUD E2E Test', () => {
     // Create
     cy.get('[data-test="open-create-prescription"]').click();
     cy.get('[data-test="create-appointment-id"]').type('45');
-    cy.get('[data-test="create-patient-id"]').type('418');
+    cy.get('[data-test="create-patient-id"]')
+      .should('have.attr', 'readonly')
+      .and('have.value')               
+      .then((value) => {
+        expect(value).to.not.be.empty; 
+      });
+
     cy.get('[data-test="create-notes"]').type('Take 1 tablet twice a day');
     cy.get('[data-test="create-amount"]').type('500');
     cy.get('[data-test="submit-create-prescription"]').click();
