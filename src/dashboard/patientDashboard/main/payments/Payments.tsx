@@ -13,70 +13,7 @@ import {
   TrendingUp,
   FileText,
   ArrowUpRight} from 'lucide-react';
-// Assuming these types and API calls are available
-// import { useGetAllPaymentsQuery ,type TPayment } from '../../../../reducers/payments/paymentsAPI';
-// Mocking the data and types for this example
-type TPayment = {
-  paymentId: number;
-  transactionId?: string;
-  appointmentId: number;
-  amount?: string;
-  paymentStatus?: 'Paid' | 'Pending' | 'Failed' | string;
-  paymentDate?: string;
-  createdAt?: string;
-};
-
-// Mock hook for demonstration
-const useGetAllPaymentsQuery = (arg: any, options: any) => {
-  const mockData: TPayment[] = [
-    {
-      paymentId: 1,
-      transactionId: 'TX1234567890',
-      appointmentId: 101,
-      amount: '5000',
-      paymentStatus: 'Paid',
-      paymentDate: '2023-10-26T10:00:00Z',
-      createdAt: '2023-10-26T09:55:00Z'
-    },
-    {
-      paymentId: 2,
-      transactionId: 'TX0987654321',
-      appointmentId: 102,
-      amount: '7500',
-      paymentStatus: 'Pending',
-      paymentDate: '2023-10-25T14:30:00Z',
-      createdAt: '2023-10-25T14:25:00Z'
-    },
-    {
-      paymentId: 3,
-      transactionId: 'TX1122334455',
-      appointmentId: 103,
-      amount: '2500',
-      paymentStatus: 'Failed',
-      paymentDate: '2023-10-24T18:00:00Z',
-      createdAt: '2023-10-24T17:58:00Z'
-    },
-    {
-      paymentId: 4,
-      transactionId: 'TX5566778899',
-      appointmentId: 104,
-      amount: '12000',
-      paymentStatus: 'Paid',
-      paymentDate: '2023-10-23T08:00:00Z',
-      createdAt: '2023-10-23T07:50:00Z'
-    },
-    {
-      paymentId: 5,
-      transactionId: 'TX9988776655',
-      appointmentId: 105,
-      amount: '3000',
-      paymentStatus: 'Paid',
-      paymentDate: '2023-10-22T11:00:00Z',
-      createdAt: '2023-10-22T10:55:00Z'
-    },
-  ];
-  return { data: { data: mockData }, isLoading: false, error: null };
-};
+import { useGetAllPaymentsQuery ,type TPayment } from '../../../../reducers/payments/paymentsAPI';
 
 const Payments = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,13 +32,13 @@ const Payments = () => {
   // Filter and search payments
   const filteredPayments = useMemo(() => {
     return payments.filter(payment => {
-      const matchesSearch =
+      const matchesSearch = 
         payment.transactionId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         payment.paymentId.toString().includes(searchTerm) ||
         payment.appointmentId.toString().includes(searchTerm);
-
+      
       const matchesStatus = statusFilter === 'All' || payment.paymentStatus === statusFilter;
-
+      
       return matchesSearch && matchesStatus;
     });
   }, [payments, searchTerm, statusFilter]);
@@ -199,20 +136,19 @@ const Payments = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Payment History</h1>
-              <p className="text-gray-600 mt-1 text-sm sm:text-base">Track and manage your medical payment transactions</p>
+              <p className="text-gray-600 mt-1">Track and manage your medical payment transactions</p>
             </div>
-            <div className="w-full sm:w-auto flex items-center space-x-3">
-              <button className="w-full sm:w-auto bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2">
+            <div className="flex items-center space-x-3">
+              <button className="bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center gap-2">
                 <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">Export History</span>
-                <span className="inline sm:hidden">Export</span>
+                Export History
               </button>
             </div>
           </div>
@@ -221,7 +157,7 @@ const Payments = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -321,11 +257,12 @@ const Payments = () => {
           </div>
         </div>
 
-        {/* Payments Table (Desktop) */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hidden md:block">
+        {/* Payments Table */}
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
           </div>
+
           {filteredPayments.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -335,7 +272,7 @@ const Payments = () => {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50 hidden md:table-header-group">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Transaction
@@ -354,10 +291,10 @@ const Payments = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-200 md:table-row-group block">
                   {filteredPayments.map((payment) => (
-                    <tr key={payment.paymentId} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                    <tr key={payment.paymentId} className="hover:bg-gray-50 transition-colors text-sm md:table-row block w-full border-b border-gray-100 md:border-0">
+                      <td className="px-6 py-4 whitespace-nowrap block md:table-cell">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
                             #{payment.transactionId || `PAY-${payment.paymentId}`}
@@ -367,12 +304,12 @@ const Payments = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap block md:table-cell">
                         <div className="text-sm font-medium text-gray-900">
                           {formatAmount(payment.amount)}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap block md:table-cell">
                         <div className="flex items-center space-x-2">
                           {getStatusIcon(payment.paymentStatus)}
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.paymentStatus)}`}>
@@ -380,10 +317,10 @@ const Payments = () => {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap block md:table-cell text-sm text-gray-500">
                         {formatDate(payment.paymentDate || payment.createdAt)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium block md:table-cell">
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => handleViewDetails(payment)}
@@ -408,77 +345,12 @@ const Payments = () => {
             </div>
           )}
         </div>
-
-        {/* Payments Cards (Mobile) */}
-        <div className="md:hidden">
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
-            </div>
-            {filteredPayments.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">No payments found</p>
-                <p className="text-gray-400">Try adjusting your search or filter criteria</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {filteredPayments.map((payment) => (
-                  <div key={payment.paymentId} className="p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex flex-col">
-                        <div className="text-sm font-medium text-gray-900">
-                          #{payment.transactionId || `PAY-${payment.paymentId}`}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          Appointment #{payment.appointmentId}
-                        </div>
-                      </div>
-                      <div className="text-lg font-bold text-gray-900">
-                        {formatAmount(payment.amount)}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        {getStatusIcon(payment.paymentStatus)}
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.paymentStatus)}`}>
-                          {payment.paymentStatus || 'Unknown'}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {formatDate(payment.paymentDate || payment.createdAt)}
-                      </div>
-                    </div>
-                    <div className="flex justify-end space-x-2 mt-4 border-t pt-4 border-gray-100">
-                      <button
-                        onClick={() => handleViewDetails(payment)}
-                        className="text-teal-600 hover:text-teal-900 transition-colors flex items-center gap-1"
-                      >
-                        <Eye className="h-4 w-4" />
-                        <span className="text-sm">View</span>
-                      </button>
-                      {payment.paymentStatus === 'Paid' && (
-                        <button
-                          onClick={() => handleDownloadReceipt(payment)}
-                          className="text-pink-600 hover:text-pink-900 transition-colors flex items-center gap-1"
-                        >
-                          <Download className="h-4 w-4" />
-                          <span className="text-sm">Receipt</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Payment Details Modal */}
       {showDetails && selectedPayment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900">Payment Details</h3>
               <button
@@ -490,21 +362,21 @@ const Payments = () => {
             </div>
 
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between">
                 <span className="text-gray-600">Payment ID:</span>
                 <span className="font-medium">#{selectedPayment.paymentId}</span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between">
                 <span className="text-gray-600">Transaction ID:</span>
-                <span className="font-medium text-right break-all">{selectedPayment.transactionId || 'N/A'}</span>
+                <span className="font-medium">{selectedPayment.transactionId || 'N/A'}</span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between">
                 <span className="text-gray-600">Appointment ID:</span>
                 <span className="font-medium">#{selectedPayment.appointmentId}</span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between">
                 <span className="text-gray-600">Amount:</span>
-                <span className="font-bold text-lg">{formatAmount(selectedPayment.amount)}</span>
+                <span className="font-medium text-lg">{formatAmount(selectedPayment.amount)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Status:</span>
@@ -515,27 +387,27 @@ const Payments = () => {
                   </span>
                 </div>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between">
                 <span className="text-gray-600">Payment Date:</span>
-                <span className="font-medium text-right">{formatDate(selectedPayment.paymentDate)}</span>
+                <span className="font-medium">{formatDate(selectedPayment.paymentDate)}</span>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between">
                 <span className="text-gray-600">Created:</span>
-                <span className="font-medium text-right">{formatDate(selectedPayment.createdAt)}</span>
+                <span className="font-medium">{formatDate(selectedPayment.createdAt)}</span>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShowDetails(false)}
-                className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors font-medium"
               >
                 Close
               </button>
               {selectedPayment.paymentStatus === 'Paid' && (
                 <button
                   onClick={() => handleDownloadReceipt(selectedPayment)}
-                  className="flex-1 bg-gradient-to-r from-teal-500 to-pink-500 text-white py-3 px-4 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-medium flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-teal-500 to-pink-500 text-white py-2 px-4 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-medium flex items-center justify-center gap-2"
                 >
                   <Download className="h-4 w-4" />
                   Receipt
