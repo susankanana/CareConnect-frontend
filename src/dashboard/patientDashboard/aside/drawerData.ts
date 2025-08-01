@@ -26,13 +26,13 @@ export const userDrawerData: DrawerData[] = [
     },
     {
         id: "complaints",
-        name: "Complaint",
+        name: "Complaints",
         icon: FaRegComment,
         link: "complaints"
     },
     {
         id: "payments",
-        name: "Payment",
+        name: "Payments",
         icon: RiSecurePaymentLine,
         link: "payments"
     },

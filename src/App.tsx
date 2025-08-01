@@ -36,6 +36,7 @@ import Neurology from './pages/services/Neurology'
 import Ophthalmology from './pages/services/Ophthalmology'
 import Orthopedics from './pages/services/Orthopedics'
 import Pediatrics from './pages/services/Pediatrics'
+import Payments from './dashboard/patientDashboard/main/payments/Payments'
 
 
 function App() {
@@ -162,6 +163,10 @@ function App() {
         {
           path: 'complaints',
           element: <PatientComplaints />
+        },
+        {
+          path: 'payments',
+          element: <Payments />
         },
         {
           path: 'profile',
