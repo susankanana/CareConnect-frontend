@@ -110,15 +110,15 @@ const ChatInterface = () => {
           </div>
         ))}
         {loading && (
-           <div className="flex justify-start">
-             <div className="max-w-[75%] px-4 py-2 rounded-xl shadow-md bg-pink-100 text-pink-900 rounded-bl-none">
-               <div className="animate-pulse flex space-x-2">
-                 <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
-                 <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
-                 <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
-               </div>
-             </div>
-           </div>
+            <div className="flex justify-start">
+              <div className="max-w-[75%] px-4 py-2 rounded-xl shadow-md bg-pink-100 text-pink-900 rounded-bl-none">
+                <div className="animate-pulse flex space-x-2">
+                  <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
+                  <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
+                  <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
+                </div>
+              </div>
+            </div>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -160,7 +160,7 @@ const FloatingAiAssistant = () => {
       {/* Floating Action Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 p-4 rounded-full shadow-lg text-white bg-gradient-to-r from-teal-500 to-pink-500 hover:from-teal-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-110 z-50"
+        className="fixed bottom-6 right-6 p-4 rounded-full shadow-lg text-white bg-gradient-to-r from-teal-500 to-pink-500 hover:from-teal-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-110 z-10" // Lower z-index
       >
         <MessageCircle className="h-7 w-7" />
       </button>
@@ -168,7 +168,7 @@ const FloatingAiAssistant = () => {
       {/* Modal Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-end justify-end p-4 z-40 transition-opacity duration-300"
+          className="fixed inset-0 bg-black/70 flex items-end justify-end p-4 z-50 transition-opacity duration-300" // Higher z-index
           onClick={() => setIsOpen(false)}
         >
           {/* Modal Container */}
@@ -179,7 +179,7 @@ const FloatingAiAssistant = () => {
             {/* Close button for the modal */}
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-50" // Ensure the close button is on top
             >
               <X className="h-6 w-6" />
             </button>
