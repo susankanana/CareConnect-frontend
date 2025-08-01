@@ -50,31 +50,30 @@ const ChatInterface = () => {
     setPrompt('');
 
     try {
-      // Make a POST request to your backend API route
-      const apiResponse = await fetch("/api/ai-assistant", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // Send the user's message in the request body
-        body: JSON.stringify({ message: prompt }),
-      });
+      const res = await fetch("/api/ai-assistant", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: prompt }),
+    });
 
-      if (!apiResponse.ok) {
-        // Handle server-side errors
-        const errorData = await apiResponse.json();
-        throw new Error(errorData.error || "Failed to get a response from the backend.");
+    let data;
+
+    if (!res.ok) {
+      const text = await res.text(); // fallback for non-JSON (e.g., 404 HTML)
+      throw new Error(`Request failed: ${res.status} ${text}`);
+    }
+
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+          throw new Error("Received a non-JSON response from the server.");
       }
 
-      // Parse the JSON response from your backend
-      const result = await apiResponse.json();
-      const aiMessage: ChatMessage = { sender: 'ai', text: result.reply };
-      // Add the AI's response to the chat history
-      setMessages((prevMessages) => [...prevMessages, aiMessage]);
+    const aiMessage: ChatMessage = { sender: "ai", text: data.reply };
+    setMessages((prevMessages) => [...prevMessages, aiMessage]);
 
     } catch (err) {
-      console.error(err);
-      
+      console.error("API call failed:", err);
       let errorMessage = "Failed to get a response from the AI assistant. Please try again.";
       if (err instanceof Error) {
         errorMessage = err.message;
