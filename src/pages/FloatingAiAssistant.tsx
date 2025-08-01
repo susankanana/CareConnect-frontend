@@ -35,54 +35,53 @@ const ChatInterface = () => {
    * Sends the user's prompt to the backend server.
    */
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!prompt.trim()) {
-      toast.error("Please enter a prompt.");
-      return;
-    }
+  if (!prompt.trim()) {
+    toast.error("Please enter a prompt.");
+    return;
+  }
 
-    const userMessage: ChatMessage = { sender: 'user', text: prompt };
-    // Optimistically add the user's message to the chat history
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-    
-    setLoading(true);
-    setPrompt('');
+  const userPrompt = prompt;
+  const userMessage: ChatMessage = { sender: 'user', text: userPrompt };
 
-    try {
-      const res = await fetch("/api/ai-assistant", {
+  setMessages((prevMessages) => [...prevMessages, userMessage]);
+  setPrompt('');
+  setLoading(true);
+
+  try {
+    const res = await fetch("https://careconnect-backend-c2he.onrender.com/api/ai-assistant", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: prompt }),
+      body: JSON.stringify({ message: userPrompt }),
     });
 
-    let data;
-
     if (!res.ok) {
-      const text = await res.text(); // fallback for non-JSON (e.g., 404 HTML)
-      throw new Error(`Request failed: ${res.status} ${text}`);
+      const text = await res.text();
+      try {
+        const errObj = JSON.parse(text);
+        throw new Error(errObj.error || `Request failed: ${res.status}`);
+      } catch {
+        throw new Error(`Request failed: ${res.status} ${text}`);
+      }
     }
 
-      try {
-        data = await res.json();
-      } catch (jsonErr) {
-          throw new Error("Received a non-JSON response from the server.");
-      }
-
+    const data = await res.json();
     const aiMessage: ChatMessage = { sender: "ai", text: data.reply };
     setMessages((prevMessages) => [...prevMessages, aiMessage]);
 
-    } catch (err) {
-      console.error("API call failed:", err);
-      let errorMessage = "Failed to get a response from the AI assistant. Please try again.";
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      }
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
+  } catch (err) {
+    console.error("API call failed:", err);
+    let errorMessage = "Failed to get a response from the AI assistant. Please try again.";
+    if (err instanceof Error) {
+      errorMessage = err.message;
     }
-  };
+    toast.error(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="flex flex-col h-full">
