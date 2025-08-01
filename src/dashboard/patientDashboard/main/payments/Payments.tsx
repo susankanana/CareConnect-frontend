@@ -17,7 +17,7 @@ import { useGetAllPaymentsQuery ,type TPayment } from '../../../../reducers/paym
 
 const Payments = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('All');
   const [selectedPayment, setSelectedPayment] = useState<TPayment | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -37,7 +37,7 @@ const Payments = () => {
         payment.paymentId.toString().includes(searchTerm) ||
         payment.appointmentId.toString().includes(searchTerm);
       
-      const matchesStatus = statusFilter === 'all' || payment.paymentStatus === statusFilter;
+      const matchesStatus = statusFilter === 'All' || payment.paymentStatus === statusFilter;
       
       return matchesSearch && matchesStatus;
     });
@@ -62,11 +62,11 @@ const Payments = () => {
 
   const getStatusIcon = (status?: string) => {
     switch (status) {
-      case 'completed':
+      case 'Paid':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'pending':
+      case 'Pending':
         return <Clock className="h-5 w-5 text-yellow-500" />;
-      case 'failed':
+      case 'Failed':
         return <XCircle className="h-5 w-5 text-red-500" />;
       default:
         return <AlertCircle className="h-5 w-5 text-gray-500" />;
@@ -75,11 +75,11 @@ const Payments = () => {
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'completed':
+      case 'Paid':
         return 'bg-green-100 text-green-800';
-      case 'pending':
+      case 'Pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'failed':
+      case 'Failed':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -247,10 +247,10 @@ const Payments = () => {
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white"
                 >
-                  <option value="all">All Status</option>
-                  <option value="completed">Completed</option>
-                  <option value="pending">Pending</option>
-                  <option value="failed">Failed</option>
+                  <option value="All">All Status</option>
+                  <option value="Paid">Completed</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Failed">Failed</option>
                 </select>
               </div>
             </div>
@@ -328,7 +328,7 @@ const Payments = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </button>
-                          {payment.paymentStatus === 'completed' && (
+                          {payment.paymentStatus === 'Paid' && (
                             <button
                               onClick={() => handleDownloadReceipt(payment)}
                               className="text-pink-600 hover:text-pink-900 transition-colors"
@@ -404,7 +404,7 @@ const Payments = () => {
               >
                 Close
               </button>
-              {selectedPayment.paymentStatus === 'completed' && (
+              {selectedPayment.paymentStatus === 'Paid' && (
                 <button
                   onClick={() => handleDownloadReceipt(selectedPayment)}
                   className="flex-1 bg-gradient-to-r from-teal-500 to-pink-500 text-white py-2 px-4 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-medium flex items-center justify-center gap-2"
