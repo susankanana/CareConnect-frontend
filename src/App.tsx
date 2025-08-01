@@ -37,6 +37,7 @@ import Ophthalmology from './pages/services/Ophthalmology'
 import Orthopedics from './pages/services/Orthopedics'
 import Pediatrics from './pages/services/Pediatrics'
 import Payments from './dashboard/patientDashboard/main/payments/Payments'
+import FloatingAiAssistant from './pages/FloatingAiAssistant'
 
 
 function App() {
@@ -203,6 +204,7 @@ function App() {
         }
 
       }} />
+      <FloatingAiAssistant />
     </>
   )
 }
