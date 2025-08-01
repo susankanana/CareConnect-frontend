@@ -55,6 +55,8 @@ const ChatInterface = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: userPrompt }),
     });
+    console.log("Sending to AI:", userPrompt);
+
 
     if (!res.ok) {
       const text = await res.text();
