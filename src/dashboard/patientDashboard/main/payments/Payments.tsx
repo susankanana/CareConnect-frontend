@@ -13,7 +13,7 @@ import {
   TrendingUp,
   FileText,
   ArrowUpRight} from 'lucide-react';
-import { useGetAllPaymentsQuery, type TPayment } from '../../../../reducers/payments/paymentsAPI';
+import { useGetAllPaymentsQuery ,type TPayment } from '../../../../reducers/payments/paymentsAPI';
 
 const Payments = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,9 +46,9 @@ const Payments = () => {
   // Calculate payment statistics
   const paymentStats = useMemo(() => {
     const totalAmount = payments.reduce((sum, payment) => sum + parseFloat(payment.amount || '0'), 0);
-    const successfulPayments = payments.filter(p => p.paymentStatus === 'completed').length;
-    const pendingPayments = payments.filter(p => p.paymentStatus === 'pending').length;
-    const failedPayments = payments.filter(p => p.paymentStatus === 'failed').length;
+    const successfulPayments = payments.filter(p => p.paymentStatus === 'Paid').length;
+    const pendingPayments = payments.filter(p => p.paymentStatus === 'Pending').length;
+    const failedPayments = payments.filter(p => p.paymentStatus === 'Failed').length;
 
     return {
       totalAmount,
