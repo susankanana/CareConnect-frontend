@@ -21,7 +21,8 @@ import {
   Star,
   Receipt,
   ArrowRight,
-  Loader
+  Loader,
+  Smartphone
 } from 'lucide-react';
 
 // Import the doctors API hook and type
@@ -64,12 +65,15 @@ const Appointments = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [appointmentDetails, setAppointmentDetails] = useState<any>(null);
   const [prescriptionAmount, setPrescriptionAmount] = useState("0.00");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'Stripe' | 'M-Pesa'>('Stripe');
+  const [mpesaPhone, setMpesaPhone] = useState('');
 
   const user = useSelector((state: RootState) => state.user.user);
   const isLoggedIn = useSelector((state: RootState) => !!state.user.token);
 
   const [createAppointment, { isLoading }] = appointmentsAPI.useCreateAppointmentMutation();
   const [createCheckoutSession, { isLoading: isCreatingSession }] = paymentsAPI.useCreateCheckoutSessionMutation();
+  const [initiateMpesaPayment, { isLoading: isInitiatingMpesa }] = paymentsAPI.useInitiateMpesaPaymentMutation();
 
   // Get prescriptions for the appointment to calculate total
   const { data: prescriptionsData } = prescriptionsAPI.useGetPrescriptionsByPatientIdQuery(
@@ -151,6 +155,29 @@ const Appointments = () => {
       return;
     }
 
+    if (selectedPaymentMethod === 'M-Pesa') {
+      if (!mpesaPhone || mpesaPhone.length < 10) {
+        toast.error("Please enter a valid M-Pesa phone number");
+        return;
+      }
+
+      try {
+        await initiateMpesaPayment({
+          appointmentId: appointmentDetails.appointmentId,
+          phone: mpesaPhone
+        }).unwrap();
+
+        toast.success("M-Pesa payment initiated! Please check your phone for the payment prompt.");
+        // You might want to show a different UI here or redirect to a status page
+        setIsSubmitted(true);
+      } catch (error: any) {
+        console.error("M-Pesa payment error:", error);
+        toast.error(error.data?.message || "Failed to initiate M-Pesa payment");
+      }
+      return;
+    }
+
+    // Handle Stripe payment
     try {
       const response = await createCheckoutSession({
         appointmentId: appointmentDetails.appointmentId
@@ -283,6 +310,87 @@ const Appointments = () => {
               </div>
             </div>
 
+            {/* Payment Method Selection */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-teal-600" />
+                Select Payment Method
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {/* Stripe Option */}
+                <div
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    selectedPaymentMethod === 'Stripe'
+                      ? 'border-teal-500 bg-teal-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => setSelectedPaymentMethod('Stripe')}
+                >
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="Stripe"
+                      checked={selectedPaymentMethod === 'Stripe'}
+                      onChange={() => setSelectedPaymentMethod('Stripe')}
+                      className="text-teal-600 focus:ring-teal-500"
+                    />
+                    <CreditCard className="h-6 w-6 text-blue-600" />
+                    <div>
+                      <p className="font-medium text-gray-900">Credit/Debit Card</p>
+                      <p className="text-sm text-gray-600">Secure payment via Stripe</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* M-Pesa Option */}
+                <div
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                    selectedPaymentMethod === 'M-Pesa'
+                      ? 'border-teal-500 bg-teal-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => setSelectedPaymentMethod('M-Pesa')}
+                >
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="M-Pesa"
+                      checked={selectedPaymentMethod === 'M-Pesa'}
+                      onChange={() => setSelectedPaymentMethod('M-Pesa')}
+                      className="text-teal-600 focus:ring-teal-500"
+                    />
+                    <Smartphone className="h-6 w-6 text-green-600" />
+                    <div>
+                      <p className="font-medium text-gray-900">M-Pesa</p>
+                      <p className="text-sm text-gray-600">Mobile money payment</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* M-Pesa Phone Number Input */}
+              {selectedPaymentMethod === 'M-Pesa' && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    M-Pesa Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={mpesaPhone}
+                    onChange={(e) => setMpesaPhone(e.target.value)}
+                    placeholder="254712345678"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Enter your M-Pesa registered phone number (format: 254XXXXXXXXX)
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button
@@ -292,6 +400,8 @@ const Appointments = () => {
                   setAppointmentDetails(null);
                   setSelectedDoctor(null);
                   setPrescriptionAmount("0.00");
+                  setSelectedPaymentMethod('Stripe');
+                  setMpesaPhone('');
                   reset();
                 }}
                 className="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
@@ -300,17 +410,19 @@ const Appointments = () => {
               </button>
               <button
                 onClick={handleProceedToCheckout}
-                disabled={isCreatingSession}
+                disabled={isCreatingSession || isInitiatingMpesa || (selectedPaymentMethod === 'M-Pesa' && !mpesaPhone)}
                 className="flex-1 bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isCreatingSession ? (
+                {(isCreatingSession || isInitiatingMpesa) ? (
                   <>
                     <Loader className="h-5 w-5 animate-spin" />
                     <span>Processing...</span>
                   </>
                 ) : (
                   <>
-                    <span>Proceed to Checkout</span>
+                    <span>
+                      {selectedPaymentMethod === 'M-Pesa' ? 'Pay with M-Pesa' : 'Proceed to Checkout'}
+                    </span>
                     <ArrowRight className="h-5 w-5" />
                   </>
                 )}
@@ -322,7 +434,10 @@ const Appointments = () => {
               <div className="flex items-center space-x-2">
                 <Shield className="h-5 w-5 text-blue-600" />
                 <span className="text-sm text-blue-800 font-medium">
-                  Secure payment powered by Stripe. Your payment information is encrypted and protected.
+                  {selectedPaymentMethod === 'Stripe' 
+                    ? 'Secure payment powered by Stripe. Your payment information is encrypted and protected.'
+                    : 'Secure M-Pesa payment. You will receive an STK push notification on your phone.'
+                  }
                 </span>
               </div>
             </div>
@@ -378,6 +493,8 @@ const Appointments = () => {
                   setAppointmentDetails(null);
                   setSelectedDoctor(null);
                   setPrescriptionAmount("0.00");
+                  setSelectedPaymentMethod('Stripe');
+                  setMpesaPhone('');
                   reset();
                 }}
                 className="bg-teal-600 text-white px-8 py-3 rounded-lg hover:bg-teal-700 transition-colors font-semibold"

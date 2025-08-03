@@ -6,11 +6,30 @@ export type TPayment = {
   paymentId: number;
   appointmentId: number;
   amount: string;
+  paymentMethod?: string;
   paymentStatus?: string;
   transactionId?: string;
   paymentDate?: string;
   createdAt?: string;
   updatedAt?: string;
+};
+
+// Define the type for the M-Pesa STK push request body
+export type TInitiateMpesaStkPushRequest = {
+  appointmentId: number;
+  phone: string;
+};
+
+// Define the type for the M-Pesa STK push response body
+export type TInitiateMpesaStkPushResponse = {
+  message: string;
+  data: {
+    MerchantRequestID: string;
+    CheckoutRequestID: string;
+    ResponseCode: string;
+    ResponseDescription: string;
+    CustomerMessage: string;
+  };
 };
 
 export const paymentsAPI = createApi({
@@ -28,10 +47,19 @@ export const paymentsAPI = createApi({
   }),
   tagTypes: ["Payments"],
   endpoints: (builder) => ({
-    // POST /payment/checkout-session
+    // POST /payment/checkout-session----STRIPE
     createCheckoutSession: builder.mutation<{ url: string }, { appointmentId: number }>({
       query: (data) => ({
         url: "/payment/checkout-session",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // POST /payment/mpesa/initiate ---- M-PESA
+    initiateMpesaPayment: builder.mutation<TInitiateMpesaStkPushResponse, TInitiateMpesaStkPushRequest>({
+      query: (data) => ({
+        url: "/payment/mpesa/initiate",
         method: "POST",
         body: data,
       }),
@@ -52,26 +80,13 @@ export const paymentsAPI = createApi({
     getPaymentsByAppointmentId: builder.query<{ data: TPayment[] }, number>({
       query: (appointmentId) => `/payments/appointment/${appointmentId}`,
     }),
-
-    // PATCH /payment/status/:id
-    updatePaymentStatus: builder.mutation<
-      { message: string },
-      { id: number; paymentStatus: string }
-    >({
-      query: ({ id, paymentStatus }) => ({
-        url: `/payment/status/${id}`,
-        method: "PATCH",
-        body: { paymentStatus },
-      }),
-      invalidatesTags: ["Payments"],
-    }),
   }),
 });
 
 export const {
   useCreateCheckoutSessionMutation,
+  useInitiateMpesaPaymentMutation,
   useGetAllPaymentsQuery,
   useGetPaymentByIdQuery,
   useGetPaymentsByAppointmentIdQuery,
-  useUpdatePaymentStatusMutation,
 } = paymentsAPI;
