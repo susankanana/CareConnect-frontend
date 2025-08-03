@@ -75,6 +75,30 @@ const Appointments = () => {
   const [createCheckoutSession, { isLoading: isCreatingSession }] = paymentsAPI.useCreateCheckoutSessionMutation();
   const [initiateMpesaPayment, { isLoading: isInitiatingMpesa }] = paymentsAPI.useInitiateMpesaPaymentMutation();
 
+  // Polling for M-Pesa payment status
+  const { refetch: refetchPaymentStatus } = paymentsAPI.useCheckPaymentStatusByAppointmentIdQuery(
+    appointmentDetails?.appointmentId ?? 0,
+    { skip: !appointmentDetails?.appointmentId, refetchOnMountOrArgChange: true }
+  );
+  useEffect(() => {
+    if (selectedPaymentMethod !== 'M-Pesa' || !appointmentDetails?.appointmentId) return;
+
+    const intervalId = setInterval(async () => {
+      try {
+        const result = await refetchPaymentStatus().unwrap();
+        if (result.status === 'Paid') {
+          clearInterval(intervalId); // Stop polling
+          toast.success("M-Pesa payment confirmed!");
+          setIsSubmitted(true); // This shows the success page
+        }
+      } catch (err) {
+        console.error("Error checking payment status", err);
+      }
+    }, 4000); // Poll every 4 seconds
+
+    return () => clearInterval(intervalId); // Cleanup on unmount
+  }, [appointmentDetails?.appointmentId, selectedPaymentMethod]);
+
   // Get prescriptions for the appointment to calculate total
   const { data: prescriptionsData } = prescriptionsAPI.useGetPrescriptionsByPatientIdQuery(
     user?.user_id || 0,
@@ -168,8 +192,7 @@ const Appointments = () => {
         }).unwrap();
 
         toast.success("M-Pesa payment initiated! Please check your phone for the payment prompt.");
-        // You might want to show a different UI here or redirect to a status page
-        setIsSubmitted(true);
+        
       } catch (error: any) {
         console.error("M-Pesa payment error:", error);
         toast.error(error.data?.message || "Failed to initiate M-Pesa payment");

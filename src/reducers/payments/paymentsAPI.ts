@@ -80,6 +80,12 @@ export const paymentsAPI = createApi({
     getPaymentsByAppointmentId: builder.query<{ data: TPayment[] }, number>({
       query: (appointmentId) => `/payments/appointment/${appointmentId}`,
     }),
+
+    // GET /payments/status/:appointmentId
+    checkPaymentStatusByAppointmentId: builder.query<{ status: string }, number>({
+      query: (appointmentId) => `/payments/status/${appointmentId}`,
+    }),
+
   }),
 });
 
@@ -89,4 +95,5 @@ export const {
   useGetAllPaymentsQuery,
   useGetPaymentByIdQuery,
   useGetPaymentsByAppointmentIdQuery,
+  useCheckPaymentStatusByAppointmentIdQuery,
 } = paymentsAPI;
