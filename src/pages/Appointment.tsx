@@ -67,6 +67,7 @@ const Appointments = () => {
   const [prescriptionAmount, setPrescriptionAmount] = useState("0.00");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'Stripe' | 'M-Pesa'>('Stripe');
   const [mpesaPhone, setMpesaPhone] = useState('');
+  const [isPollingPayment, setIsPollingPayment] = useState(false);
 
   const user = useSelector((state: RootState) => state.user.user);
   const isLoggedIn = useSelector((state: RootState) => !!state.user.token);
@@ -75,29 +76,55 @@ const Appointments = () => {
   const [createCheckoutSession, { isLoading: isCreatingSession }] = paymentsAPI.useCreateCheckoutSessionMutation();
   const [initiateMpesaPayment, { isLoading: isInitiatingMpesa }] = paymentsAPI.useInitiateMpesaPaymentMutation();
 
-  // Polling for M-Pesa payment status
-  const { refetch: refetchPaymentStatus } = paymentsAPI.useCheckPaymentStatusByAppointmentIdQuery(
-    appointmentDetails?.appointmentId ?? 0,
-    { skip: !appointmentDetails?.appointmentId, refetchOnMountOrArgChange: true }
-  );
+// M-Pesa payment status polling
+  const [checkPaymentStatus] = paymentsAPI.useLazyCheckPaymentStatusByAppointmentIdQuery();
+
   useEffect(() => {
-    if (selectedPaymentMethod !== 'M-Pesa' || !appointmentDetails?.appointmentId) return;
+    if (!isPollingPayment || !appointmentDetails?.appointmentId) return;
 
-    const intervalId = setInterval(async () => {
+    const pollPaymentStatus = async () => {
       try {
-        const result = await refetchPaymentStatus().unwrap();
-        if (result.status === 'Paid') {
-          clearInterval(intervalId); // Stop polling
-          toast.success("M-Pesa payment confirmed!");
-          setIsSubmitted(true); // This shows the success page
-        }
-      } catch (err) {
-        console.error("Error checking payment status", err);
-      }
-    }, 4000); // Poll every 4 seconds
+        const result = await checkPaymentStatus(appointmentDetails.appointmentId).unwrap();
+        
+        const status = result.status?.toLowerCase();
 
-    return () => clearInterval(intervalId); // Cleanup on unmount
-  }, [appointmentDetails?.appointmentId, selectedPaymentMethod]);
+        if (status === 'paid') {
+          setIsPollingPayment(false);
+          toast.success("M-Pesa payment confirmed!");
+          setIsSubmitted(true);
+        } else if (status === 'failed') {
+          setIsPollingPayment(false);
+          toast.error("Payment failed. Please try again.");
+        } else if (status === 'pending') {
+          toast.info("Payment is still pending...", {
+            duration: 2000,
+          });
+        // Continue polling until payment is confirmed or fails
+        } else {
+        console.warn("Unknown payment status:", status);
+        }
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+        // Polling continues silently
+      }
+    };
+
+    // Poll immediately, then every 5 seconds
+    pollPaymentStatus();
+    const intervalId = setInterval(pollPaymentStatus, 5000);
+
+    // Stop polling after 5 minutes (60 attempts)
+    const timeoutId = setTimeout(() => {
+      clearInterval(intervalId);
+      setIsPollingPayment(false);
+      toast.error("Payment confirmation timeout. Please check your payment status.");
+    }, 300000); // 5 minutes   
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+    };
+  }, [isPollingPayment, appointmentDetails?.appointmentId, checkPaymentStatus]);
 
   // Get prescriptions for the appointment to calculate total
   const { data: prescriptionsData } = prescriptionsAPI.useGetPrescriptionsByPatientIdQuery(
@@ -190,6 +217,7 @@ const Appointments = () => {
           appointmentId: appointmentDetails.appointmentId,
           phone: mpesaPhone
         }).unwrap();
+        setIsPollingPayment(true);
 
         toast.success("M-Pesa payment initiated! Please check your phone for the payment prompt.");
         
