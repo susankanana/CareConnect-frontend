@@ -76,6 +76,11 @@ const Appointments = () => {
   const [createCheckoutSession, { isLoading: isCreatingSession }] = paymentsAPI.useCreateCheckoutSessionMutation();
   const [initiateMpesaPayment, { isLoading: isInitiatingMpesa }] = paymentsAPI.useInitiateMpesaPaymentMutation();
 
+  console.log("RENDERING: isSubmitted =", isSubmitted, "appointmentDetails =", appointmentDetails);
+  useEffect(() => {
+    console.log("useEffect: isSubmitted changed to", isSubmitted);
+  }, [isSubmitted]);
+ 
 // M-Pesa payment status polling
   const [checkPaymentStatus] = paymentsAPI.useLazyCheckPaymentStatusByAppointmentIdQuery();
 
@@ -92,6 +97,7 @@ const Appointments = () => {
           setIsPollingPayment(false);
           toast.success("M-Pesa payment confirmed!");
           setIsSubmitted(true);
+          console.log("Payment confirmed, setting isSubmitted = true");
         } else if (status === 'failed') {
           setIsPollingPayment(false);
           toast.error("Payment failed. Please try again.");
@@ -499,7 +505,6 @@ const Appointments = () => {
   }
 
   // Final success page after payment
-  console.log("RENDERING: isSubmitted =", isSubmitted, "appointmentDetails =", appointmentDetails);
 
   if (isSubmitted && appointmentDetails ) {
     return (
