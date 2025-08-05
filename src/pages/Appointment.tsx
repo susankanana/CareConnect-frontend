@@ -76,12 +76,7 @@ const Appointments = () => {
   const [createCheckoutSession, { isLoading: isCreatingSession }] = paymentsAPI.useCreateCheckoutSessionMutation();
   const [initiateMpesaPayment, { isLoading: isInitiatingMpesa }] = paymentsAPI.useInitiateMpesaPaymentMutation();
 
-  console.log("RENDERING: isSubmitted =", isSubmitted, "appointmentDetails =", appointmentDetails);
-  useEffect(() => {
-    console.log("useEffect: isSubmitted changed to", isSubmitted);
-  }, [isSubmitted]);
- 
-// M-Pesa payment status polling
+  // M-Pesa payment status polling
   const [checkPaymentStatus] = paymentsAPI.useLazyCheckPaymentStatusByAppointmentIdQuery();
 
   useEffect(() => {
@@ -91,27 +86,17 @@ const Appointments = () => {
       try {
         const result = await checkPaymentStatus(appointmentDetails.appointmentId).unwrap();
         
-        const status = result.status?.toLowerCase();
-
-        if (status === 'paid') {
+        if (result.status === 'Paid') {
           setIsPollingPayment(false);
           toast.success("M-Pesa payment confirmed!");
-          setIsSubmitted(true);
-          console.log("Payment confirmed, setting isSubmitted = true");
-        } else if (status === 'failed') {
+          setIsSubmitted(true); // Navigate to success page
+        } else if (result.status === 'Failed') {
           setIsPollingPayment(false);
           toast.error("Payment failed. Please try again.");
-        } else if (status === 'pending') {
-          toast.info("Payment is still pending...", {
-            duration: 2000,
-          });
-        // Continue polling until payment is confirmed or fails
-        } else {
-        console.warn("Unknown payment status:", status);
         }
       } catch (error) {
         console.error("Error checking payment status:", error);
-        // Polling continues silently
+        // Continue polling on error, don't stop
       }
     };
 
@@ -124,7 +109,7 @@ const Appointments = () => {
       clearInterval(intervalId);
       setIsPollingPayment(false);
       toast.error("Payment confirmation timeout. Please check your payment status.");
-    }, 300000); // 5 minutes   
+    }, 300000); // 5 minutes
 
     return () => {
       clearInterval(intervalId);
@@ -223,10 +208,9 @@ const Appointments = () => {
           appointmentId: appointmentDetails.appointmentId,
           phone: mpesaPhone
         }).unwrap();
-        setIsPollingPayment(true);
 
         toast.success("M-Pesa payment initiated! Please check your phone for the payment prompt.");
-        
+        setIsPollingPayment(true); // Start polling for payment status
       } catch (error: any) {
         console.error("M-Pesa payment error:", error);
         toast.error(error.data?.message || "Failed to initiate M-Pesa payment");
@@ -459,6 +443,7 @@ const Appointments = () => {
                   setPrescriptionAmount("0.00");
                   setSelectedPaymentMethod('Stripe');
                   setMpesaPhone('');
+                  setIsPollingPayment(false);
                   reset();
                 }}
                 className="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
@@ -467,13 +452,15 @@ const Appointments = () => {
               </button>
               <button
                 onClick={handleProceedToCheckout}
-                disabled={isCreatingSession || isInitiatingMpesa || (selectedPaymentMethod === 'M-Pesa' && !mpesaPhone)}
+                disabled={isCreatingSession || isInitiatingMpesa || isPollingPayment || (selectedPaymentMethod === 'M-Pesa' && !mpesaPhone)}
                 className="flex-1 bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {(isCreatingSession || isInitiatingMpesa) ? (
+                {(isCreatingSession || isInitiatingMpesa || isPollingPayment) ? (
                   <>
                     <Loader className="h-5 w-5 animate-spin" />
-                    <span>Processing...</span>
+                    <span>
+                      {isPollingPayment ? 'Waiting for payment confirmation...' : 'Processing...'}
+                    </span>
                   </>
                 ) : (
                   <>
@@ -493,7 +480,9 @@ const Appointments = () => {
                 <span className="text-sm text-blue-800 font-medium">
                   {selectedPaymentMethod === 'Stripe' 
                     ? 'Secure payment powered by Stripe. Your payment information is encrypted and protected.'
-                    : 'Secure M-Pesa payment. You will receive an STK push notification on your phone.'
+                    : isPollingPayment 
+                      ? 'Please complete the payment on your phone. We are waiting for confirmation...'
+                      : 'Secure M-Pesa payment. You will receive an STK push notification on your phone.'
                   }
                 </span>
               </div>
@@ -505,8 +494,7 @@ const Appointments = () => {
   }
 
   // Final success page after payment
-
-  if (isSubmitted && appointmentDetails ) {
+  if (isSubmitted && appointmentDetails) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="max-w-2xl mx-auto px-4">
@@ -553,6 +541,7 @@ const Appointments = () => {
                   setPrescriptionAmount("0.00");
                   setSelectedPaymentMethod('Stripe');
                   setMpesaPhone('');
+                  setIsPollingPayment(false);
                   reset();
                 }}
                 className="bg-teal-600 text-white px-8 py-3 rounded-lg hover:bg-teal-700 transition-colors font-semibold"
