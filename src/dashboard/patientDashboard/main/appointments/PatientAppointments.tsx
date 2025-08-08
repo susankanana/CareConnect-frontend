@@ -280,26 +280,40 @@ const PatientAppointments = () => {
 
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-3">Payment Breakdown</h3>
-                                <div className="bg-teal-50 rounded-lg p-6 mb-8">
-                                    <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <div className="bg-white rounded-xl shadow-md p-6 mb-8 border border-teal-100">
+                                    <h3 className="text-lg font-semibold text-teal-700 mb-6 flex items-center gap-2">
                                     <CreditCard className="h-5 w-5 text-teal-600" />
                                         Payment Breakdown
                                     </h3>
-                                    <div className="space-y-3 text-sm">
+
+                                    <div className="space-y-4 text-sm text-gray-700">
                                         <div className="flex justify-between">
-                                            <span>Total Amount:</span>
-                                            <span className="text-lg font-bold text-teal-600">
+                                            <span>Consultation Fee</span>
+                                            <span className="font-medium text-gray-900">
+                                                KSh 6,500
+                                            </span>
+                                        </div>
+
+                                        {parseFloat(prescriptionAmount) > 0 && (
+                                        <div className="flex justify-between">
+                                            <span>Prescription Charges</span>
+                                            <span className="font-medium text-gray-900">
+                                                KSh {parseFloat(prescriptionAmount).toFixed(2)}
+                                            </span>
+                                        </div>
+                                      )}
+
+                                        <hr className="border-t border-gray-200" />
+
+                                        <div className="flex justify-between items-center pt-2">
+                                            <span className="text-base font-semibold text-gray-900">Total Amount</span>
+                                            <span className="text-xl font-bold text-teal-600">
                                                 KSh {parseFloat(selectedAppointment.totalAmount).toFixed(2)}
                                             </span>
-                                            {parseFloat(prescriptionAmount) > 0 && (
-                                            <div className="text-xs text-gray-600">
-                                                (Includes consultation fee and prescription charges)
-                                            </div>
-                                            )}
                                         </div>
-                                        
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
