@@ -280,7 +280,7 @@ const PatientAppointments = () => {
 
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-3">Payment Breakdown</h3>
-                                <div className="bg-white rounded-xl shadow-md p-6 mb-8 border border-teal-100">
+                                <div className="bg-teal-50 rounded-xl shadow-md p-6 mb-8 border border-teal-100">
                                     <h3 className="text-lg font-semibold text-teal-700 mb-6 flex items-center gap-2">
                                     <CreditCard className="h-5 w-5 text-teal-600" />
                                         Payment Breakdown
@@ -294,14 +294,14 @@ const PatientAppointments = () => {
                                             </span>
                                         </div>
 
-                                        {parseFloat(prescriptionAmount) > 0 && (
+                                        true && (
                                         <div className="flex justify-between">
                                             <span>Prescription Charges</span>
                                             <span className="font-medium text-gray-900">
                                                 KSh {parseFloat(prescriptionAmount).toFixed(2)}
                                             </span>
                                         </div>
-                                      )}
+                                      )
 
                                         <hr className="border-t border-gray-200" />
 
