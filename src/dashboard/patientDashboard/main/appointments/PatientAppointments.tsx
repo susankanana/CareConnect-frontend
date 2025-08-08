@@ -291,12 +291,13 @@ const PatientAppointments = () => {
                                             <span className="text-lg font-bold text-teal-600">
                                                 KSh {parseFloat(selectedAppointment.totalAmount).toFixed(2)}
                                             </span>
+                                            {parseFloat(prescriptionAmount) > 0 && (
+                                            <div className="text-xs text-gray-600">
+                                                (Includes consultation fee and prescription charges)
+                                            </div>
+                                            )}
                                         </div>
-                                        {parseFloat(prescriptionAmount) > 0 && (
-                                        <div className="text-xs text-gray-600">
-                                            (Includes consultation fee and prescription charges)
-                                        </div>
-                                        )}
+                                        
                                     </div>
                                 </div>
                             </div>
