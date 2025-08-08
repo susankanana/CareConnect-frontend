@@ -275,10 +275,10 @@ const Payments = () => {
                 <thead className="bg-gray-50 hidden md:table-header-group">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Method
+                      Transaction
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Transaction
+                      Method
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Amount
@@ -297,9 +297,6 @@ const Payments = () => {
                 <tbody className="bg-white divide-y divide-gray-200 md:table-row-group block">
                   {filteredPayments.map((payment) => (
                     <tr key={payment.paymentId} className="hover:bg-gray-50 transition-colors text-sm md:table-row block w-full border-b border-gray-100 md:border-0">
-                      <td className="px-6 py-4 whitespace-nowrap block md:table-cell text-sm text-gray-700">
-                        {payment.paymentMethod || 'N/A'}
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap block md:table-cell">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
@@ -309,6 +306,9 @@ const Payments = () => {
                             Appointment #{payment.appointmentId}
                           </div>
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap block md:table-cell text-sm text-gray-700">
+                        {payment.paymentMethod || 'N/A'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap block md:table-cell">
                         <div className="text-sm font-medium text-gray-900">
@@ -369,10 +369,6 @@ const Payments = () => {
 
             <div className="space-y-4">
               <div className="flex justify-between">
-                <span className="text-gray-600">Payment Method:</span>
-                <span className="font-medium">{selectedPayment.paymentMethod || 'N/A'}</span>
-              </div>
-              <div className="flex justify-between">
                 <span className="text-gray-600">Payment ID:</span>
                 <span className="font-medium">#{selectedPayment.paymentId}</span>
               </div>
@@ -383,6 +379,10 @@ const Payments = () => {
               <div className="flex justify-between">
                 <span className="text-gray-600">Appointment ID:</span>
                 <span className="font-medium">#{selectedPayment.appointmentId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Payment Method:</span>
+                <span className="font-medium">{selectedPayment.paymentMethod || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Amount:</span>
