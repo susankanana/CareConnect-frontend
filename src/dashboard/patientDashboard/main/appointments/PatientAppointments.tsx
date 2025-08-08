@@ -38,6 +38,47 @@ const PatientAppointments = () => {
         { skip: !userId }
     );
 
+    // M-Pesa payment status polling
+    const [checkPaymentStatus] = paymentsAPI.useLazyCheckPaymentStatusByAppointmentIdQuery();
+
+    useEffect(() => {
+        if (!isPollingPayment || !selectedAppointment?.appointmentId) return;
+
+        const pollPaymentStatus = async () => {
+            try {
+                const result = await checkPaymentStatus(selectedAppointment.appointmentId).unwrap();
+                
+                if (result.status === 'Paid' || result.status === 'completed' || result.status === 'success') {
+                    setIsPollingPayment(false);
+                    toast.success("M-Pesa payment confirmed!");
+                    setShowSuccess(true); // Show success page
+                } else if (result.status === 'Failed' || result.status === 'failed' || result.status === 'cancelled') {
+                    setIsPollingPayment(false);
+                    toast.error("Payment failed. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error checking payment status:", error);
+                // Continue polling on error, don't stop
+            }
+        };
+
+        // Poll immediately, then every 5 seconds
+        pollPaymentStatus();
+        const intervalId = setInterval(pollPaymentStatus, 5000);
+
+        // Stop polling after 5 minutes (60 attempts)
+        const timeoutId = setTimeout(() => {
+            clearInterval(intervalId);
+            setIsPollingPayment(false);
+            toast.error("Payment confirmation timeout. Please check your payment status.");
+        }, 300000); // 5 minutes
+
+        return () => {
+            clearInterval(intervalId);
+            clearTimeout(timeoutId);
+        };
+    }, [isPollingPayment, selectedAppointment?.appointmentId, checkPaymentStatus]);
+    
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'Confirmed':
@@ -103,46 +144,6 @@ const PatientAppointments = () => {
         );
     }
     
-    // M-Pesa payment status polling
-    const [checkPaymentStatus] = paymentsAPI.useLazyCheckPaymentStatusByAppointmentIdQuery();
-
-    useEffect(() => {
-        if (!isPollingPayment || !selectedAppointment?.appointmentId) return;
-
-        const pollPaymentStatus = async () => {
-            try {
-                const result = await checkPaymentStatus(selectedAppointment.appointmentId).unwrap();
-                
-                if (result.status === 'Paid' || result.status === 'completed' || result.status === 'success') {
-                    setIsPollingPayment(false);
-                    toast.success("M-Pesa payment confirmed!");
-                    setShowSuccess(true); // Show success page
-                } else if (result.status === 'Failed' || result.status === 'failed' || result.status === 'cancelled') {
-                    setIsPollingPayment(false);
-                    toast.error("Payment failed. Please try again.");
-                }
-            } catch (error) {
-                console.error("Error checking payment status:", error);
-                // Continue polling on error, don't stop
-            }
-        };
-
-        // Poll immediately, then every 5 seconds
-        pollPaymentStatus();
-        const intervalId = setInterval(pollPaymentStatus, 5000);
-
-        // Stop polling after 5 minutes (60 attempts)
-        const timeoutId = setTimeout(() => {
-            clearInterval(intervalId);
-            setIsPollingPayment(false);
-            toast.error("Payment confirmation timeout. Please check your payment status.");
-        }, 300000); // 5 minutes
-
-        return () => {
-            clearInterval(intervalId);
-            clearTimeout(timeoutId);
-        };
-    }, [isPollingPayment, selectedAppointment?.appointmentId, checkPaymentStatus]);
 
     // Handle proceeding to checkout
     const handleProceedToCheckout = async () => {
