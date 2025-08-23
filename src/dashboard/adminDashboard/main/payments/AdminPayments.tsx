@@ -278,7 +278,7 @@ const AdminPayments = () => {
                             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white"
                         >
                             <option value="All">All Methods</option>
-                            <option value="Card">Stripe</option>
+                            <option value="Stripe">Stripe</option>
                             <option value="M-Pesa">M-Pesa</option>
                             <option value="Cash">Cash</option>
                         </select>
