@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
-import { FaCalendarDay, FaCalendarWeek, FaCalendarAlt } from "react-icons/fa";
+import { FaCalendarDay, FaCalendarWeek, FaCalendarAlt, FaDollarSign } from "react-icons/fa";
 import { useGetAllPaymentsQuery, type TPayment } from '../../../../reducers/payments/paymentsAPI';
 
 interface RevenueSummary {
@@ -108,11 +108,16 @@ const AdminPayments = () => {
   if (payments.length === 0) {
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-800">Payments Dashboard</h1>
-            <Link to="/admin/dashboard" className="text-blue-600 hover:text-blue-800 transition-colors">
-              &larr; Back to Dashboard
-            </Link>
+          <div className="flex items-center mb-6">
+            <div className="flex flex-col">
+                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    <FaDollarSign className="h-7 w-7 text-green-600" />
+                    Payments Management
+                </h1>
+                <p className="text-gray-600 mt-1">
+                    Manage all payments - {payments.length} total payments
+                </p>
+            </div>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-lg text-center text-gray-500 text-lg">
               No payments found.
@@ -123,11 +128,16 @@ const AdminPayments = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Payments Dashboard</h1>
-        <Link to="/admin/dashboard" className="text-blue-600 hover:text-blue-800 transition-colors">
-          &larr; Back to Dashboard
-        </Link>
+      <div className="flex items-center mb-6">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <FaDollarSign className="h-7 w-7 text-green-600" />
+            Payments Management
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Manage all payments - {payments.length} total payments
+          </p>
+        </div>
       </div>
 
       {/* Revenue Summary Cards */}
