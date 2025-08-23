@@ -7,7 +7,7 @@ export type TPayment = {
   appointmentId: number;
   amount: string;
   paymentMethod?: string;
-  paymentStatus?: string;
+  paymentStatus: string;
   transactionId?: string;
   paymentDate?: string;
   createdAt?: string;

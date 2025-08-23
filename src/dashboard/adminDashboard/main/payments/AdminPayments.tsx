@@ -1,244 +1,215 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
+import { useGetAllPaymentsQuery } from "../../../../reducers/payments/paymentsAPI";
+import { Loader2, CreditCard, CheckCircle, AlertCircle } from "lucide-react";
 import { Link } from "react-router";
-import { FaCalendarDay, FaCalendarWeek, FaCalendarAlt, FaDollarSign } from "react-icons/fa";
-import { useGetAllPaymentsQuery, type TPayment } from '../../../../reducers/payments/paymentsAPI';
-
-interface RevenueSummary {
-  today: number;
-  week: number;
-  month: number;
-}
 
 const AdminPayments = () => {
-  const { data, isLoading, isError} = useGetAllPaymentsQuery();
+  const { data, isLoading, isError, error } = useGetAllPaymentsQuery();
 
-  const [revenueSummary, setRevenueSummary] = useState<RevenueSummary>({
-    today: 0,
-    week: 0,
-    month: 0,
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" }>({
+    key: "paymentDate",
+    direction: "desc",
   });
 
-  // Calculate revenue summary whenever the data changes
-  useEffect(() => {
-    if (data?.data) {
-      calculateRevenueSummary(data.data);
-    }
-  }, [data]);
+  const [filters, setFilters] = useState({
+    method: "All",
+    status: "All",
+  });
 
-  const calculateRevenueSummary = (allPayments: TPayment[]) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize to the start of the day
-    
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
-    
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-    let dailyRevenue = 0;
-    let weeklyRevenue = 0;
-    let monthlyRevenue = 0;
-
-    allPayments.forEach((payment) => {
-      // Use a fallback for payment.paymentDate, and ensure the date is valid
-      const paymentDate = payment.paymentDate
-        ? new Date(payment.paymentDate)
-        : new Date(payment.createdAt || '2025-01-01'); // Fallback to createdAt or a default date
-      
-      // Check if the date is valid before proceeding
-      if (isNaN(paymentDate.getTime())) {
-          console.error('Invalid date found for payment:', payment);
-          return;
-      }
-
-      // Convert the amount string to a number, handling potential parsing errors
-      const amount = parseFloat(payment.amount || '0');
-      if (isNaN(amount)) {
-          console.error('Invalid amount found for payment:', payment);
-          return;
-      }
-
-      // Normalize the payment date for accurate comparison
-      const normalizedPaymentDate = new Date(paymentDate);
-      normalizedPaymentDate.setHours(0, 0, 0, 0);
-
-      if (normalizedPaymentDate.getTime() === today.getTime()) {
-        dailyRevenue += amount;
-      }
-
-      if (normalizedPaymentDate >= startOfWeek) {
-        weeklyRevenue += amount;
-      }
-
-      if (normalizedPaymentDate >= startOfMonth) {
-        monthlyRevenue += amount;
-      }
-    });
-
-    setRevenueSummary({
-      today: dailyRevenue,
-      week: weeklyRevenue,
-      month: monthlyRevenue,
-    });
+  const handleSort = (key: string) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
   };
 
-  // Conditional rendering based on RTK Query states
+  const revenueSummary = useMemo(() => {
+    if (!data?.data) return { today: 0, week: 0, month: 0 };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    return data.data.reduce(
+      (acc, payment) => {
+        const paymentDate = payment.paymentDate
+          ? new Date(payment.paymentDate)
+          : new Date(payment.createdAt || "");
+
+        if (isNaN(paymentDate.getTime())) return acc;
+
+        const normalizedPaymentDate = new Date(paymentDate);
+        normalizedPaymentDate.setHours(0, 0, 0, 0);
+
+        const amount = parseFloat(payment.amount || "0");
+        if (isNaN(amount)) return acc;
+
+        if (normalizedPaymentDate.getTime() === today.getTime()) acc.today += amount;
+        if (normalizedPaymentDate >= startOfWeek) acc.week += amount;
+        if (normalizedPaymentDate >= startOfMonth) acc.month += amount;
+
+        return acc;
+      },
+      { today: 0, week: 0, month: 0 }
+    );
+  }, [data]);
+
+  const filteredAndSortedPayments = useMemo(() => {
+    if (!data?.data) return [];
+
+    let filtered = data.data;
+
+    if (filters.method !== "All") {
+      filtered = filtered.filter((p) => p.paymentMethod === filters.method);
+    }
+    if (filters.status !== "All") {
+      filtered = filtered.filter((p) => p.paymentStatus === filters.status);
+    }
+
+    return [...filtered].sort((a, b) => {
+      const aVal = a[sortConfig.key as keyof typeof a] ?? "";
+      const bVal = b[sortConfig.key as keyof typeof b] ?? "";
+
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortConfig.direction === "asc"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
+      }
+
+      const dateA = new Date(aVal as string).getTime();
+      const dateB = new Date(bVal as string).getTime();
+      return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
+    });
+  }, [data, filters, sortConfig]);
+
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full text-lg text-gray-600">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-        <span className="ml-4">Loading payments data...</span>
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="animate-spin text-blue-500" size={40} />
       </div>
     );
   }
 
   if (isError) {
-    // The error object from RTK Query might have a `message` property
-    const errorMessage = 'An unknown error occurred.';
+    const errorMessage =
+      (error as any)?.data?.message || (error as any)?.error || "An unknown error occurred.";
     return (
       <div className="flex justify-center items-center h-full text-red-500 text-lg">
         <p>Error: {errorMessage}</p>
       </div>
     );
   }
-  
-  // Use the data from the query hook directly
-  const payments = data?.data || [];
 
-  // No payments found state
-  if (payments.length === 0) {
+  if (!filteredAndSortedPayments.length) {
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
-          <div className="flex items-center mb-6">
-            <div className="flex flex-col">
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <FaDollarSign className="h-7 w-7 text-green-600" />
-                    Payments Management
-                </h1>
-                <p className="text-gray-600 mt-1">
-                    Manage all payments - {payments.length} total payments
-                </p>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center text-gray-500 text-lg">
-              No payments found.
-          </div>
-        </div>
+      <div className="flex justify-center items-center h-full text-gray-500 text-lg">
+        <p>No payment records found.</p>
+      </div>
     );
   }
 
+  const statusColors: Record<string, string> = {
+    Paid: "bg-green-100 text-green-800",
+    Pending: "bg-yellow-100 text-yellow-800",
+    Failed: "bg-red-100 text-red-800",
+  };
+
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex items-center mb-6">
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <FaDollarSign className="h-7 w-7 text-green-600" />
-            Payments Management
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Manage all payments - {payments.length} total payments
-          </p>
-        </div>
-      </div>
-
-      {/* Revenue Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-lg flex items-center">
-          <div className="bg-green-100 text-green-600 p-3 rounded-full mr-4">
-            <FaCalendarDay size={24} />
-          </div>
+    <div className="p-6 space-y-6">
+      {/* Revenue Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-4 rounded-2xl shadow flex items-center space-x-4">
+          <CheckCircle className="text-green-500" size={28} />
           <div>
-            <p className="text-sm font-medium text-gray-500">Daily Revenue</p>
-            <p className="text-2xl font-semibold text-gray-900">
-              Ksh {revenueSummary.today.toFixed(2)}
-            </p>
+            <h3 className="text-lg font-semibold">Today's Revenue</h3>
+            <p className="text-xl font-bold text-green-600">KES {revenueSummary.today}</p>
           </div>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-lg flex items-center">
-          <div className="bg-blue-100 text-blue-600 p-3 rounded-full mr-4">
-            <FaCalendarWeek size={24} />
-          </div>
+        <div className="bg-white p-4 rounded-2xl shadow flex items-center space-x-4">
+          <CreditCard className="text-blue-500" size={28} />
           <div>
-            <p className="text-sm font-medium text-gray-500">Weekly Revenue</p>
-            <p className="text-2xl font-semibold text-gray-900">
-              Ksh {revenueSummary.week.toFixed(2)}
-            </p>
+            <h3 className="text-lg font-semibold">This Week</h3>
+            <p className="text-xl font-bold text-blue-600">KES {revenueSummary.week}</p>
           </div>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-lg flex items-center">
-          <div className="bg-purple-100 text-purple-600 p-3 rounded-full mr-4">
-            <FaCalendarAlt size={24} />
-          </div>
+        <div className="bg-white p-4 rounded-2xl shadow flex items-center space-x-4">
+          <AlertCircle className="text-purple-500" size={28} />
           <div>
-            <p className="text-sm font-medium text-gray-500">Monthly Revenue</p>
-            <p className="text-2xl font-semibold text-gray-900">
-              Ksh {revenueSummary.month.toFixed(2)}
-            </p>
+            <h3 className="text-lg font-semibold">This Month</h3>
+            <p className="text-xl font-bold text-purple-600">KES {revenueSummary.month}</p>
           </div>
         </div>
       </div>
 
-      {/* Payments Table */}
-      <div className="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">All Payments</h2>
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-4">
+        <select
+          value={filters.method}
+          onChange={(e) => setFilters((prev) => ({ ...prev, method: e.target.value }))}
+          className="border rounded-lg px-3 py-2"
+        >
+          <option value="All">All Methods</option>
+          <option value="Card">Card</option>
+          <option value="M-Pesa">M-Pesa</option>
+          <option value="Cash">Cash</option>
+        </select>
+
+        <select
+          value={filters.status}
+          onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
+          className="border rounded-lg px-3 py-2"
+        >
+          <option value="All">All Status</option>
+          <option value="Paid">Paid</option>
+          <option value="Pending">Pending</option>
+          <option value="Failed">Failed</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto bg-white rounded-2xl shadow">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Payment ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Appointment ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Amount
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Method
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Transaction ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Payment Date
-              </th>
+              {["Amount", "Method", "Status", "Date"].map((col) => (
+                <th
+                  key={col}
+                  onClick={() => handleSort(col.toLowerCase())}
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700"
+                >
+                  {col} {sortConfig.key === col.toLowerCase() ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                </th>
+              ))}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {payments.map((payment) => (
-              <tr key={payment.paymentId}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{payment.paymentId}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <Link to={`/admin/appointments/${payment.appointmentId}`} className="text-blue-600 hover:underline">
-                    {payment.appointmentId}
-                  </Link>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  Ksh {payment.amount ? parseFloat(payment.amount).toFixed(2) : '0.00'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {payment.paymentMethod || 'N/A'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+          <tbody className="divide-y divide-gray-200">
+            {filteredAndSortedPayments.map((payment) => (
+              <tr key={payment.paymentId} className="hover:bg-gray-50 transition">
+                <td className="px-6 py-4 whitespace-nowrap font-medium">KES {payment.amount || "0"}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{payment.paymentMethod || "N/A"}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      payment.paymentStatus === "Paid"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
+                      statusColors[payment.paymentStatus] || "bg-gray-100 text-gray-800"
                     }`}
                   >
-                    {payment.paymentStatus || 'N/A'}
+                    {payment.paymentStatus || "N/A"}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {payment.transactionId || "N/A"}
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {new Date(payment.paymentDate || payment.createdAt || "").toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {payment.paymentDate ? new Date(payment.paymentDate).toLocaleDateString() : 'N/A'}
+                <td className="px-6 py-4 whitespace-nowrap text-blue-600 hover:underline">
+                  <Link to={`/admin/payments/${payment.paymentId}`}>View</Link>
                 </td>
               </tr>
             ))}
