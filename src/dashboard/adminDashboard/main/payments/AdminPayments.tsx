@@ -180,7 +180,7 @@ const AdminPayments = () => {
 
   const exportToCSV = () => {
     const headers = ["PaymentID", "AppointmentID", "Method", "Amount", "Date"];
-    const rows = filteredAndSortedPayments.map(p => [p.paymentId, p.appointmentId, p.paymentMethod, p.amount, p.paymentDate]);
+    const rows = filteredAndSortedPayments.map(p => [p.paymentId, p.appointmentId, p.paymentMethod, p.amount, formatDate(p.paymentDate || p.createdAt)]);
     const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -231,27 +231,27 @@ const AdminPayments = () => {
           <CheckCircle className="text-green-500" size={28} />
           <div>
             <h3 className="text-lg font-semibold">Today's Revenue</h3>
-            <p className="text-xl font-bold text-green-600">KES {revenueSummary.today}</p>
+            <p className="text-xl font-bold text-green-600">KES {formatAmount(revenueSummary.today.toString())}</p>
           </div>
         </div>
         <div className="bg-white p-4 rounded-2xl shadow flex items-center space-x-4">
           <CreditCard className="text-blue-500" size={28} />
           <div>
             <h3 className="text-lg font-semibold">This Week</h3>
-            <p className="text-xl font-bold text-blue-600">KES {revenueSummary.week}</p>
+            <p className="text-xl font-bold text-blue-600">KES {formatAmount(revenueSummary.week.toString())}</p>
           </div>
         </div>
         <div className="bg-white p-4 rounded-2xl shadow flex items-center space-x-4">
           <AlertCircle className="text-purple-500" size={28} />
           <div>
             <h3 className="text-lg font-semibold">This Month</h3>
-            <p className="text-xl font-bold text-purple-600">KES {revenueSummary.month}</p>
+            <p className="text-xl font-bold text-purple-600">KES {formatAmount(revenueSummary.month.toString())}</p>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Filters */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
                 <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
@@ -314,79 +314,120 @@ const AdminPayments = () => {
 
         {/* Table */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
-          </div>
-          {filteredAndSortedPayments.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">No payments found</p>
+            <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">Recent Transactions</h3>
             </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-[700px] w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Appointment ID</th>
-                    <th
-                      onClick={() => handleSort("amount")}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
-                    >
-                      Amount {sortConfig.key === "amount" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th
-                      onClick={() => handleSort("paymentDate")}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
-                    >
-                      Date {sortConfig.key === "paymentDate" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredAndSortedPayments.map((payment) => (
-                    <tr key={payment.paymentId} className="hover:bg-gray-50 text-sm">
-                      <td className="px-6 py-4 font-medium text-gray-900">#{payment.paymentId}</td>
-                      <td className="px-6 py-4 text-gray-700">#{payment.appointmentId}</td>
-                      <td className="px-6 py-4">{formatAmount(payment.amount)}</td>
-                      <td className="px-6 py-4">{payment.paymentMethod || "N/A"}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(payment.paymentStatus)}
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.paymentStatus)}`}>
+            {filteredAndSortedPayments.length === 0 ? (
+                <div className="text-center py-12">
+                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">No payments found</p>
+                </div>
+            ) : (
+            <>
+            {/* Desktop Table */}
+            <div className="overflow-x-auto hidden md:block">
+                <table className="min-w-[700px] w-full">
+                    <thead className="bg-gray-50">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Appointment ID</th>
+                            <th
+                                onClick={() => handleSort("amount")}
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
+                            >
+                                Amount {sortConfig.key === "amount" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th
+                                onClick={() => handleSort("paymentDate")}
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer"
+                            >
+                                Date {sortConfig.key === "paymentDate" ? (sortConfig.direction === "asc" ? "▲" : "▼") : ""}
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                        {filteredAndSortedPayments.map((payment) => (
+                        <tr key={payment.paymentId} className="hover:bg-gray-50 text-sm">
+                            <td className="px-6 py-4 font-medium text-gray-900">#{payment.paymentId}</td>
+                            <td className="px-6 py-4 text-gray-700">#{payment.appointmentId}</td>
+                            <td className="px-6 py-4">{formatAmount(payment.amount)}</td>
+                            <td className="px-6 py-4">{payment.paymentMethod || "N/A"}</td>
+                            <td className="px-6 py-4">
+                                <div className="flex items-center space-x-2">
+                                    {getStatusIcon(payment.paymentStatus)}
+                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.paymentStatus)}`}>
+                                        {payment.paymentStatus || "Unknown"}
+                                    </span>
+                                </div>
+                            </td>
+                            <td className="px-6 py-4 text-gray-500">
+                                {formatDate(payment.paymentDate || payment.createdAt)}
+                            </td>
+                            <td className="px-6 py-4 flex items-center space-x-2">
+                                <button
+                                    onClick={() => handleViewDetails(payment)}
+                                    className="text-teal-600 hover:text-teal-900"
+                                >
+                                    <Eye className="h-4 w-4" />
+                                </button>
+                                {payment.paymentStatus === "Paid" && (
+                                <button
+                                    onClick={() => handleDownloadReceipt(payment)}
+                                    className="text-pink-600 hover:text-pink-900"
+                                >
+                                    <Download className="h-4 w-4" />
+                                </button>
+                            )}
+                           </td>
+                        </tr>
+                     ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-gray-200">
+                {filteredAndSortedPayments.map((payment) => (
+                <div key={payment.paymentId} className="p-4 space-y-2">
+                    <p className="text-sm font-medium text-gray-900">Payment ID: #{payment.paymentId}</p>
+                    <p className="text-sm text-gray-700">Appointment ID: #{payment.appointmentId}</p>
+                    <p className="text-sm">Amount: {formatAmount(payment.amount)}</p>
+                    <p className="text-sm">Method: {payment.paymentMethod || "N/A"}</p>
+                    <div className="flex items-center space-x-2">
+                        {getStatusIcon(payment.paymentStatus)}
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.paymentStatus)}`}>
                             {payment.paymentStatus || "Unknown"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-gray-500">
+                        </span>
+                    </div>
+                    <p className="text-xs text-gray-500">
                         {formatDate(payment.paymentDate || payment.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 flex items-center space-x-2">
+                    </p>
+                    <div className="flex items-center space-x-2 pt-2">
                         <button
-                          onClick={() => handleViewDetails(payment)}
-                          className="text-teal-600 hover:text-teal-900"
+                            onClick={() => handleViewDetails(payment)}
+                            className="text-teal-600 hover:text-teal-900"
                         >
-                          <Eye className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                         </button>
                         {payment.paymentStatus === "Paid" && (
-                          <button
+                        <button
                             onClick={() => handleDownloadReceipt(payment)}
                             className="text-pink-600 hover:text-pink-900"
-                          >
+                        >
                             <Download className="h-4 w-4" />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </button>
+                    )}
+                    </div>
+                </div>
+                ))}
             </div>
+            </>
           )}
         </div>
+
       </div>
 
       {/* Details Modal */}
