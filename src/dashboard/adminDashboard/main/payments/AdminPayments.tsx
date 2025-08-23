@@ -8,7 +8,9 @@ import {
   Download,
   FileText,
   Filter,
-  FileDown
+  FileDown,
+  CreditCard,
+  Search
 } from "lucide-react";
 import { FaDollarSign } from "react-icons/fa";
 import { useGetAllPaymentsQuery, type TPayment } from "../../../../reducers/payments/paymentsAPI";
@@ -42,6 +44,42 @@ const AdminPayments = () => {
       direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
   };
+
+  const revenueSummary = useMemo(() => {
+    if (!paymentsData?.data) return { today: 0, week: 0, month: 0 };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    return paymentsData.data.reduce(
+      (acc, payment) => {
+        const paymentDate = payment.paymentDate
+           ? new Date(payment.paymentDate)
+           : new Date(payment.createdAt || "");
+
+        if (isNaN(paymentDate.getTime())) return acc;
+
+        const normalizedPaymentDate = new Date(paymentDate);
+        normalizedPaymentDate.setHours(0, 0, 0, 0);
+
+        const amount = parseFloat(payment.amount || "0");
+        if (isNaN(amount)) return acc;
+
+        if (normalizedPaymentDate.getTime() === today.getTime()) acc.today += amount;
+        if (normalizedPaymentDate >= startOfWeek) acc.week += amount;
+        if (normalizedPaymentDate >= startOfMonth) acc.month += amount;
+
+        return acc;
+      },
+      { today: 0, week: 0, month: 0 }
+    );
+  }, [paymentsData]);
+
 
   // Filtering + Sorting
   const filteredAndSortedPayments = useMemo(() => {
@@ -187,51 +225,92 @@ const AdminPayments = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
-          <div className="flex flex-col md:flex-row gap-4">
-            <input
-                type="text"
-                placeholder="Search payments..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="border p-2 rounded w-full"
-            />
-            <div className="md:w-48 relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <select
-                value={filters.method}
-                onChange={(e) => setFilters((prev) => ({ ...prev, method: e.target.value }))}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white"
-              >
-                <option value="All">All Methods</option>
-                <option value="Card">Card</option>
-                <option value="M-Pesa">M-Pesa</option>
-                <option value="Cash">Cash</option>
-              </select>
-            </div>
-            <div className="md:w-48 relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white"
-              >
-                <option value="All">All Status</option>
-                <option value="Paid">Paid</option>
-                <option value="Pending">Pending</option>
-                <option value="Failed">Failed</option>
-              </select>
-            </div>
-            <button
-                onClick={exportToCSV}
-                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            >
-                <FileDown size={18} /> Export CSV Report
-            </button>
+     {/* Revenue Summary */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-4 rounded-2xl shadow flex items-center space-x-4">
+          <CheckCircle className="text-green-500" size={28} />
+          <div>
+            <h3 className="text-lg font-semibold">Today's Revenue</h3>
+            <p className="text-xl font-bold text-green-600">KES {revenueSummary.today}</p>
           </div>
         </div>
+        <div className="bg-white p-4 rounded-2xl shadow flex items-center space-x-4">
+          <CreditCard className="text-blue-500" size={28} />
+          <div>
+            <h3 className="text-lg font-semibold">This Week</h3>
+            <p className="text-xl font-bold text-blue-600">KES {revenueSummary.week}</p>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-2xl shadow flex items-center space-x-4">
+          <AlertCircle className="text-purple-500" size={28} />
+          <div>
+            <h3 className="text-lg font-semibold">This Month</h3>
+            <p className="text-xl font-bold text-purple-600">KES {revenueSummary.month}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+                <div className="flex flex-col md:flex-row gap-4 items-center">
+      
+                    {/* Search Input */}
+                    <div className="relative w-full md:flex-1">
+                        <input
+                            type="text"
+                            placeholder="Search payments..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        />
+                        <Search
+                            className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        />
+                    </div>
+
+                    {/* Method Filter */}
+                    <div className="relative w-full md:w-48">
+                        <select
+                            value={filters.method}
+                            onChange={(e) => setFilters((prev) => ({ ...prev, method: e.target.value }))}
+                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white"
+                        >
+                            <option value="All">All Methods</option>
+                            <option value="Card">Card</option>
+                            <option value="M-Pesa">M-Pesa</option>
+                            <option value="Cash">Cash</option>
+                        </select>
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    </div>
+
+                    {/* Status Filter */}
+                    <div className="relative w-full md:w-48">
+                        <select
+                            value={filters.status}
+                            onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
+                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white"
+                        >
+                            <option value="All">All Status</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Failed">Failed</option>
+                        </select>
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    </div>
+
+                    {/* Export Button */}
+                    <button
+                        onClick={exportToCSV}
+                        className="flex items-center gap-2 bg-green-600 text-white px-5 py-3 rounded-lg shadow hover:bg-green-700 transition"
+                   >
+                        <FileDown size={18} /> Export CSV Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
 
         {/* Table */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
