@@ -254,7 +254,7 @@ const AdminPayments = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
-                <div className="flex flex-col md:flex-row gap-4 items-center">
+                <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
       
                     {/* Search Input */}
                     <div className="relative w-full md:flex-1">
@@ -278,7 +278,7 @@ const AdminPayments = () => {
                             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white"
                         >
                             <option value="All">All Methods</option>
-                            <option value="Card">Card</option>
+                            <option value="Card">Stripe</option>
                             <option value="M-Pesa">M-Pesa</option>
                             <option value="Cash">Cash</option>
                         </select>
@@ -303,7 +303,7 @@ const AdminPayments = () => {
                     {/* Export Button */}
                     <button
                         onClick={exportToCSV}
-                        className="flex items-center gap-2 bg-green-600 text-white px-5 py-3 rounded-lg shadow hover:bg-green-700 transition"
+                        className="w-full md:w-auto flex items-center justify-center gap-2 bg-green-600 text-white px-5 py-3 rounded-lg shadow hover:bg-green-700 transition"
                    >
                         <FileDown size={18} /> Export CSV Report
                     </button>
@@ -324,7 +324,7 @@ const AdminPayments = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="min-w-[700px] w-full">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment ID</th>
@@ -392,7 +392,7 @@ const AdminPayments = () => {
       {/* Details Modal */}
       {showDetails && selectedPayment && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900">Payment Details</h3>
               <button onClick={() => setShowDetails(false)} className="text-gray-400 hover:text-gray-600">
