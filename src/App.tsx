@@ -37,6 +37,7 @@ import Ophthalmology from './pages/services/Ophthalmology'
 import Orthopedics from './pages/services/Orthopedics'
 import Pediatrics from './pages/services/Pediatrics'
 import Payments from './dashboard/patientDashboard/main/payments/Payments'
+import AdminPayments from './dashboard/adminDashboard/main/payments/AdminPayments'
 import FloatingAiAssistant from './pages/FloatingAiAssistant'
 
 
@@ -114,6 +115,10 @@ function App() {
          {
           path: 'complaints',
           element: <AdminComplaints />
+        },
+        {
+          path: 'payments',
+          element: <AdminPayments />
         },
         {
           path: 'profile',

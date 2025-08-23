@@ -1,6 +1,7 @@
 import { TbBrandGoogleAnalytics } from "react-icons/tb";
 import { FiUsers } from "react-icons/fi";
 import { FaUserCheck, FaUserDoctor, FaNotesMedical, FaRegComment } from "react-icons/fa6";
+import { MdOutlinePayments } from "react-icons/md";
 
 
 export type DrawerData = {
@@ -35,6 +36,12 @@ export const adminDrawerData: DrawerData[] = [
         name: "Complaints",
         icon: FaRegComment,
         link: "complaints"
+    },
+    {
+        id: "payments",
+        name: "Payments",
+        icon: MdOutlinePayments,
+        link: "payments"
     },
     {
         id: "profile",
