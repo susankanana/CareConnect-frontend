@@ -231,21 +231,21 @@ const AdminPayments = () => {
           <CheckCircle className="text-green-500" size={28} />
           <div>
             <h3 className="text-lg font-semibold">Today's Revenue</h3>
-            <p className="text-xl font-bold text-green-600">KES {formatAmount(revenueSummary.today.toString())}</p>
+            <p className="text-xl font-bold text-green-600"> {formatAmount(revenueSummary.today.toString())}</p>
           </div>
         </div>
         <div className="bg-white p-4 rounded-2xl shadow flex items-center space-x-4">
           <CreditCard className="text-blue-500" size={28} />
           <div>
             <h3 className="text-lg font-semibold">This Week</h3>
-            <p className="text-xl font-bold text-blue-600">KES {formatAmount(revenueSummary.week.toString())}</p>
+            <p className="text-xl font-bold text-blue-600"> {formatAmount(revenueSummary.week.toString())}</p>
           </div>
         </div>
         <div className="bg-white p-4 rounded-2xl shadow flex items-center space-x-4">
           <AlertCircle className="text-purple-500" size={28} />
           <div>
             <h3 className="text-lg font-semibold">This Month</h3>
-            <p className="text-xl font-bold text-purple-600">KES {formatAmount(revenueSummary.month.toString())}</p>
+            <p className="text-xl font-bold text-purple-600"> {formatAmount(revenueSummary.month.toString())}</p>
           </div>
         </div>
       </div>
