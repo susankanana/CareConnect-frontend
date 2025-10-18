@@ -11,26 +11,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout your repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22.14.0
-          cache: 'npm'
 
+      # 3️⃣ Setup pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+          run_install: false
+
+      # 4️⃣ Install dependencies with pnpm
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
+      # 5️⃣ Run Cypress tests on your live Vercel deployment
       - name: Run Cypress tests on Vercel deployment
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
           wait-on: 'https://care-connect-frontend.vercel.app/'
           wait-on-timeout: 120
-          command: npx cypress run --config baseUrl=https://care-connect-frontend.vercel.app/
+          command: pnpm cypress run --config baseUrl=https://care-connect-frontend.vercel.app/
 
+      # 6️⃣ Upload Cypress artifacts (for debugging failed tests)
       - name: Upload Cypress artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
