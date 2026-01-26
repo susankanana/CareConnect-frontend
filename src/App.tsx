@@ -1,50 +1,49 @@
-import { createBrowserRouter, RouterProvider } from 'react-router'
-import './App.css'
-import LandingPage from './pages/LandingPage'
-import Register from './pages/auth/Register'
-import Login from './pages/auth/Login'
-import AboutPage from './pages/AboutPage'
-import Appointment from './pages/Appointment'
-import PaymentSuccess from './pages/payment/PaymentSuccess'
-import PaymentCancelled from './pages/payment/PaymentCancelled'
-import AdminDashboard from './dashboard/adminDashboard/AdminDashboard'
-import Error from './components/error/Error'
-import VerifyUser from './pages/auth/VerifyUser'
-import { Toaster } from 'sonner'
-import Users from './dashboard/adminDashboard/main/users/Users'
-import AdminProfile from './dashboard/adminDashboard/main/profile/AdminProfile'
-import { type RootState } from './app/store'
-import { useSelector } from 'react-redux'
-import AdminDoctors from './dashboard/adminDashboard/main/doctors/AdminDoctors'
-import AdminComplaints from './dashboard/adminDashboard/main/complaints/AdminComplaints'
-import AdminAnalytics from './dashboard/adminDashboard/main/analytics/AdminAnalytics'
-import DoctorDashboard from './dashboard/doctorDashboard/DoctorDashboard'
-import AdminAppointments from './dashboard/adminDashboard/main/appointments/AdminAppointments'
-import DoctorAppointments from './dashboard/doctorDashboard/main/appointments/DoctorAppointments'
-import DoctorProfile from './dashboard/doctorDashboard/main/profile/DoctorProfile'
-import DoctorPrescriptions from './dashboard/doctorDashboard/main/prescriptions/DoctorPrescriptions'
-import DoctorAnalytics from './dashboard/doctorDashboard/main/analytics/DoctorAnalytics'
-import PatientProfile from './dashboard/patientDashboard/main/profile/PatientProfile'
-import PatientDashboard from './dashboard/patientDashboard/PatientDashboard'
-import PatientAnalytics from './dashboard/patientDashboard/main/analytics/PatientAnalytics'
-import PatientAppointments from './dashboard/patientDashboard/main/appointments/PatientAppointments'
-import PatientDoctors from './dashboard/patientDashboard/main/doctors/PatientDoctors'
-import PatientComplaints from './dashboard/patientDashboard/main/complaints/PatientComplaints'
-import Cardiology from './pages/services/Cardiology'
-import EmergencyCare from './pages/services/EmergencyCare'
-import Neurology from './pages/services/Neurology'
-import Ophthalmology from './pages/services/Ophthalmology'
-import Orthopedics from './pages/services/Orthopedics'
-import Pediatrics from './pages/services/Pediatrics'
-import Payments from './dashboard/patientDashboard/main/payments/Payments'
-import AdminPayments from './dashboard/adminDashboard/main/payments/AdminPayments'
-import FloatingAiAssistant from './pages/FloatingAiAssistant'
-
+import { createBrowserRouter, RouterProvider } from 'react-router';
+import './App.css';
+import LandingPage from './pages/LandingPage';
+import Register from './pages/auth/Register';
+import Login from './pages/auth/Login';
+import AboutPage from './pages/AboutPage';
+import Appointment from './pages/Appointment';
+import PaymentSuccess from './pages/payment/PaymentSuccess';
+import PaymentCancelled from './pages/payment/PaymentCancelled';
+import AdminDashboard from './dashboard/adminDashboard/AdminDashboard';
+import Error from './components/error/Error';
+import VerifyUser from './pages/auth/VerifyUser';
+import { Toaster } from 'sonner';
+import Users from './dashboard/adminDashboard/main/users/Users';
+import AdminProfile from './dashboard/adminDashboard/main/profile/AdminProfile';
+import { type RootState } from './app/store';
+import { useSelector } from 'react-redux';
+import AdminDoctors from './dashboard/adminDashboard/main/doctors/AdminDoctors';
+import AdminComplaints from './dashboard/adminDashboard/main/complaints/AdminComplaints';
+import AdminAnalytics from './dashboard/adminDashboard/main/analytics/AdminAnalytics';
+import DoctorDashboard from './dashboard/doctorDashboard/DoctorDashboard';
+import AdminAppointments from './dashboard/adminDashboard/main/appointments/AdminAppointments';
+import DoctorAppointments from './dashboard/doctorDashboard/main/appointments/DoctorAppointments';
+import DoctorProfile from './dashboard/doctorDashboard/main/profile/DoctorProfile';
+import DoctorPrescriptions from './dashboard/doctorDashboard/main/prescriptions/DoctorPrescriptions';
+import DoctorAnalytics from './dashboard/doctorDashboard/main/analytics/DoctorAnalytics';
+import PatientProfile from './dashboard/patientDashboard/main/profile/PatientProfile';
+import PatientDashboard from './dashboard/patientDashboard/PatientDashboard';
+import PatientAnalytics from './dashboard/patientDashboard/main/analytics/PatientAnalytics';
+import PatientAppointments from './dashboard/patientDashboard/main/appointments/PatientAppointments';
+import PatientDoctors from './dashboard/patientDashboard/main/doctors/PatientDoctors';
+import PatientComplaints from './dashboard/patientDashboard/main/complaints/PatientComplaints';
+import Cardiology from './pages/services/Cardiology';
+import EmergencyCare from './pages/services/EmergencyCare';
+import Neurology from './pages/services/Neurology';
+import Ophthalmology from './pages/services/Ophthalmology';
+import Orthopedics from './pages/services/Orthopedics';
+import Pediatrics from './pages/services/Pediatrics';
+import Payments from './dashboard/patientDashboard/main/payments/Payments';
+import AdminPayments from './dashboard/adminDashboard/main/payments/AdminPayments';
+import FloatingAiAssistant from './pages/FloatingAiAssistant';
 
 function App() {
   const isAdmin = useSelector((state: RootState) => state.user.user?.role === 'admin');
   const isUser = useSelector((state: RootState) => state.user.user?.role === 'user');
-   const isDoctor = useSelector((state: RootState) => state.user.user?.role === 'doctor');
+  const isDoctor = useSelector((state: RootState) => state.user.user?.role === 'doctor');
 
   const router = createBrowserRouter([
     {
@@ -53,47 +52,47 @@ function App() {
     },
     {
       path: '/about',
-      element: <AboutPage />
+      element: <AboutPage />,
     },
     {
       path: '/register',
-      element: <Register />
+      element: <Register />,
     },
     {
       path: '/register/verify',
-      element: <VerifyUser />
+      element: <VerifyUser />,
     },
     {
       path: '/login',
-      element: <Login />
+      element: <Login />,
     },
     {
       path: '/appointments',
-      element: <Appointment />
+      element: <Appointment />,
     },
     {
       path: '/service/cardiology',
-      element: <Cardiology />
+      element: <Cardiology />,
     },
     {
       path: '/service/emergencycare',
-      element: <EmergencyCare />
+      element: <EmergencyCare />,
     },
     {
       path: '/service/neurology',
-      element: <Neurology />
+      element: <Neurology />,
     },
     {
       path: '/service/ophthalmology',
-      element: <Ophthalmology />
+      element: <Ophthalmology />,
     },
     {
       path: '/service/orthopedics',
-      element: <Orthopedics />
+      element: <Orthopedics />,
     },
     {
       path: '/service/pediatrics',
-      element: <Pediatrics />
+      element: <Pediatrics />,
     },
     // Admin Dashboard Routes
     {
@@ -102,56 +101,56 @@ function App() {
       children: [
         {
           path: 'users',
-          element: <Users />
+          element: <Users />,
         },
         {
           path: 'doctors',
-          element: <AdminDoctors />
+          element: <AdminDoctors />,
         },
         {
           path: 'appointments',
-          element: <AdminAppointments />
+          element: <AdminAppointments />,
         },
-         {
+        {
           path: 'complaints',
-          element: <AdminComplaints />
+          element: <AdminComplaints />,
         },
         {
           path: 'payments',
-          element: <AdminPayments />
+          element: <AdminPayments />,
         },
         {
           path: 'profile',
-          element: <AdminProfile />
+          element: <AdminProfile />,
         },
         {
           path: 'analytics',
-          element: <AdminAnalytics/>
+          element: <AdminAnalytics />,
         },
-      ]
+      ],
     },
-// Doctor dashboard routes
+    // Doctor dashboard routes
     {
       path: '/doctor/dashboard',
       element: isDoctor ? <DoctorDashboard /> : <Login />,
       children: [
         {
           path: 'appointments',
-          element: <DoctorAppointments />
+          element: <DoctorAppointments />,
         },
         {
           path: 'prescriptions',
-          element: <DoctorPrescriptions />
+          element: <DoctorPrescriptions />,
         },
         {
           path: 'profile',
-          element: <DoctorProfile />
+          element: <DoctorProfile />,
         },
         {
           path: 'analytics',
-          element: <DoctorAnalytics />
-        }
-      ]
+          element: <DoctorAnalytics />,
+        },
+      ],
     },
     // User dashboard routes
     {
@@ -160,58 +159,60 @@ function App() {
       children: [
         {
           path: 'appointments',
-          element: <PatientAppointments />
+          element: <PatientAppointments />,
         },
         {
           path: 'doctors',
-          element: <PatientDoctors />
+          element: <PatientDoctors />,
         },
         {
           path: 'complaints',
-          element: <PatientComplaints />
+          element: <PatientComplaints />,
         },
         {
           path: 'payments',
-          element: <Payments />
+          element: <Payments />,
         },
         {
           path: 'profile',
-          element: <PatientProfile />
+          element: <PatientProfile />,
         },
         {
           path: 'analytics',
-          element: <PatientAnalytics />
-        }
-      ]
+          element: <PatientAnalytics />,
+        },
+      ],
     },
     {
       path: '/payment-success',
-      element: <PaymentSuccess />
+      element: <PaymentSuccess />,
     },
     {
       path: '/payment-cancelled',
-      element: <PaymentCancelled />
+      element: <PaymentCancelled />,
     },
     {
       path: '*',
-      element: <Error />
-    }
-  ])
+      element: <Error />,
+    },
+  ]);
 
   return (
     <>
       <RouterProvider router={router} />
-      <Toaster position='top-right' toastOptions={{
-        classNames: {
-          error: 'bg-red-500 text-white',
-          success: 'bg-green-500 text-white',
-          info: 'bg-blue-500 text-white',
-        }
-
-      }} />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          classNames: {
+            error: 'bg-red-500 text-white',
+            success: 'bg-green-500 text-white',
+            info: 'bg-blue-500 text-white',
+          },
+        }}
+      />
       <FloatingAiAssistant />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

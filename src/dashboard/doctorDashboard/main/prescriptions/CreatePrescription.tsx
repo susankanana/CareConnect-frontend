@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { useSelector } from "react-redux";
-import { toast } from "sonner";
+import { useEffect, useState } from 'react';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { useSelector } from 'react-redux';
+import { toast } from 'sonner';
 
-import type { RootState } from "../../../../app/store";
-import { prescriptionsAPI } from "../../../../reducers/prescriptions/prescriptionsAPI";
+import type { RootState } from '../../../../app/store';
+import { prescriptionsAPI } from '../../../../reducers/prescriptions/prescriptionsAPI';
 import {
   appointmentsAPI,
   type TDetailedAppointment,
-} from "../../../../reducers/appointments/appointmentsAPI";
+} from '../../../../reducers/appointments/appointmentsAPI';
 
 type CreatePrescriptionInputs = {
   appointmentId: number;
@@ -22,18 +22,18 @@ type CreatePrescriptionInputs = {
 const schema: yup.ObjectSchema<CreatePrescriptionInputs> = yup.object({
   appointmentId: yup
     .number()
-    .positive("Appointment ID must be positive")
-    .required("Appointment ID is required"),
+    .positive('Appointment ID must be positive')
+    .required('Appointment ID is required'),
   patientId: yup
     .number()
-    .positive("Patient ID must be positive")
-    .required("Patient ID is required"),
-  notes: yup.string().required("Prescription notes are required"),
+    .positive('Patient ID must be positive')
+    .required('Patient ID is required'),
+  notes: yup.string().required('Prescription notes are required'),
   amount: yup
     .number()
-    .typeError("Amount must be a number")
-    .positive("Amount must be positive")
-    .required("Amount is required"),
+    .typeError('Amount must be a number')
+    .positive('Amount must be positive')
+    .required('Amount is required'),
 });
 
 type CreatePrescriptionProps = {
@@ -56,14 +56,14 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     watch,
     setValue,
     // setError, // We will manage custom error outside of RHF state for consistent display
-    clearErrors, 
+    clearErrors,
     formState: { errors: formErrors }, // Renamed to avoid collision with local state
   } = useForm<CreatePrescriptionInputs>({
     resolver: yupResolver(schema),
-    mode: "onChange",
+    mode: 'onChange',
   });
 
-  const watchedAppointmentId = watch("appointmentId");
+  const watchedAppointmentId = watch('appointmentId');
 
   const {
     data: doctorAppointments,
@@ -74,7 +74,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
   });
 
   useEffect(() => {
-    setValue("patientId", 0);
+    setValue('patientId', 0);
     setFoundAppointment(null); // Reset foundAppointment each time ID changes
     setCustomAppointmentError(null); //Clear custom error on ID change start
 
@@ -97,7 +97,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
 
     // If data hasn't loaded (e.g., query skipped or failed silently before data exists)
     if (!doctorAppointments?.data) {
-      setCustomAppointmentError("Unable to load appointments to verify ID. Please refresh.");
+      setCustomAppointmentError('Unable to load appointments to verify ID. Please refresh.');
       return;
     }
 
@@ -107,13 +107,13 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
 
     if (!matched) {
       // If no match found, set the custom error
-      setCustomAppointmentError("This appointment ID does not belong to you or does not exist.");
+      setCustomAppointmentError('This appointment ID does not belong to you or does not exist.');
       setFoundAppointment(null);
     } else {
       // If a match is found, ensure no custom error is set
       setCustomAppointmentError(null);
       setFoundAppointment(matched);
-      setValue("patientId", matched.patient.id);
+      setValue('patientId', matched.patient.id);
     }
   }, [
     watchedAppointmentId,
@@ -121,29 +121,28 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
     isFetchingAppointments,
     isLoadingAppointments,
     doctorId,
-    setValue
+    setValue,
   ]);
 
   const onSubmit: SubmitHandler<CreatePrescriptionInputs> = async (data) => {
     try {
       if (!doctorId) {
-        toast.error("Doctor ID not found. Please login again.");
+        toast.error('Doctor ID not found. Please login again.');
         return;
       }
 
       if (!doctorAppointments?.data) {
-        toast.error("Appointments data not loaded. Cannot verify ownership. Please try again.");
+        toast.error('Appointments data not loaded. Cannot verify ownership. Please try again.');
         return;
       }
 
       const foundAppointmentOnSubmit = doctorAppointments.data.find(
-        (appointment: TDetailedAppointment) =>
-          appointment.appointmentId === data.appointmentId
+        (appointment: TDetailedAppointment) => appointment.appointmentId === data.appointmentId
       );
 
       if (!foundAppointmentOnSubmit) {
-        toast.error("Error: The appointment ID does not belong to you or does not exist.");
-        setCustomAppointmentError("This appointment ID does not belong to you or does not exist.");
+        toast.error('Error: The appointment ID does not belong to you or does not exist.');
+        setCustomAppointmentError('This appointment ID does not belong to you or does not exist.');
         return;
       }
 
@@ -154,13 +153,13 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
       };
 
       await createPrescription(payload).unwrap();
-      toast.success("Prescription created successfully!");
+      toast.success('Prescription created successfully!');
       reset();
       refetch();
-      (document.getElementById("create_prescription_modal") as HTMLDialogElement)?.close();
+      (document.getElementById('create_prescription_modal') as HTMLDialogElement)?.close();
     } catch (error) {
-      console.error("Error creating prescription:", error);
-      toast.error("Failed to create prescription. Please try again.");
+      console.error('Error creating prescription:', error);
+      toast.error('Failed to create prescription. Please try again.');
     }
   };
 
@@ -194,7 +193,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
             <input
               data-test="create-appointment-id"
               type="number"
-              {...register("appointmentId", { valueAsNumber: true })}
+              {...register('appointmentId', { valueAsNumber: true })}
               placeholder="Enter appointment ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
@@ -215,7 +214,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
             {/* Displaying success state (only if no errors and found) */}
             {!isValidatingAppointment && !hasOverallAppointmentError && foundAppointment && (
               <span className="text-sm text-green-600 flex items-center gap-1 mt-1">
-                Valid appointment for {foundAppointment.patient.name}{" "}
+                Valid appointment for {foundAppointment.patient.name}{' '}
                 {foundAppointment.patient.lastName}
               </span>
             )}
@@ -227,7 +226,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
             <input
               data-test="create-patient-id"
               type="number"
-              {...register("patientId", { valueAsNumber: true })}
+              {...register('patientId', { valueAsNumber: true })}
               placeholder="Enter patient ID"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               readOnly
@@ -250,7 +249,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
             </label>
             <textarea
               data-test="create-notes"
-              {...register("notes")}
+              {...register('notes')}
               placeholder="Enter detailed prescription notes, medications, dosage, etc."
               className="textarea textarea-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               rows={4}
@@ -267,7 +266,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               data-test="create-amount"
               type="number"
               step="0.01"
-              {...register("amount", { valueAsNumber: true })}
+              {...register('amount', { valueAsNumber: true })}
               placeholder="0.00"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
@@ -289,7 +288,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
                   <span className="loading loading-spinner loading-sm" /> Creating...
                 </>
               ) : (
-                "Create Prescription"
+                'Create Prescription'
               )}
             </button>
             <button
@@ -298,7 +297,7 @@ const CreatePrescription = ({ refetch }: CreatePrescriptionProps) => {
               className="btn btn-ghost"
               onClick={() => {
                 (
-                  document.getElementById("create_prescription_modal") as HTMLDialogElement
+                  document.getElementById('create_prescription_modal') as HTMLDialogElement
                 )?.close();
                 reset();
                 clearErrors(); // Clears all RHF errors

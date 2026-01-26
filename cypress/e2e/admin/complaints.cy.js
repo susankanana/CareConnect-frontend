@@ -2,8 +2,8 @@
 
 describe('Complaints CRUD E2E Test', () => {
   beforeEach(() => {
-    cy.loginAsAdmin(); 
-    cy.visit('/admin/dashboard/complaints'); 
+    cy.loginAsAdmin();
+    cy.visit('/admin/dashboard/complaints');
   });
 
   it('should change status, update, and delete a complaint via the UI', () => {
@@ -22,14 +22,16 @@ describe('Complaints CRUD E2E Test', () => {
     // === Edit Complaint ===
     cy.get('@firstComplaint').find('[data-test^="edit-complaint-"]').click();
     cy.get('[data-test="update-subject-input"]').clear().type('Updated Subject via Cypress');
-    cy.get('[data-test="update-description-textarea"]').clear().type('Updated Description via Cypress');
+    cy.get('[data-test="update-description-textarea"]')
+      .clear()
+      .type('Updated Description via Cypress');
     cy.get('[data-test="submit-update-btn"]').click();
 
     // === Delete Complaint ===
     cy.intercept('DELETE', '/complaint/*', {
-    statusCode: 200,
-    body: { message: 'Mocked delete success' }
-     }).as('deleteComplaint');
+      statusCode: 200,
+      body: { message: 'Mocked delete success' },
+    }).as('deleteComplaint');
 
     cy.get('@firstComplaint').find('[data-test^="delete-complaint-"]').click();
     cy.get('[data-test="confirm-delete-btn"]').click();

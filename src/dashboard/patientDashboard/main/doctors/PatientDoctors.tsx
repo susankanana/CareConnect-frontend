@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { doctorsAPI, type TDoctor } from "../../../../reducers/doctors/doctorsAPI";
-import { Search, Stethoscope, Star, Calendar, Phone, Mail, XCircle, MapPin } from "lucide-react";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../../../app/store";
-import { appointmentsAPI } from "../../../../reducers/appointments/appointmentsAPI";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { doctorsAPI, type TDoctor } from '../../../../reducers/doctors/doctorsAPI';
+import { Search, Stethoscope, Star, Calendar, Phone, Mail, XCircle, MapPin } from 'lucide-react';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../../../app/store';
+import { appointmentsAPI } from '../../../../reducers/appointments/appointmentsAPI';
+import { toast } from 'sonner';
 
 // --- Appointment Booking Logic (Moved and adapted from CreateAppointment) ---
 
@@ -22,7 +22,7 @@ const appointmentSchema = yup.object({
   appointmentDate: yup
     .string()
     .required('Appointment date is required')
-    .test('future-date', 'Appointment date must be in the future', function(value) {
+    .test('future-date', 'Appointment date must be in the future', function (value) {
       if (!value) return false;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -33,21 +33,36 @@ const appointmentSchema = yup.object({
 });
 
 const timeSlots = [
-  "09:00:00", "09:30:00", "10:00:00", "10:30:00", "11:00:00", "11:30:00",
-  "14:00:00", "14:30:00", "15:00:00", "15:30:00", "16:00:00", "16:30:00"
+  '09:00:00',
+  '09:30:00',
+  '10:00:00',
+  '10:30:00',
+  '11:00:00',
+  '11:30:00',
+  '14:00:00',
+  '14:30:00',
+  '15:00:00',
+  '15:30:00',
+  '16:00:00',
+  '16:30:00',
 ];
 
-const DEFAULT_CONSULTATION_FEE = "6500.00";
+const DEFAULT_CONSULTATION_FEE = '6500.00';
 
 const PatientDoctors = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSpecialization, setSelectedSpecialization] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSpecialization, setSelectedSpecialization] = useState('');
   const [doctorToBook, setDoctorToBook] = useState<TDoctor | null>(null);
 
   const user = useSelector((state: RootState) => state.user.user);
   const userId = user?.user_id;
 
-  const { data: doctorsData, isLoading, error, refetch: refetchDoctors } = doctorsAPI.useGetDoctorsQuery(undefined, {
+  const {
+    data: doctorsData,
+    isLoading,
+    error,
+    refetch: refetchDoctors,
+  } = doctorsAPI.useGetDoctorsQuery(undefined, {
     refetchOnMountOrArgChange: true,
     pollingInterval: 60000,
   });
@@ -57,7 +72,8 @@ const PatientDoctors = () => {
     { skip: !selectedSpecialization }
   );
 
-  const [createAppointment, { isLoading: isBookingLoading }] = appointmentsAPI.useCreateAppointmentMutation();
+  const [createAppointment, { isLoading: isBookingLoading }] =
+    appointmentsAPI.useCreateAppointmentMutation();
 
   const {
     register,
@@ -74,13 +90,13 @@ const PatientDoctors = () => {
 
   useEffect(() => {
     if (doctorToBook) {
-      setValue("doctorId", doctorToBook.doctor?.doctorId || 0);
+      setValue('doctorId', doctorToBook.doctor?.doctorId || 0);
     }
   }, [doctorToBook, setValue]);
 
   // Get unique specializations for filter dropdown
   const specializations = doctorsData?.data
-    ? [...new Set(doctorsData.data.map(doctor => doctor.doctor?.specialization).filter(Boolean))]
+    ? [...new Set(doctorsData.data.map((doctor) => doctor.doctor?.specialization).filter(Boolean))]
     : [];
 
   // Filter doctors based on search term and specialization
@@ -88,10 +104,11 @@ const PatientDoctors = () => {
     let doctors = selectedSpecialization ? specializationData?.data || [] : doctorsData?.data || [];
 
     if (searchTerm) {
-      doctors = doctors.filter(doctor =>
-        doctor.doctor?.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.user?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.user?.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
+      doctors = doctors.filter(
+        (doctor) =>
+          doctor.doctor?.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          doctor.user?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          doctor.user?.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -101,7 +118,7 @@ const PatientDoctors = () => {
   const handleBookAppointmentClick = (doctor: TDoctor) => {
     setDoctorToBook(doctor);
     // Open the modal using the dialog element's showModal() method
-    const modal = document.getElementById("create_appointment_modal") as HTMLDialogElement;
+    const modal = document.getElementById('create_appointment_modal') as HTMLDialogElement;
     if (modal) {
       modal.showModal();
     }
@@ -110,7 +127,7 @@ const PatientDoctors = () => {
   const handleCloseModal = () => {
     setDoctorToBook(null);
     reset(); // Reset form fields when modal closes
-    const modal = document.getElementById("create_appointment_modal") as HTMLDialogElement;
+    const modal = document.getElementById('create_appointment_modal') as HTMLDialogElement;
     if (modal) {
       modal.close();
     }
@@ -119,7 +136,7 @@ const PatientDoctors = () => {
   const onSubmit: SubmitHandler<CreateAppointmentInputs> = async (data) => {
     try {
       if (!userId) {
-        toast.error("User ID not found. Please login again.");
+        toast.error('User ID not found. Please login again.');
         return;
       }
 
@@ -131,12 +148,12 @@ const PatientDoctors = () => {
       };
 
       await createAppointment(payload).unwrap();
-      toast.success("Appointment booked successfully!");
+      toast.success('Appointment booked successfully!');
       handleCloseModal(); // Close modal on success
       refetchDoctors(); // Refetch doctors to update any relevant data, like patient counts if applicable
     } catch (error) {
-      console.error("Error creating appointment:", error);
-      toast.error("Failed to book appointment. Please try again.");
+      console.error('Error creating appointment:', error);
+      toast.error('Failed to book appointment. Please try again.');
     }
   };
 
@@ -157,7 +174,9 @@ const PatientDoctors = () => {
     if (!doctor || !doctor.doctor?.availableDays) return false;
     const dayName = getDayName(dateString);
     // Ensure doctor.doctor.availableDays is an array and includes the dayName
-    return Array.isArray(doctor.doctor.availableDays) && doctor.doctor.availableDays.includes(dayName);
+    return (
+      Array.isArray(doctor.doctor.availableDays) && doctor.doctor.availableDays.includes(dayName)
+    );
   };
 
   if (isLoading) {
@@ -247,11 +266,13 @@ const PatientDoctors = () => {
 
                 {/* Verification Badge */}
                 <div className="absolute top-3 right-3">
-                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
-                    doctor.user?.isVerified
-                      ? 'bg-green-100 text-green-800 border border-green-200'
-                      : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
+                      doctor.user?.isVerified
+                        ? 'bg-green-100 text-green-800 border border-green-200'
+                        : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                    }`}
+                  >
                     {doctor.user?.isVerified ? 'Verified' : 'Unverified'}
                   </span>
                 </div>
@@ -261,7 +282,10 @@ const PatientDoctors = () => {
               <div className="p-6">
                 {/* Doctor Name & Specialization */}
                 <div className="text-center mb-4">
-                  <h3 data-test="doctor-name" className="text-xl font-bold text-gray-900 group-hover:text-teal-600 transition-colors">
+                  <h3
+                    data-test="doctor-name"
+                    className="text-xl font-bold text-gray-900 group-hover:text-teal-600 transition-colors"
+                  >
                     Dr. {doctor.user?.firstName} {doctor.user?.lastName}
                   </h3>
                   <p className="text-teal-600 font-semibold">{doctor.doctor?.specialization}</p>
@@ -287,7 +311,9 @@ const PatientDoctors = () => {
 
                   <div className="flex items-center gap-3 text-gray-600">
                     <MapPin className="h-4 w-4 text-teal-500" />
-                    <span className="text-sm">{doctor.user?.address || 'Address not provided'}</span>
+                    <span className="text-sm">
+                      {doctor.user?.address || 'Address not provided'}
+                    </span>
                   </div>
                 </div>
 
@@ -344,16 +370,15 @@ const PatientDoctors = () => {
           <h3 className="text-xl font-semibold text-gray-900 mb-2">No doctors found</h3>
           <p className="text-gray-600 mb-4">
             {searchTerm || selectedSpecialization
-              ? "Try adjusting your search criteria"
-              : "No doctors are currently available"
-            }
+              ? 'Try adjusting your search criteria'
+              : 'No doctors are currently available'}
           </p>
           {(searchTerm || selectedSpecialization) && (
             <button
               data-test="clear-filters-btn"
               onClick={() => {
-                setSearchTerm("");
-                setSelectedSpecialization("");
+                setSearchTerm('');
+                setSelectedSpecialization('');
               }}
               className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
@@ -368,16 +393,18 @@ const PatientDoctors = () => {
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Medical Staff Overview</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div data-test="summary-total-doctors" className="text-center p-4 bg-teal-50 rounded-lg">
-              <div className="text-2xl font-bold text-teal-600">
-                {doctorsData.data.length}
-              </div>
+            <div
+              data-test="summary-total-doctors"
+              className="text-center p-4 bg-teal-50 rounded-lg"
+            >
+              <div className="text-2xl font-bold text-teal-600">{doctorsData.data.length}</div>
               <div className="text-sm text-gray-600">Total Doctors</div>
             </div>
-            <div data-test="summary-specializations" className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">
-                {specializations.length}
-              </div>
+            <div
+              data-test="summary-specializations"
+              className="text-center p-4 bg-blue-50 rounded-lg"
+            >
+              <div className="text-2xl font-bold text-blue-600">{specializations.length}</div>
               <div className="text-sm text-gray-600">Specializations</div>
             </div>
             <div data-test="summary-verified" className="text-center p-4 bg-green-50 rounded-lg">
@@ -387,9 +414,7 @@ const PatientDoctors = () => {
               <div className="text-sm text-gray-600">Verified</div>
             </div>
             <div data-test="summary-showing" className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-gray-600">
-                {filteredDoctors().length}
-              </div>
+              <div className="text-2xl font-bold text-gray-600">{filteredDoctors().length}</div>
               <div className="text-sm text-gray-600">Showing</div>
             </div>
           </div>
@@ -401,27 +426,36 @@ const PatientDoctors = () => {
         <div className="modal-box bg-white w-full max-w-xs sm:max-w-2xl mx-auto rounded-lg border border-gray-200">
           <div className="bg-gradient-to-r from-teal-500 to-pink-500 -m-6 mb-6 p-6 rounded-t-lg">
             <h3 className="font-bold text-lg text-white">Book New Appointment</h3>
-            <p className="text-teal-100 text-sm mt-1">Schedule your consultation with our doctors</p>
+            <p className="text-teal-100 text-sm mt-1">
+              Schedule your consultation with our doctors
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} data-test="create-appointment-form" className="flex flex-col gap-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            data-test="create-appointment-form"
+            className="flex flex-col gap-6"
+          >
             {/* Doctor Selection (pre-selected if opened from a doctor card) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
               <select
                 data-test="doctor-select"
-                {...register("doctorId", { valueAsNumber: true })}
+                {...register('doctorId', { valueAsNumber: true })}
                 className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
                 disabled={!!doctorToBook} // Disable if a doctor is already selected
               >
                 <option value="">Choose a doctor</option>
                 {doctorsData?.data?.map((doctor: TDoctor) => (
                   <option key={doctor.doctor?.doctorId} value={doctor.doctor?.doctorId}>
-                    Dr. {doctor.user?.firstName} {doctor.user?.lastName} - {doctor.doctor?.specialization}
+                    Dr. {doctor.user?.firstName} {doctor.user?.lastName} -{' '}
+                    {doctor.doctor?.specialization}
                   </option>
                 ))}
               </select>
-              {errors.doctorId && <span className="text-sm text-red-600">{errors.doctorId.message}</span>}
+              {errors.doctorId && (
+                <span className="text-sm text-red-600">{errors.doctorId.message}</span>
+              )}
             </div>
 
             {/* Selected Doctor Info */}
@@ -449,22 +483,27 @@ const PatientDoctors = () => {
 
             {/* Date Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Appointment Date
+              </label>
               <input
                 data-test="appointment-date-input"
                 type="date"
-                {...register("appointmentDate")}
+                {...register('appointmentDate')}
                 min={new Date().toISOString().split('T')[0]}
                 className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               />
-              {errors.appointmentDate && <span className="text-sm text-red-600">{errors.appointmentDate.message}</span>}
-
-              {doctorToBook && watchedValues.appointmentDate && !isDateAvailable(watchedValues.appointmentDate, doctorToBook) && (
-                <p className="text-sm text-red-600 mt-1">
-                  Doctor is not available on {getDayName(watchedValues.appointmentDate)}.
-                </p>
+              {errors.appointmentDate && (
+                <span className="text-sm text-red-600">{errors.appointmentDate.message}</span>
               )}
 
+              {doctorToBook &&
+                watchedValues.appointmentDate &&
+                !isDateAvailable(watchedValues.appointmentDate, doctorToBook) && (
+                  <p className="text-sm text-red-600 mt-1">
+                    Doctor is not available on {getDayName(watchedValues.appointmentDate)}.
+                  </p>
+                )}
             </div>
 
             {/* Time Selection */}
@@ -472,7 +511,7 @@ const PatientDoctors = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
               <select
                 data-test="appointment-time-slot-select"
-                {...register("timeSlot")}
+                {...register('timeSlot')}
                 className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
                 disabled={!doctorToBook || !watchedValues.appointmentDate}
               >
@@ -483,7 +522,9 @@ const PatientDoctors = () => {
                   </option>
                 ))}
               </select>
-              {errors.timeSlot && <span className="text-sm text-red-600">{errors.timeSlot.message}</span>}
+              {errors.timeSlot && (
+                <span className="text-sm text-red-600">{errors.timeSlot.message}</span>
+              )}
             </div>
 
             {/* Consultation Fee */}
@@ -509,7 +550,7 @@ const PatientDoctors = () => {
                     <span className="loading loading-spinner loading-sm" /> Booking...
                   </>
                 ) : (
-                  "Book Appointment"
+                  'Book Appointment'
                 )}
               </button>
               <button

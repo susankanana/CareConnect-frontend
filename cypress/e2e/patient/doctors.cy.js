@@ -2,7 +2,7 @@
 
 describe('Doctors CRUD E2E Test', () => {
   beforeEach(() => {
-    cy.loginAsPatient(); 
+    cy.loginAsPatient();
     cy.visit('/user/dashboard/doctors');
   });
 
@@ -13,16 +13,18 @@ describe('Doctors CRUD E2E Test', () => {
     // Search by doctor name (partial match)
     cy.get('[data-test="search-doctor-input"]').type('Dennis');
     cy.get('[data-test="doctor-name"]').each((doctorname) => {
-     //cy.wrap(doctorname): Wraps the raw DOM element so you can use Cypress commands on it.
-     //.invoke('text'): Extracts the visible text content of the element.
-     cy.wrap(doctorname).invoke('text').should('match', /Dennis/i);
+      //cy.wrap(doctorname): Wraps the raw DOM element so you can use Cypress commands on it.
+      //.invoke('text'): Extracts the visible text content of the element.
+      cy.wrap(doctorname)
+        .invoke('text')
+        .should('match', /Dennis/i);
     });
 
     // Clear the input
     cy.get('[data-test="search-doctor-input"]').clear();
 
     // Filter by specialization
-    cy.get('[data-test="specialization-filter"]').select('Cardiologist'); 
+    cy.get('[data-test="specialization-filter"]').select('Cardiologist');
     cy.get('[data-test="doctor-card"]').each((doctorcard) => {
       cy.wrap(doctorcard).contains('Cardiologist');
     });

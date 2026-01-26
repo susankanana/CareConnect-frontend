@@ -16,7 +16,7 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage,
-  whitelist: ['user']
+  whitelist: ['user'],
 };
 
 const rootReducer = combineReducers({
@@ -28,7 +28,7 @@ const rootReducer = combineReducers({
   [prescriptionsAPI.reducerPath]: prescriptionsAPI.reducer,
   [paymentsAPI.reducerPath]: paymentsAPI.reducer,
   [servicesAPI.reducerPath]: servicesAPI.reducer,
-  user: userSlice
+  user: userSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

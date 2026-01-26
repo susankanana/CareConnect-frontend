@@ -22,14 +22,14 @@ import {
   Receipt,
   ArrowRight,
   Loader,
-  Smartphone
+  Smartphone,
 } from 'lucide-react';
 
 // Import the doctors API hook and type
 import { useGetDoctorsQuery, type TDoctor } from '../reducers/doctors/doctorsAPI';
 
 // Define a default consultation fee
-const DEFAULT_CONSULTATION_FEE = "6500.00"; // Example default fee
+const DEFAULT_CONSULTATION_FEE = '6500.00'; // Example default fee
 
 type AppointmentInputs = {
   doctorId: number;
@@ -43,7 +43,7 @@ const schema = yup.object({
   appointmentDate: yup
     .string()
     .required('Appointment date is required')
-    .test('future-date', 'Appointment date must be in the future', function(value) {
+    .test('future-date', 'Appointment date must be in the future', function (value) {
       if (!value) return false;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -55,8 +55,18 @@ const schema = yup.object({
 });
 
 const timeSlots = [
-  "09:00:00", "09:30:00", "10:00:00", "10:30:00", "11:00:00", "11:30:00",
-  "14:00:00", "14:30:00", "15:00:00", "15:30:00", "16:00:00", "16:30:00"
+  '09:00:00',
+  '09:30:00',
+  '10:00:00',
+  '10:30:00',
+  '11:00:00',
+  '11:30:00',
+  '14:00:00',
+  '14:30:00',
+  '15:00:00',
+  '15:30:00',
+  '16:00:00',
+  '16:30:00',
 ];
 
 const Appointments = () => {
@@ -64,7 +74,7 @@ const Appointments = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [appointmentDetails, setAppointmentDetails] = useState<any>(null);
-  const [prescriptionAmount, setPrescriptionAmount] = useState("0.00");
+  const [prescriptionAmount, setPrescriptionAmount] = useState('0.00');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'Stripe' | 'M-Pesa'>('Stripe');
   const [mpesaPhone, setMpesaPhone] = useState('');
   const [isPollingPayment, setIsPollingPayment] = useState(false);
@@ -73,8 +83,10 @@ const Appointments = () => {
   const isLoggedIn = useSelector((state: RootState) => !!state.user.token);
 
   const [createAppointment, { isLoading }] = appointmentsAPI.useCreateAppointmentMutation();
-  const [createCheckoutSession, { isLoading: isCreatingSession }] = paymentsAPI.useCreateCheckoutSessionMutation();
-  const [initiateMpesaPayment, { isLoading: isInitiatingMpesa }] = paymentsAPI.useInitiateMpesaPaymentMutation();
+  const [createCheckoutSession, { isLoading: isCreatingSession }] =
+    paymentsAPI.useCreateCheckoutSessionMutation();
+  const [initiateMpesaPayment, { isLoading: isInitiatingMpesa }] =
+    paymentsAPI.useInitiateMpesaPaymentMutation();
 
   // M-Pesa payment status polling
   const [checkPaymentStatus] = paymentsAPI.useLazyCheckPaymentStatusByAppointmentIdQuery();
@@ -85,17 +97,17 @@ const Appointments = () => {
     const pollPaymentStatus = async () => {
       try {
         const result = await checkPaymentStatus(appointmentDetails.appointmentId).unwrap();
-        
+
         if (result.status === 'Paid') {
           setIsPollingPayment(false);
-          toast.success("M-Pesa payment confirmed!");
+          toast.success('M-Pesa payment confirmed!');
           setIsSubmitted(true); // Navigate to success page
         } else if (result.status === 'Failed') {
           setIsPollingPayment(false);
-          toast.error("Payment failed. Please try again.");
+          toast.error('Payment failed. Please try again.');
         }
       } catch (error) {
-        console.error("Error checking payment status:", error);
+        console.error('Error checking payment status:', error);
         // Continue polling on error, don't stop
       }
     };
@@ -108,7 +120,7 @@ const Appointments = () => {
     const timeoutId = setTimeout(() => {
       clearInterval(intervalId);
       setIsPollingPayment(false);
-      toast.error("Payment confirmation timeout. Please check your payment status.");
+      toast.error('Payment confirmation timeout. Please check your payment status.');
     }, 300000); // 5 minutes
 
     return () => {
@@ -124,13 +136,14 @@ const Appointments = () => {
   );
 
   // Fetch doctors data using the Redux Toolkit Query hook
-  const { data: doctorsData, error: doctorsError, isLoading: doctorsLoading } = useGetDoctorsQuery(
-    undefined,
-    {
-      refetchOnMountOrArgChange: true,
-      pollingInterval: 60000,
-    }
-  );
+  const {
+    data: doctorsData,
+    error: doctorsError,
+    isLoading: doctorsLoading,
+  } = useGetDoctorsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+    pollingInterval: 60000,
+  });
 
   // Access the data array from the response, default to empty array if not available
   const doctors = doctorsData?.data || [];
@@ -141,12 +154,12 @@ const Appointments = () => {
     watch,
     setValue,
     formState: { errors },
-    reset
+    reset,
   } = useForm<AppointmentInputs>({
     resolver: yupResolver(schema),
     defaultValues: {
       totalAmount: DEFAULT_CONSULTATION_FEE, // Set default value for totalAmount
-    }
+    },
   });
 
   const watchedValues = watch();
@@ -154,7 +167,9 @@ const Appointments = () => {
   // Update selected doctor when doctorId changes
   useEffect(() => {
     if (watchedValues.doctorId && doctors.length > 0) {
-      const doctor = doctors.find((d: TDoctor) => d.doctor?.doctorId === Number(watchedValues.doctorId));
+      const doctor = doctors.find(
+        (d: TDoctor) => d.doctor?.doctorId === Number(watchedValues.doctorId)
+      );
       setSelectedDoctor(doctor || null);
     }
   }, [watchedValues.doctorId, doctors]); // Add doctors to dependency array
@@ -177,43 +192,46 @@ const Appointments = () => {
     if (!doctor || !doctor.doctor?.availableDays) return false;
 
     const dayName = getDayName(dateString);
-    return Array.isArray(doctor.doctor.availableDays) && doctor.doctor.availableDays.includes(dayName);
+    return (
+      Array.isArray(doctor.doctor.availableDays) && doctor.doctor.availableDays.includes(dayName)
+    );
   };
 
   // Calculate total amount including prescriptions
   const calculateTotalAmount = () => {
     const consultationFee = parseFloat(DEFAULT_CONSULTATION_FEE);
-    const totalPrescriptionAmount = prescriptionsData?.data?.reduce((sum, prescription) => {
-      return sum + parseFloat(prescription.amount || "0.00");
-    }, 0) || 0;
-    
+    const totalPrescriptionAmount =
+      prescriptionsData?.data?.reduce((sum, prescription) => {
+        return sum + parseFloat(prescription.amount || '0.00');
+      }, 0) || 0;
+
     return (consultationFee + totalPrescriptionAmount).toFixed(2);
   };
 
   // Handle proceeding to checkout
   const handleProceedToCheckout = async () => {
     if (!appointmentDetails?.appointmentId) {
-      toast.error("No appointment found for checkout");
+      toast.error('No appointment found for checkout');
       return;
     }
 
     if (selectedPaymentMethod === 'M-Pesa') {
       if (!mpesaPhone || mpesaPhone.length < 10) {
-        toast.error("Please enter a valid M-Pesa phone number");
+        toast.error('Please enter a valid M-Pesa phone number');
         return;
       }
 
       try {
         await initiateMpesaPayment({
           appointmentId: appointmentDetails.appointmentId,
-          phone: mpesaPhone
+          phone: mpesaPhone,
         }).unwrap();
 
-        toast.success("M-Pesa payment initiated! Please check your phone for the payment prompt.");
+        toast.success('M-Pesa payment initiated! Please check your phone for the payment prompt.');
         setIsPollingPayment(true); // Start polling for payment status
       } catch (error: any) {
-        console.error("M-Pesa payment error:", error);
-        toast.error(error.data?.message || "Failed to initiate M-Pesa payment");
+        console.error('M-Pesa payment error:', error);
+        toast.error(error.data?.message || 'Failed to initiate M-Pesa payment');
       }
       return;
     }
@@ -221,28 +239,28 @@ const Appointments = () => {
     // Handle Stripe payment
     try {
       const response = await createCheckoutSession({
-        appointmentId: appointmentDetails.appointmentId
+        appointmentId: appointmentDetails.appointmentId,
       }).unwrap();
 
       if (response.url) {
         window.location.href = response.url;
       } else {
-        toast.error("Failed to create checkout session");
+        toast.error('Failed to create checkout session');
       }
     } catch (error: any) {
-      console.error("Checkout error:", error);
-      toast.error(error.data?.message || "Failed to proceed to checkout");
+      console.error('Checkout error:', error);
+      toast.error(error.data?.message || 'Failed to proceed to checkout');
     }
   };
 
   const onSubmit: SubmitHandler<AppointmentInputs> = async (data) => {
     if (!isLoggedIn || !user) {
-      toast.error("Please login to book an appointment");
+      toast.error('Please login to book an appointment');
       return;
     }
 
     if (!selectedDoctor) {
-      toast.error("Please select a doctor.");
+      toast.error('Please select a doctor.');
       return;
     }
 
@@ -261,19 +279,18 @@ const Appointments = () => {
 
       // The key change: Access response.data
       const response = await createAppointment(appointmentData).unwrap();
-      
+
       setAppointmentDetails({
         ...response.data,
         doctor: selectedDoctor,
-        patient: user
+        patient: user,
       });
       setShowCheckout(true);
       setIsSubmitted(false);
-      toast.success("Appointment booked successfully!");
-      
+      toast.success('Appointment booked successfully!');
     } catch (error: any) {
-      console.error("Appointment booking error:", error);
-      toast.error(error.data?.message || "Failed to book appointment. Please try again.");
+      console.error('Appointment booking error:', error);
+      toast.error(error.data?.message || 'Failed to book appointment. Please try again.');
     }
   };
 
@@ -289,7 +306,8 @@ const Appointments = () => {
               </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-4">Appointment Booked!</h1>
               <p className="text-gray-600">
-                Your appointment has been successfully scheduled. Please proceed to payment to confirm your booking.
+                Your appointment has been successfully scheduled. Please proceed to payment to
+                confirm your booking.
               </p>
             </div>
 
@@ -303,12 +321,15 @@ const Appointments = () => {
                 <div className="flex justify-between">
                   <span>Doctor:</span>
                   <span className="font-medium">
-                    {appointmentDetails.doctor?.user?.firstName} {appointmentDetails.doctor?.user?.lastName}
+                    {appointmentDetails.doctor?.user?.firstName}{' '}
+                    {appointmentDetails.doctor?.user?.lastName}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Specialization:</span>
-                  <span className="font-medium">{appointmentDetails.doctor?.doctor?.specialization}</span>
+                  <span className="font-medium">
+                    {appointmentDetails.doctor?.doctor?.specialization}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Date:</span>
@@ -357,7 +378,7 @@ const Appointments = () => {
                 <CreditCard className="h-5 w-5 text-teal-600" />
                 Select Payment Method
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {/* Stripe Option */}
                 <div
@@ -440,7 +461,7 @@ const Appointments = () => {
                   setIsSubmitted(false);
                   setAppointmentDetails(null);
                   setSelectedDoctor(null);
-                  setPrescriptionAmount("0.00");
+                  setPrescriptionAmount('0.00');
                   setSelectedPaymentMethod('Stripe');
                   setMpesaPhone('');
                   setIsPollingPayment(false);
@@ -452,10 +473,15 @@ const Appointments = () => {
               </button>
               <button
                 onClick={handleProceedToCheckout}
-                disabled={isCreatingSession || isInitiatingMpesa || isPollingPayment || (selectedPaymentMethod === 'M-Pesa' && !mpesaPhone)}
+                disabled={
+                  isCreatingSession ||
+                  isInitiatingMpesa ||
+                  isPollingPayment ||
+                  (selectedPaymentMethod === 'M-Pesa' && !mpesaPhone)
+                }
                 className="flex-1 bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {(isCreatingSession || isInitiatingMpesa || isPollingPayment) ? (
+                {isCreatingSession || isInitiatingMpesa || isPollingPayment ? (
                   <>
                     <Loader className="h-5 w-5 animate-spin" />
                     <span>
@@ -465,7 +491,9 @@ const Appointments = () => {
                 ) : (
                   <>
                     <span>
-                      {selectedPaymentMethod === 'M-Pesa' ? 'Pay with M-Pesa' : 'Proceed to Checkout'}
+                      {selectedPaymentMethod === 'M-Pesa'
+                        ? 'Pay with M-Pesa'
+                        : 'Proceed to Checkout'}
                     </span>
                     <ArrowRight className="h-5 w-5" />
                   </>
@@ -478,12 +506,11 @@ const Appointments = () => {
               <div className="flex items-center space-x-2">
                 <Shield className="h-5 w-5 text-blue-600" />
                 <span className="text-sm text-blue-800 font-medium">
-                  {selectedPaymentMethod === 'Stripe' 
+                  {selectedPaymentMethod === 'Stripe'
                     ? 'Secure payment powered by Stripe. Your payment information is encrypted and protected.'
-                    : isPollingPayment 
+                    : isPollingPayment
                       ? 'Please complete the payment on your phone. We are waiting for confirmation...'
-                      : 'Secure M-Pesa payment. You will receive an STK push notification on your phone.'
-                  }
+                      : 'Secure M-Pesa payment. You will receive an STK push notification on your phone.'}
                 </span>
               </div>
             </div>
@@ -504,29 +531,36 @@ const Appointments = () => {
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Payment Successful!</h1>
             <p className="text-gray-600 mb-8">
-              Your appointment has been confirmed and payment processed. You will receive a confirmation email shortly.
+              Your appointment has been confirmed and payment processed. You will receive a
+              confirmation email shortly.
             </p>
 
             <div className="bg-gray-50 rounded-lg p-6 mb-8 text-left">
               <h3 className="font-semibold text-gray-900 mb-4">Appointment Details</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="font-medium">Doctor:</span> {appointmentDetails.doctor?.user?.firstName} {appointmentDetails.doctor?.user?.lastName}
+                  <span className="font-medium">Doctor:</span>{' '}
+                  {appointmentDetails.doctor?.user?.firstName}{' '}
+                  {appointmentDetails.doctor?.user?.lastName}
                 </div>
                 <div>
-                  <span className="font-medium">Specialization:</span> {appointmentDetails.doctor?.doctor?.specialization}
+                  <span className="font-medium">Specialization:</span>{' '}
+                  {appointmentDetails.doctor?.doctor?.specialization}
                 </div>
                 <div>
-                  <span className="font-medium">Date:</span> {new Date(appointmentDetails.appointmentDate).toLocaleDateString()}
+                  <span className="font-medium">Date:</span>{' '}
+                  {new Date(appointmentDetails.appointmentDate).toLocaleDateString()}
                 </div>
                 <div>
-                  <span className="font-medium">Time:</span> {formatTimeSlot(appointmentDetails.timeSlot)}
+                  <span className="font-medium">Time:</span>{' '}
+                  {formatTimeSlot(appointmentDetails.timeSlot)}
                 </div>
                 <div>
                   <span className="font-medium">Total Paid:</span> KSh {calculateTotalAmount()}
                 </div>
                 <div>
-                  <span className="font-medium">Appointment ID:</span> #{appointmentDetails.appointmentId}
+                  <span className="font-medium">Appointment ID:</span> #
+                  {appointmentDetails.appointmentId}
                 </div>
               </div>
             </div>
@@ -538,7 +572,7 @@ const Appointments = () => {
                   setShowCheckout(false);
                   setAppointmentDetails(null);
                   setSelectedDoctor(null);
-                  setPrescriptionAmount("0.00");
+                  setPrescriptionAmount('0.00');
                   setSelectedPaymentMethod('Stripe');
                   setMpesaPhone('');
                   setIsPollingPayment(false);
@@ -549,7 +583,7 @@ const Appointments = () => {
                 Book Another Appointment
               </button>
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => (window.location.href = '/')}
                 className="border-2 border-teal-600 text-teal-600 px-8 py-3 rounded-lg hover:bg-teal-50 transition-colors font-semibold"
               >
                 Back to Home
@@ -584,7 +618,11 @@ const Appointments = () => {
             <div className="flex items-center space-x-2">
               <Shield className="h-5 w-5 text-yellow-600" />
               <span className="text-yellow-800 font-medium">
-                Please <a href="/login" className="text-teal-600 hover:underline">login</a> to book an appointment
+                Please{' '}
+                <a href="/login" className="text-teal-600 hover:underline">
+                  login
+                </a>{' '}
+                to book an appointment
               </span>
             </div>
           </div>
@@ -599,7 +637,11 @@ const Appointments = () => {
             </h2>
 
             {doctorsLoading && <p className="text-center text-gray-700">Loading doctors...</p>}
-            {!!doctorsError && <p className="text-center text-red-500">Error fetching doctors. Please try again later.</p>}
+            {!!doctorsError && (
+              <p className="text-center text-red-500">
+                Error fetching doctors. Please try again later.
+              </p>
+            )}
 
             {!doctorsLoading && !doctorsError && doctors.length === 0 && (
               <p className="text-center text-gray-700">No doctors available at this time.</p>
@@ -615,7 +657,9 @@ const Appointments = () => {
                         ? 'border-teal-500 bg-teal-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    onClick={() => doctor.doctor?.doctorId && setValue('doctorId', doctor.doctor.doctorId)}
+                    onClick={() =>
+                      doctor.doctor?.doctorId && setValue('doctorId', doctor.doctor.doctorId)
+                    }
                   >
                     <input
                       type="radio"
@@ -639,7 +683,9 @@ const Appointments = () => {
                       <span className="text-sm font-medium">{doctor.doctor?.rating || 'N/A'}</span>
                     </div>
                     <p className="text-sm text-gray-600 text-center mb-3">
-                      {doctor.doctor?.experience != null ? `${doctor.doctor.experience} years experience` : 'N/A'}
+                      {doctor.doctor?.experience != null
+                        ? `${doctor.doctor.experience} years experience`
+                        : 'N/A'}
                     </p>
                     <div className="text-center">
                       <span className="text-lg font-bold text-gray-900">
@@ -675,27 +721,29 @@ const Appointments = () => {
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
                 {errors.appointmentDate && (
-                  <span className="text-red-600 text-sm mt-1 block">{errors.appointmentDate.message}</span>
+                  <span className="text-red-600 text-sm mt-1 block">
+                    {errors.appointmentDate.message}
+                  </span>
                 )}
 
                 {selectedDoctor && (
                   <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                     <p className="text-sm text-blue-800">
-                      <strong>Available Days:</strong> {selectedDoctor.doctor?.availableDays?.join(', ') || 'Not specified'}
+                      <strong>Available Days:</strong>{' '}
+                      {selectedDoctor.doctor?.availableDays?.join(', ') || 'Not specified'}
                     </p>
-                    {watchedValues.appointmentDate && !isDateAvailable(watchedValues.appointmentDate, selectedDoctor) && (
-                      <p className="text-sm text-red-600 mt-1">
-                        Doctor is not available on {getDayName(watchedValues.appointmentDate)}
-                      </p>
-                    )}
+                    {watchedValues.appointmentDate &&
+                      !isDateAvailable(watchedValues.appointmentDate, selectedDoctor) && (
+                        <p className="text-sm text-red-600 mt-1">
+                          Doctor is not available on {getDayName(watchedValues.appointmentDate)}
+                        </p>
+                      )}
                   </div>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Time Slot
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
                 <select
                   {...register('timeSlot')}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
@@ -734,8 +782,12 @@ const Appointments = () => {
                     <User className="h-5 w-5 text-gray-400" />
                     <div>
                       <p className="font-medium text-gray-900">Doctor</p>
-                      <p className="text-gray-600">{selectedDoctor.user?.firstName} {selectedDoctor.user?.lastName}</p>
-                      <p className="text-sm text-teal-600">{selectedDoctor.doctor?.specialization}</p>
+                      <p className="text-gray-600">
+                        {selectedDoctor.user?.firstName} {selectedDoctor.user?.lastName}
+                      </p>
+                      <p className="text-sm text-teal-600">
+                        {selectedDoctor.doctor?.specialization}
+                      </p>
                     </div>
                   </div>
 
@@ -744,7 +796,8 @@ const Appointments = () => {
                     <div>
                       <p className="font-medium text-gray-900">Date & Time</p>
                       <p className="text-gray-600">
-                        {new Date(watchedValues.appointmentDate).toLocaleDateString()} at {formatTimeSlot(watchedValues.timeSlot)}
+                        {new Date(watchedValues.appointmentDate).toLocaleDateString()} at{' '}
+                        {formatTimeSlot(watchedValues.timeSlot)}
                       </p>
                     </div>
                   </div>
@@ -770,7 +823,9 @@ const Appointments = () => {
           <div className="text-center">
             <button
               type="submit"
-              disabled={isLoading || !isLoggedIn || doctorsLoading || !!doctorsError || doctors.length === 0}
+              disabled={
+                isLoading || !isLoggedIn || doctorsLoading || !!doctorsError || doctors.length === 0
+              }
               className="bg-gradient-to-r from-teal-500 to-pink-500 text-white px-12 py-4 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold text-lg flex items-center justify-center space-x-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (

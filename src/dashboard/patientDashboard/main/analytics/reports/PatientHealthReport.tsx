@@ -5,13 +5,7 @@ import { appointmentsAPI } from '../../../../../reducers/appointments/appointmen
 import { prescriptionsAPI } from '../../../../../reducers/prescriptions/prescriptionsAPI';
 import { complaintsAPI } from '../../../../../reducers/complaints/complaintsAPI';
 import { toast } from 'sonner';
-import {
-  Download,
-  Heart,
-  X,
-  Loader,
-  CheckCircle
-} from 'lucide-react';
+import { Download, Heart, X, Loader, CheckCircle } from 'lucide-react';
 
 interface HealthReportProps {
   isOpen: boolean;
@@ -25,22 +19,20 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
   const user = useSelector((state: RootState) => state.user.user);
   const userId = user?.user_id;
 
-  const { data: appointmentsData } = appointmentsAPI.useGetAppointmentsByUserIdQuery(
-    userId ?? 0,
-    { skip: !userId }
-  );
+  const { data: appointmentsData } = appointmentsAPI.useGetAppointmentsByUserIdQuery(userId ?? 0, {
+    skip: !userId,
+  });
   const { data: prescriptionsData } = prescriptionsAPI.useGetPrescriptionsByPatientIdQuery(
     userId ?? 0,
     { skip: !userId }
   );
-  const { data: complaintsData } = complaintsAPI.useGetComplaintsByUserIdQuery(
-    userId ?? 0,
-    { skip: !userId }
-  );
+  const { data: complaintsData } = complaintsAPI.useGetComplaintsByUserIdQuery(userId ?? 0, {
+    skip: !userId,
+  });
 
   const generateHealthReport = async () => {
     if (!appointmentsData?.data || !user) {
-      toast.error("No health data available for report generation");
+      toast.error('No health data available for report generation');
       return;
     }
 
@@ -54,20 +46,20 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
       // Calculate health metrics
       const totalSpent = appointments.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0);
       const totalAppointments = appointments.length;
-      const uniqueDoctors = new Set(appointments.map(apt => apt.doctor.id)).size;
-      const specializations = [...new Set(appointments.map(apt => apt.doctor.specialization))];
+      const uniqueDoctors = new Set(appointments.map((apt) => apt.doctor.id)).size;
+      const specializations = [...new Set(appointments.map((apt) => apt.doctor.specialization))];
 
       const appointmentsByStatus = {
-        confirmed: appointments.filter(apt => apt.status === 'Confirmed').length,
-        pending: appointments.filter(apt => apt.status === 'Pending').length,
-        cancelled: appointments.filter(apt => apt.status === 'Cancelled').length
+        confirmed: appointments.filter((apt) => apt.status === 'Confirmed').length,
+        pending: appointments.filter((apt) => apt.status === 'Pending').length,
+        cancelled: appointments.filter((apt) => apt.status === 'Cancelled').length,
       };
 
       const complaintsByStatus = {
-        open: complaints.filter(c => c.status === 'Open').length,
-        inProgress: complaints.filter(c => c.status === 'In Progress').length,
-        resolved: complaints.filter(c => c.status === 'Resolved').length,
-        closed: complaints.filter(c => c.status === 'Closed').length
+        open: complaints.filter((c) => c.status === 'Open').length,
+        inProgress: complaints.filter((c) => c.status === 'In Progress').length,
+        resolved: complaints.filter((c) => c.status === 'Resolved').length,
+        closed: complaints.filter((c) => c.status === 'Closed').length,
       };
 
       // Generate HTML report
@@ -143,7 +135,7 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
           <div class="section">
             <div class="section-title">Medical Specializations Visited</div>
             <div class="specialization-list">
-              ${specializations.map(spec => `<span class="specialization-tag">${spec}</span>`).join('')}
+              ${specializations.map((spec) => `<span class="specialization-tag">${spec}</span>`).join('')}
             </div>
             <p style="margin-top: 15px; color: #666;">You have consulted with specialists across ${specializations.length} different medical fields, showing comprehensive healthcare coverage.</p>
           </div>
@@ -174,7 +166,9 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
             </table>
           </div>
 
-          ${reportType === 'detailed' ? `
+          ${
+            reportType === 'detailed'
+              ? `
           <div class="section">
             <div class="section-title">Recent Appointments</div>
             <table class="table">
@@ -185,7 +179,10 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
                 <th>Status</th>
                 <th>Amount</th>
               </tr>
-              ${appointments.slice(0, 10).map(apt => `
+              ${appointments
+                .slice(0, 10)
+                .map(
+                  (apt) => `
                 <tr>
                   <td>${new Date(apt.appointmentDate).toLocaleDateString()}</td>
                   <td>Dr. ${apt.doctor.name} ${apt.doctor.lastName}</td>
@@ -193,11 +190,15 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
                   <td class="status-${apt.status.toLowerCase()}">${apt.status}</td>
                   <td>KSh ${parseFloat(apt.totalAmount).toLocaleString()}</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join('')}
             </table>
           </div>
 
-          ${prescriptions.length > 0 ? `
+          ${
+            prescriptions.length > 0
+              ? `
           <div class="section">
             <div class="section-title">Prescription Summary</div>
             <table class="table">
@@ -206,22 +207,33 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
                 <th>Amount</th>
                 <th>Notes</th>
               </tr>
-              ${prescriptions.slice(0, 5).map(prescription => {
-                const relatedAppointment = appointments.find(apt => apt.appointmentId === prescription.appointmentId);
-                return `
+              ${prescriptions
+                .slice(0, 5)
+                .map((prescription) => {
+                  const relatedAppointment = appointments.find(
+                    (apt) => apt.appointmentId === prescription.appointmentId
+                  );
+                  return `
                   <tr>
                     <td>${relatedAppointment ? new Date(relatedAppointment.appointmentDate).toLocaleDateString() : 'N/A'}</td>
                     <td>KSh ${parseFloat(prescription.amount).toLocaleString()}</td>
                     <td>${prescription.notes.substring(0, 100)}${prescription.notes.length > 100 ? '...' : ''}</td>
                   </tr>
                 `;
-              }).join('')}
+                })
+                .join('')}
             </table>
           </div>
-          ` : ''}
-          ` : ''}
+          `
+              : ''
+          }
+          `
+              : ''
+          }
 
-          ${complaints.length > 0 ? `
+          ${
+            complaints.length > 0
+              ? `
           <div class="section">
             <div class="section-title">Feedback & Complaints</div>
             <table class="table">
@@ -247,7 +259,9 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
               </tr>
             </table>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <div class="section">
             <div class="section-title">Health Insights</div>
@@ -283,11 +297,11 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast.success("Health report generated and downloaded successfully!");
+      toast.success('Health report generated and downloaded successfully!');
       onClose();
     } catch (error) {
-      console.error("Error generating health report:", error);
-      toast.error("Failed to generate health report. Please try again.");
+      console.error('Error generating health report:', error);
+      toast.error('Failed to generate health report. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -356,7 +370,10 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-teal-600">
-                    KSh {appointmentsData.data.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0).toFixed(0)}
+                    KSh{' '}
+                    {appointmentsData.data
+                      .reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0)
+                      .toFixed(0)}
                   </div>
                   <div className="text-sm text-gray-600">Healthcare Investment</div>
                 </div>

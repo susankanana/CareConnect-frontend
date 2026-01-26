@@ -1,6 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ApiDomain } from "../../utils/ApiDomain";
-import type { RootState } from "../../app/store";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { ApiDomain } from '../../utils/ApiDomain';
+import type { RootState } from '../../app/store';
 
 export type TPrescription = {
   prescriptionId: number;
@@ -14,34 +14,34 @@ export type TPrescription = {
 };
 
 export const prescriptionsAPI = createApi({
-  reducerPath: "prescriptionsAPI",
+  reducerPath: 'prescriptionsAPI',
   baseQuery: fetchBaseQuery({
     baseUrl: ApiDomain,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).user.token;
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
-      headers.set("Content-Type", "application/json");
+      headers.set('Content-Type', 'application/json');
       return headers;
     },
   }),
-  tagTypes: ["Prescriptions"],
+  tagTypes: ['Prescriptions'],
   endpoints: (builder) => ({
     // POST /prescription/register
     createPrescription: builder.mutation<TPrescription, Partial<TPrescription>>({
       query: (newPrescription) => ({
-        url: "/prescription/register",
-        method: "POST",
+        url: '/prescription/register',
+        method: 'POST',
         body: newPrescription,
       }),
-      invalidatesTags: ["Prescriptions"],
+      invalidatesTags: ['Prescriptions'],
     }),
 
     // GET /prescriptions
     getPrescriptions: builder.query<{ data: TPrescription[] }, void>({
-      query: () => "/prescriptions",
-      providesTags: ["Prescriptions"],
+      query: () => '/prescriptions',
+      providesTags: ['Prescriptions'],
     }),
 
     // GET /prescription/:id
@@ -63,19 +63,19 @@ export const prescriptionsAPI = createApi({
     updatePrescription: builder.mutation<TPrescription, Partial<TPrescription> & { id: number }>({
       query: ({ id, ...rest }) => ({
         url: `/prescription/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: rest,
       }),
-      invalidatesTags: ["Prescriptions"],
+      invalidatesTags: ['Prescriptions'],
     }),
 
     // DELETE /prescription/:id
     deletePrescription: builder.mutation<{ message: string }, number>({
       query: (id) => ({
         url: `/prescription/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["Prescriptions"],
+      invalidatesTags: ['Prescriptions'],
     }),
   }),
 });

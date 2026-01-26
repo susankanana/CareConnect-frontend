@@ -1,6 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ApiDomain } from "../../utils/ApiDomain";
-import type { RootState } from "../../app/store";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { ApiDomain } from '../../utils/ApiDomain';
+import type { RootState } from '../../app/store';
 
 export type TPayment = {
   paymentId: number;
@@ -33,42 +33,45 @@ export type TInitiateMpesaStkPushResponse = {
 };
 
 export const paymentsAPI = createApi({
-  reducerPath: "paymentsAPI",
+  reducerPath: 'paymentsAPI',
   baseQuery: fetchBaseQuery({
     baseUrl: ApiDomain,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).user.token;
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
-      headers.set("Content-Type", "application/json");
+      headers.set('Content-Type', 'application/json');
       return headers;
     },
   }),
-  tagTypes: ["Payments"],
+  tagTypes: ['Payments'],
   endpoints: (builder) => ({
     // POST /payment/checkout-session----STRIPE
     createCheckoutSession: builder.mutation<{ url: string }, { appointmentId: number }>({
       query: (data) => ({
-        url: "/payment/checkout-session",
-        method: "POST",
+        url: '/payment/checkout-session',
+        method: 'POST',
         body: data,
       }),
     }),
 
     // POST /payment/mpesa/initiate ---- M-PESA
-    initiateMpesaPayment: builder.mutation<TInitiateMpesaStkPushResponse, TInitiateMpesaStkPushRequest>({
+    initiateMpesaPayment: builder.mutation<
+      TInitiateMpesaStkPushResponse,
+      TInitiateMpesaStkPushRequest
+    >({
       query: (data) => ({
-        url: "/payment/mpesa/initiate",
-        method: "POST",
+        url: '/payment/mpesa/initiate',
+        method: 'POST',
         body: data,
       }),
     }),
 
     // GET /payments
     getAllPayments: builder.query<{ data: TPayment[] }, void>({
-      query: () => "/payments",
-      providesTags: ["Payments"],
+      query: () => '/payments',
+      providesTags: ['Payments'],
     }),
 
     // GET /payment/:id
@@ -85,7 +88,6 @@ export const paymentsAPI = createApi({
     checkPaymentStatusByAppointmentId: builder.query<{ status: string }, number>({
       query: (appointmentId) => `/payments/status/${appointmentId}`,
     }),
-
   }),
 });
 

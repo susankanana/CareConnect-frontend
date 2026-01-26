@@ -4,13 +4,7 @@ import type { RootState } from '../../../../../app/store';
 import { appointmentsAPI } from '../../../../../reducers/appointments/appointmentsAPI';
 import { prescriptionsAPI } from '../../../../../reducers/prescriptions/prescriptionsAPI';
 import { toast } from 'sonner';
-import {
-  FileText,
-  Download,
-  X,
-  Loader,
-  CheckCircle
-} from 'lucide-react';
+import { FileText, Download, X, Loader, CheckCircle } from 'lucide-react';
 
 interface ReportGeneratorProps {
   isOpen: boolean;
@@ -18,10 +12,14 @@ interface ReportGeneratorProps {
 }
 
 const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose }) => {
-  const [reportType, setReportType] = useState<'monthly' | 'quarterly' | 'yearly' | 'custom'>('monthly');
+  const [reportType, setReportType] = useState<'monthly' | 'quarterly' | 'yearly' | 'custom'>(
+    'monthly'
+  );
   const [dateRange, setDateRange] = useState({
-    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0]
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+      .toISOString()
+      .split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
   });
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -40,25 +38,25 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
   const handleReportTypeChange = (type: 'monthly' | 'quarterly' | 'yearly' | 'custom') => {
     setReportType(type);
     const now = new Date();
-    
+
     switch (type) {
       case 'monthly':
         setDateRange({
           startDate: new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0],
-          endDate: now.toISOString().split('T')[0]
+          endDate: now.toISOString().split('T')[0],
         });
         break;
       case 'quarterly':
         const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
         setDateRange({
           startDate: quarterStart.toISOString().split('T')[0],
-          endDate: now.toISOString().split('T')[0]
+          endDate: now.toISOString().split('T')[0],
         });
         break;
       case 'yearly':
         setDateRange({
           startDate: new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0],
-          endDate: now.toISOString().split('T')[0]
+          endDate: now.toISOString().split('T')[0],
         });
         break;
       default:
@@ -69,7 +67,7 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
 
   const generateReport = async () => {
     if (!appointmentsData?.data || !user) {
-      toast.error("No data available for report generation");
+      toast.error('No data available for report generation');
       return;
     }
 
@@ -77,35 +75,44 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
 
     try {
       // Filter data by date range
-      const filteredAppointments = appointmentsData.data.filter(apt => {
+      const filteredAppointments = appointmentsData.data.filter((apt) => {
         const aptDate = new Date(apt.appointmentDate);
         const start = new Date(dateRange.startDate);
         const end = new Date(dateRange.endDate);
         return aptDate >= start && aptDate <= end;
       });
 
-      const filteredPrescriptions = prescriptionsData?.data?.filter(prescription => {
-        // Find related appointment to check date
-        const relatedAppointment = appointmentsData.data.find(apt => apt.appointmentId === prescription.appointmentId);
-        if (!relatedAppointment) return false;
-        
-        const aptDate = new Date(relatedAppointment.appointmentDate);
-        const start = new Date(dateRange.startDate);
-        const end = new Date(dateRange.endDate);
-        return aptDate >= start && aptDate <= end;
-      }) || [];
+      const filteredPrescriptions =
+        prescriptionsData?.data?.filter((prescription) => {
+          // Find related appointment to check date
+          const relatedAppointment = appointmentsData.data.find(
+            (apt) => apt.appointmentId === prescription.appointmentId
+          );
+          if (!relatedAppointment) return false;
+
+          const aptDate = new Date(relatedAppointment.appointmentDate);
+          const start = new Date(dateRange.startDate);
+          const end = new Date(dateRange.endDate);
+          return aptDate >= start && aptDate <= end;
+        }) || [];
 
       // Calculate metrics
-      const totalRevenue = filteredAppointments.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0);
+      const totalRevenue = filteredAppointments.reduce(
+        (sum, apt) => sum + parseFloat(apt.totalAmount),
+        0
+      );
       const totalAppointments = filteredAppointments.length;
-      const totalPatients = new Set(filteredAppointments.map(apt => apt.patient.id)).size;
+      const totalPatients = new Set(filteredAppointments.map((apt) => apt.patient.id)).size;
       const totalPrescriptions = filteredPrescriptions.length;
-      const prescriptionRevenue = filteredPrescriptions.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+      const prescriptionRevenue = filteredPrescriptions.reduce(
+        (sum, p) => sum + parseFloat(p.amount),
+        0
+      );
 
       const statusBreakdown = {
-        confirmed: filteredAppointments.filter(apt => apt.status === 'Confirmed').length,
-        pending: filteredAppointments.filter(apt => apt.status === 'Pending').length,
-        cancelled: filteredAppointments.filter(apt => apt.status === 'Cancelled').length
+        confirmed: filteredAppointments.filter((apt) => apt.status === 'Confirmed').length,
+        pending: filteredAppointments.filter((apt) => apt.status === 'Pending').length,
+        cancelled: filteredAppointments.filter((apt) => apt.status === 'Cancelled').length,
       };
 
       // Generate HTML report
@@ -205,7 +212,10 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
                 <th>Status</th>
                 <th>Amount</th>
               </tr>
-              ${filteredAppointments.slice(0, 10).map(apt => `
+              ${filteredAppointments
+                .slice(0, 10)
+                .map(
+                  (apt) => `
                 <tr>
                   <td>${new Date(apt.appointmentDate).toLocaleDateString()}</td>
                   <td>${apt.timeSlot}</td>
@@ -213,11 +223,15 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
                   <td class="status-${apt.status.toLowerCase()}">${apt.status}</td>
                   <td>KSh ${parseFloat(apt.totalAmount).toLocaleString()}</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join('')}
             </table>
           </div>
 
-          ${filteredPrescriptions.length > 0 ? `
+          ${
+            filteredPrescriptions.length > 0
+              ? `
           <div class="section">
             <div class="section-title">Prescription Summary</div>
             <table class="table">
@@ -233,7 +247,9 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
               </tr>
             </table>
           </div>
-          ` : ''}
+          `
+              : ''
+          }
 
           <div class="footer">
             <p>This report was generated by CareConnect Hospital Management System</p>
@@ -254,11 +270,11 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast.success("Report generated and downloaded successfully!");
+      toast.success('Report generated and downloaded successfully!');
       onClose();
     } catch (error) {
-      console.error("Error generating report:", error);
-      toast.error("Failed to generate report. Please try again.");
+      console.error('Error generating report:', error);
+      toast.error('Failed to generate report. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -295,7 +311,7 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
                 { value: 'monthly', label: 'This Month' },
                 { value: 'quarterly', label: 'This Quarter' },
                 { value: 'yearly', label: 'This Year' },
-                { value: 'custom', label: 'Custom Range' }
+                { value: 'custom', label: 'Custom Range' },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -319,7 +335,7 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
               <input
                 type="date"
                 value={dateRange.startDate}
-                onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                onChange={(e) => setDateRange((prev) => ({ ...prev, startDate: e.target.value }))}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
               />
             </div>
@@ -328,7 +344,7 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
               <input
                 type="date"
                 value={dateRange.endDate}
-                onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                onChange={(e) => setDateRange((prev) => ({ ...prev, endDate: e.target.value }))}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
               />
             </div>
@@ -341,41 +357,55 @@ const DoctorReportGenerator: React.FC<ReportGeneratorProps> = ({ isOpen, onClose
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-teal-600">
-                    {appointmentsData.data.filter(apt => {
-                      const aptDate = new Date(apt.appointmentDate);
-                      const start = new Date(dateRange.startDate);
-                      const end = new Date(dateRange.endDate);
-                      return aptDate >= start && aptDate <= end;
-                    }).length}
+                    {
+                      appointmentsData.data.filter((apt) => {
+                        const aptDate = new Date(apt.appointmentDate);
+                        const start = new Date(dateRange.startDate);
+                        const end = new Date(dateRange.endDate);
+                        return aptDate >= start && aptDate <= end;
+                      }).length
+                    }
                   </div>
                   <div className="text-sm text-gray-600">Appointments</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-teal-600">
-                    {new Set(appointmentsData.data.filter(apt => {
-                      const aptDate = new Date(apt.appointmentDate);
-                      const start = new Date(dateRange.startDate);
-                      const end = new Date(dateRange.endDate);
-                      return aptDate >= start && aptDate <= end;
-                    }).map(apt => apt.patient.id)).size}
+                    {
+                      new Set(
+                        appointmentsData.data
+                          .filter((apt) => {
+                            const aptDate = new Date(apt.appointmentDate);
+                            const start = new Date(dateRange.startDate);
+                            const end = new Date(dateRange.endDate);
+                            return aptDate >= start && aptDate <= end;
+                          })
+                          .map((apt) => apt.patient.id)
+                      ).size
+                    }
                   </div>
                   <div className="text-sm text-gray-600">Patients</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-teal-600">
-                    KSh {appointmentsData.data.filter(apt => {
-                      const aptDate = new Date(apt.appointmentDate);
-                      const start = new Date(dateRange.startDate);
-                      const end = new Date(dateRange.endDate);
-                      return aptDate >= start && aptDate <= end;
-                    }).reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0).toFixed(0)}
+                    KSh{' '}
+                    {appointmentsData.data
+                      .filter((apt) => {
+                        const aptDate = new Date(apt.appointmentDate);
+                        const start = new Date(dateRange.startDate);
+                        const end = new Date(dateRange.endDate);
+                        return aptDate >= start && aptDate <= end;
+                      })
+                      .reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0)
+                      .toFixed(0)}
                   </div>
                   <div className="text-sm text-gray-600">Revenue</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-teal-600">
-                    {prescriptionsData?.data?.filter(prescription => {
-                      const relatedAppointment = appointmentsData.data.find(apt => apt.appointmentId === prescription.appointmentId);
+                    {prescriptionsData?.data?.filter((prescription) => {
+                      const relatedAppointment = appointmentsData.data.find(
+                        (apt) => apt.appointmentId === prescription.appointmentId
+                      );
                       if (!relatedAppointment) return false;
                       const aptDate = new Date(relatedAppointment.appointmentDate);
                       const start = new Date(dateRange.startDate);

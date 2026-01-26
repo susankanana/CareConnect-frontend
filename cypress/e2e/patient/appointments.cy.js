@@ -19,32 +19,32 @@ describe('Appointments CRUD E2E Test', () => {
     cy.contains('Appointment booked successfully!').should('exist');
   });
 
- it('Should perform payment on existing confirmed appointment via the UI', () => {
-  // Make sure we're on the correct page
-  cy.url().should('include', '/user/dashboard/appointments');
+  it('Should perform payment on existing confirmed appointment via the UI', () => {
+    // Make sure we're on the correct page
+    cy.url().should('include', '/user/dashboard/appointments');
 
-  // Intercept the create-checkout-session API before clicking
-  cy.intercept('POST', '**/create-checkout-session', {
-    statusCode: 200,
-    body: { url: 'https://dummy-payment-gateway.test' },
-  }).as('createCheckout');
+    // Intercept the create-checkout-session API before clicking
+    cy.intercept('POST', '**/create-checkout-session', {
+      statusCode: 200,
+      body: { url: 'https://dummy-payment-gateway.test' },
+    }).as('createCheckout');
 
-  // Wait for appointments to load
-  cy.get('body').then(($body) => {
-    // Check if any confirmed appointment exists
-    if ($body.text().includes('Confirmed')) {
-      cy.contains('Confirmed').parents('[data-test="appointment-card"]').within(() => {
-        cy.get('[data-test="pay-now-btn"]').click();
-      });
+    // Wait for appointments to load
+    cy.get('body').then(($body) => {
+      // Check if any confirmed appointment exists
+      if ($body.text().includes('Confirmed')) {
+        cy.contains('Confirmed')
+          .parents('[data-test="appointment-card"]')
+          .within(() => {
+            cy.get('[data-test="pay-now-btn"]').click();
+          });
 
-      cy.get('[data-test="proceed-to-checkout-btn"]').should('exist').click();
-      cy.wait('@createCheckout');
-    } else {
-      // Fail gracefully
-      cy.log('No confirmed appointments available for payment');
-    }
+        cy.get('[data-test="proceed-to-checkout-btn"]').should('exist').click();
+        cy.wait('@createCheckout');
+      } else {
+        // Fail gracefully
+        cy.log('No confirmed appointments available for payment');
+      }
+    });
   });
 });
-
-});
-

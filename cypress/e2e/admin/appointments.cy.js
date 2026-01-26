@@ -2,8 +2,8 @@
 
 describe('Appointments CRUD E2E Test', () => {
   beforeEach(() => {
-    cy.loginAsAdmin(); 
-    cy.visit('/admin/dashboard/appointments'); 
+    cy.loginAsAdmin();
+    cy.visit('/admin/dashboard/appointments');
   });
 
   it('Should load appointments dashboard and open update modal', () => {
@@ -34,12 +34,11 @@ describe('Appointments CRUD E2E Test', () => {
     cy.get('[data-test="delete-appointment-button"]').first().click();
     cy.get('[data-test="delete-appointment-modal"]').should('be.visible');
   });
-  
+
   it('Should cancel deletion from modal', () => {
     cy.get('[data-test="delete-appointment-button"]').first().click();
     cy.get('[data-test="delete-appointment-modal"]').should('be.visible');
     cy.get('[data-test="cancel-delete-appointment"]').click();
     cy.get('[data-test="delete-appointment-modal"]').should('not.be.visible');
   });
-
 });

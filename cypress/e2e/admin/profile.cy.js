@@ -19,9 +19,7 @@ describe('Admin Profile Update E2E Test', () => {
     // Fill in new profile info
     cy.get('[data-test="first-name-input"]').clear().type('TestFirst');
     cy.get('[data-test="last-name-input"]').clear().type('TestLast');
-    cy.get('[data-test="image-url-input"]')
-      .clear()
-      .type('https://via.placeholder.com/150');
+    cy.get('[data-test="image-url-input"]').clear().type('https://via.placeholder.com/150');
 
     // Submit the form
     cy.get('[data-test="confirm-update-btn"]').click();

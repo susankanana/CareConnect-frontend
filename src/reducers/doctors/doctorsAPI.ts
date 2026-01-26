@@ -1,6 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ApiDomain } from "../../utils/ApiDomain";
-import type { RootState } from "../../app/store";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { ApiDomain } from '../../utils/ApiDomain';
+import type { RootState } from '../../app/store';
 
 export type TDoctor = {
   user: {
@@ -11,7 +11,7 @@ export type TDoctor = {
     password?: string;
     contactPhone: string;
     address: string;
-    role: "admin" | "doctor" | "user";
+    role: 'admin' | 'doctor' | 'user';
     image_url?: string;
     isVerified: boolean;
     verificationCode?: string;
@@ -31,40 +31,37 @@ export type TDoctor = {
 };
 
 export const doctorsAPI = createApi({
-  reducerPath: "doctorsAPI",
+  reducerPath: 'doctorsAPI',
   baseQuery: fetchBaseQuery({
     baseUrl: ApiDomain,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).user.token;
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
-      headers.set("Content-Type", "application/json");
+      headers.set('Content-Type', 'application/json');
       return headers;
     },
   }),
-  tagTypes: ["Doctors"],
+  tagTypes: ['Doctors'],
   endpoints: (builder) => ({
-    // GET /doctors 
+    // GET /doctors
     getDoctors: builder.query<{ data: TDoctor[] }, void>({
-      query: () => "/doctors",
-      providesTags: ["Doctors"],
+      query: () => '/doctors',
+      providesTags: ['Doctors'],
     }),
 
-    // GET /doctor/:id 
+    // GET /doctor/:id
     getDoctorById: builder.query<{ data: TDoctor }, number>({
       query: (id) => `/doctor/${id}`,
     }),
 
-    // GET /doctors/specialization/:specialization 
+    // GET /doctors/specialization/:specialization
     getDoctorBySpecialization: builder.query<{ data: TDoctor[] }, string>({
       query: (specialization) => `/doctors/specialization/${specialization}`,
     }),
   }),
 });
 
-export const {
-  useGetDoctorsQuery,
-  useGetDoctorByIdQuery,
-  useGetDoctorBySpecializationQuery,
-} = doctorsAPI;
+export const { useGetDoctorsQuery, useGetDoctorByIdQuery, useGetDoctorBySpecializationQuery } =
+  doctorsAPI;

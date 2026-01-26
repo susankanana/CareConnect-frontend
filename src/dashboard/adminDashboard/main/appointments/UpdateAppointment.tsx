@@ -1,9 +1,12 @@
-import { useEffect } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { appointmentsAPI, type AppointmentStatus } from "../../../../reducers/appointments/appointmentsAPI";
-import { toast } from "sonner";
+import { useEffect } from 'react';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import {
+  appointmentsAPI,
+  type AppointmentStatus,
+} from '../../../../reducers/appointments/appointmentsAPI';
+import { toast } from 'sonner';
 
 type UpdateAppointmentProps = {
   appointment: any | null;
@@ -18,24 +21,37 @@ type UpdateAppointmentInputs = {
 };
 
 const schema: yup.ObjectSchema<UpdateAppointmentInputs> = yup.object({
-  appointmentDate: yup.string().required("Appointment date is required"),
-  timeSlot: yup.string().required("Time slot is required"),
-  appointmentStatus: yup.string().oneOf(["Pending", "Confirmed", "Cancelled"]).required("Status is required"),
+  appointmentDate: yup.string().required('Appointment date is required'),
+  timeSlot: yup.string().required('Time slot is required'),
+  appointmentStatus: yup
+    .string()
+    .oneOf(['Pending', 'Confirmed', 'Cancelled'])
+    .required('Status is required'),
   totalAmount: yup
     .number()
-    .typeError("Total amount must be a number")
-    .positive("Total amount must be positive")
-    .required("Total amount is required"),
+    .typeError('Total amount must be a number')
+    .positive('Total amount must be positive')
+    .required('Total amount is required'),
 });
 
 const timeSlots = [
-  "09:00:00", "09:30:00", "10:00:00", "10:30:00", "11:00:00", "11:30:00",
-  "14:00:00", "14:30:00", "15:00:00", "15:30:00", "16:00:00", "16:30:00"
+  '09:00:00',
+  '09:30:00',
+  '10:00:00',
+  '10:30:00',
+  '11:00:00',
+  '11:30:00',
+  '14:00:00',
+  '14:30:00',
+  '15:00:00',
+  '15:30:00',
+  '16:00:00',
+  '16:30:00',
 ];
 
 const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => {
-  const [updateAppointment, { isLoading }] = appointmentsAPI.useUpdateAppointmentMutation({ 
-    fixedCacheKey: "updateAppointment" 
+  const [updateAppointment, { isLoading }] = appointmentsAPI.useUpdateAppointmentMutation({
+    fixedCacheKey: 'updateAppointment',
   });
 
   const {
@@ -50,10 +66,10 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
 
   useEffect(() => {
     if (appointment) {
-      setValue("appointmentDate", appointment.appointmentDate?.slice(0, 10) || "");
-      setValue("timeSlot", appointment.timeSlot || "");
-      setValue("appointmentStatus", appointment.appointmentStatus || "Pending");
-      setValue("totalAmount", parseFloat(appointment.totalAmount) || 0);
+      setValue('appointmentDate', appointment.appointmentDate?.slice(0, 10) || '');
+      setValue('timeSlot', appointment.timeSlot || '');
+      setValue('appointmentStatus', appointment.appointmentStatus || 'Pending');
+      setValue('totalAmount', parseFloat(appointment.totalAmount) || 0);
     } else {
       reset();
     }
@@ -62,7 +78,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
   const onSubmit: SubmitHandler<UpdateAppointmentInputs> = async (data) => {
     try {
       if (!appointment) {
-        toast.error("No appointment selected for update.");
+        toast.error('No appointment selected for update.');
         return;
       }
 
@@ -73,13 +89,13 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
       };
 
       await updateAppointment(payload).unwrap();
-      toast.success("Appointment updated successfully!");
+      toast.success('Appointment updated successfully!');
       refetch();
       reset();
-      (document.getElementById("update_appointment_modal") as HTMLDialogElement)?.close();
+      (document.getElementById('update_appointment_modal') as HTMLDialogElement)?.close();
     } catch (error) {
-      console.error("Error updating appointment:", error);
-      toast.error("Failed to update appointment. Please try again.");
+      console.error('Error updating appointment:', error);
+      toast.error('Failed to update appointment. Please try again.');
     }
   };
 
@@ -100,16 +116,18 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
             Patient: {appointment?.user?.firstName} {appointment?.user?.lastName}
           </p>
         </div>
-        
-        <form data-test="update-appointment-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+
+        <form
+          data-test="update-appointment-form"
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-4"
+        >
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Appointment Date
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
             <input
               data-test="update-date-input"
               type="date"
-              {...register("appointmentDate")}
+              {...register('appointmentDate')}
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
             {errors.appointmentDate && (
@@ -118,12 +136,10 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Time Slot
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
             <select
               data-test="update-time-slot-select"
-              {...register("timeSlot")}
+              {...register('timeSlot')}
               className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             >
               <option value="">Select time slot</option>
@@ -139,12 +155,10 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
             <select
               data-test="update-status-select"
-              {...register("appointmentStatus")}
+              {...register('appointmentStatus')}
               className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             >
               <option value="Pending">Pending</option>
@@ -164,7 +178,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               data-test="update-total-amount-input"
               type="number"
               step="0.01"
-              {...register("totalAmount")}
+              {...register('totalAmount')}
               placeholder="6500.00"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
@@ -174,10 +188,10 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
           </div>
 
           <div className="modal-action">
-            <button 
+            <button
               data-test="submit-update-appointment"
-              type="submit" 
-              className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
+              type="submit"
+              className="btn bg-teal-600 hover:bg-teal-700 text-white border-none"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -185,7 +199,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
                   <span className="loading loading-spinner loading-sm" /> Updating...
                 </>
               ) : (
-                "Update Appointment"
+                'Update Appointment'
               )}
             </button>
             <button
@@ -193,7 +207,7 @@ const UpdateAppointment = ({ appointment, refetch }: UpdateAppointmentProps) => 
               className="btn btn-ghost"
               type="button"
               onClick={() => {
-                (document.getElementById("update_appointment_modal") as HTMLDialogElement)?.close();
+                (document.getElementById('update_appointment_modal') as HTMLDialogElement)?.close();
                 reset();
               }}
             >

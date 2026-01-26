@@ -6,13 +6,7 @@ import { complaintsAPI } from '../../../../../reducers/complaints/complaintsAPI'
 import { prescriptionsAPI } from '../../../../../reducers/prescriptions/prescriptionsAPI';
 import { paymentsAPI } from '../../../../../reducers/payments/paymentsAPI';
 import { toast } from 'sonner';
-import {
-  Download,
-  BarChart3,
-  X,
-  Loader,
-  CheckCircle,
-} from 'lucide-react';
+import { Download, BarChart3, X, Loader, CheckCircle } from 'lucide-react';
 
 interface SystemReportProps {
   isOpen: boolean;
@@ -20,7 +14,9 @@ interface SystemReportProps {
 }
 
 const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => {
-  const [reportType, setReportType] = useState<'monthly' | 'quarterly' | 'yearly' | 'comprehensive'>('monthly');
+  const [reportType, setReportType] = useState<
+    'monthly' | 'quarterly' | 'yearly' | 'comprehensive'
+  >('monthly');
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Fetch all system data
@@ -33,7 +29,7 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
 
   const generateSystemReport = async () => {
     if (!appointmentsData?.data || !usersData || !doctorsData?.data) {
-      toast.error("System data not available for report generation");
+      toast.error('System data not available for report generation');
       return;
     }
 
@@ -57,42 +53,53 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
       const totalPayments = payments.length;
 
       const appointmentsByStatus = {
-        confirmed: appointments.filter(apt => apt.status === 'Confirmed').length,
-        pending: appointments.filter(apt => apt.status === 'Pending').length,
-        cancelled: appointments.filter(apt => apt.status === 'Cancelled').length
+        confirmed: appointments.filter((apt) => apt.status === 'Confirmed').length,
+        pending: appointments.filter((apt) => apt.status === 'Pending').length,
+        cancelled: appointments.filter((apt) => apt.status === 'Cancelled').length,
       };
 
       const usersByRole = {
-        patients: users.filter(user => user.role === 'user').length,
-        doctors: users.filter(user => user.role === 'doctor').length,
-        admins: users.filter(user => user.role === 'admin').length
+        patients: users.filter((user) => user.role === 'user').length,
+        doctors: users.filter((user) => user.role === 'doctor').length,
+        admins: users.filter((user) => user.role === 'admin').length,
       };
 
       const complaintsByStatus = {
-        open: complaints.filter(c => c.status === 'Open').length,
-        inProgress: complaints.filter(c => c.status === 'In Progress').length,
-        resolved: complaints.filter(c => c.status === 'Resolved').length,
-        closed: complaints.filter(c => c.status === 'Closed').length
+        open: complaints.filter((c) => c.status === 'Open').length,
+        inProgress: complaints.filter((c) => c.status === 'In Progress').length,
+        resolved: complaints.filter((c) => c.status === 'Resolved').length,
+        closed: complaints.filter((c) => c.status === 'Closed').length,
       };
 
       // Top performing doctors
-      const doctorPerformance = doctors.map(doctor => {
-        const doctorAppointments = appointments.filter(apt => apt.doctor?.id === doctor.user.userId);
-        const revenue = doctorAppointments.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0);
-        return {
-          name: `Dr. ${doctor.user.firstName} ${doctor.user.lastName}`,
-          specialization: doctor.doctor.specialization,
-          appointments: doctorAppointments.length,
-          revenue
-        };
-      }).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
+      const doctorPerformance = doctors
+        .map((doctor) => {
+          const doctorAppointments = appointments.filter(
+            (apt) => apt.doctor?.id === doctor.user.userId
+          );
+          const revenue = doctorAppointments.reduce(
+            (sum, apt) => sum + parseFloat(apt.totalAmount),
+            0
+          );
+          return {
+            name: `Dr. ${doctor.user.firstName} ${doctor.user.lastName}`,
+            specialization: doctor.doctor.specialization,
+            appointments: doctorAppointments.length,
+            revenue,
+          };
+        })
+        .sort((a, b) => b.revenue - a.revenue)
+        .slice(0, 10);
 
       // Specialization distribution
-      const specializationStats = doctors.reduce((acc, doctor) => {
-        const spec = doctor.doctor.specialization;
-        acc[spec] = (acc[spec] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const specializationStats = doctors.reduce(
+        (acc, doctor) => {
+          const spec = doctor.doctor.specialization;
+          acc[spec] = (acc[spec] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       // Generate comprehensive HTML report
       const reportHTML = `
@@ -139,12 +146,15 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
               <div class="logo">CareConnect Hospital</div>
               <div class="report-title">System Performance Report</div>
               <div class="report-subtitle">Comprehensive Healthcare Management Analytics</div>
-              <div style="margin-top: 20px; font-size: 16px;">Generated on ${new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}</div>
+              <div style="margin-top: 20px; font-size: 16px;">Generated on ${new Date().toLocaleDateString(
+                'en-US',
+                {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                }
+              )}</div>
             </div>
 
             <div class="content">
@@ -224,7 +234,9 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
                     <th>Appointments</th>
                     <th>Revenue (KSh)</th>
                   </tr>
-                  ${doctorPerformance.map((doctor, index) => `
+                  ${doctorPerformance
+                    .map(
+                      (doctor, index) => `
                     <tr>
                       <td><strong>#${index + 1}</strong></td>
                       <td>${doctor.name}</td>
@@ -232,7 +244,9 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
                       <td>${doctor.appointments}</td>
                       <td>${doctor.revenue.toLocaleString()}</td>
                     </tr>
-                  `).join('')}
+                  `
+                    )
+                    .join('')}
                 </table>
               </div>
 
@@ -240,17 +254,23 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
                 <div class="section-title">Medical Specializations</div>
                 <table class="table">
                   <tr><th>Specialization</th><th>Doctors</th><th>Percentage</th></tr>
-                  ${Object.entries(specializationStats).map(([spec, count]) => `
+                  ${Object.entries(specializationStats)
+                    .map(
+                      ([spec, count]) => `
                     <tr>
                       <td>${spec}</td>
                       <td>${count}</td>
                       <td>${((count / totalDoctors) * 100).toFixed(1)}%</td>
                     </tr>
-                  `).join('')}
+                  `
+                    )
+                    .join('')}
                 </table>
               </div>
 
-              ${complaints.length > 0 ? `
+              ${
+                complaints.length > 0
+                  ? `
               <div class="section">
                 <div class="section-title">Patient Feedback & Complaints</div>
                 <div class="highlight-box">
@@ -266,7 +286,9 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
                   <tr><td>Closed</td><td>${complaintsByStatus.closed}</td><td>${((complaintsByStatus.closed / Math.max(totalComplaints, 1)) * 100).toFixed(1)}%</td></tr>
                 </table>
               </div>
-              ` : ''}
+              `
+                  : ''
+              }
 
               <div class="section">
                 <div class="section-title">System Health Indicators</div>
@@ -280,7 +302,7 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
                     <div class="metric-label">Appointments per Doctor</div>
                   </div>
                   <div class="metric-card">
-                    <div class="metric-value">${((users.filter(u => u.isVerified).length / totalUsers) * 100).toFixed(1)}%</div>
+                    <div class="metric-value">${((users.filter((u) => u.isVerified).length / totalUsers) * 100).toFixed(1)}%</div>
                     <div class="metric-label">User Verification Rate</div>
                   </div>
                   <div class="metric-card">
@@ -323,11 +345,11 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast.success("System report generated and downloaded successfully!");
+      toast.success('System report generated and downloaded successfully!');
       onClose();
     } catch (error) {
-      console.error("Error generating system report:", error);
-      toast.error("Failed to generate system report. Please try again.");
+      console.error('Error generating system report:', error);
+      toast.error('Failed to generate system report. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -364,7 +386,7 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
                 { value: 'monthly', label: 'Monthly Report' },
                 { value: 'quarterly', label: 'Quarterly Report' },
                 { value: 'yearly', label: 'Annual Report' },
-                { value: 'comprehensive', label: 'Comprehensive Report' }
+                { value: 'comprehensive', label: 'Comprehensive Report' },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -393,20 +415,19 @@ const AdminSystemReport: React.FC<SystemReportProps> = ({ isOpen, onClose }) => 
                   <div className="text-sm text-gray-600">Appointments</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-teal-600">
-                    {usersData.length}
-                  </div>
+                  <div className="text-2xl font-bold text-teal-600">{usersData.length}</div>
                   <div className="text-sm text-gray-600">Users</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-teal-600">
-                    {doctorsData.data.length}
-                  </div>
+                  <div className="text-2xl font-bold text-teal-600">{doctorsData.data.length}</div>
                   <div className="text-sm text-gray-600">Doctors</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-teal-600">
-                    KSh {appointmentsData.data.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0).toFixed(0)}
+                    KSh{' '}
+                    {appointmentsData.data
+                      .reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0)
+                      .toFixed(0)}
                   </div>
                   <div className="text-sm text-gray-600">Revenue</div>
                 </div>

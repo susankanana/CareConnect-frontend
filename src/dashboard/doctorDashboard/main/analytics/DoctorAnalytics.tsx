@@ -13,7 +13,7 @@ import {
   Pie,
   Cell,
   AreaChart,
-  Area
+  Area,
 } from 'recharts';
 import {
   TrendingUp,
@@ -26,7 +26,7 @@ import {
   BarChart3,
   Stethoscope,
   Users,
-  Pill
+  Pill,
 } from 'lucide-react';
 
 // Import APIs
@@ -62,13 +62,13 @@ const DoctorAnalytics = () => {
     // Calculate overview metrics
     const totalRevenue = appointments.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0);
     const totalAppointments = appointments.length;
-    const totalPatients = new Set(appointments.map(apt => apt.patient.id)).size;
+    const totalPatients = new Set(appointments.map((apt) => apt.patient.id)).size;
     const averageAppointmentValue = totalRevenue / totalAppointments || 0;
 
     // Monthly performance data
     const monthlyPerformance = appointments.reduce((acc, apt) => {
       const month = new Date(apt.appointmentDate).toLocaleDateString('en-US', { month: 'short' });
-      const existing = acc.find(item => item.month === month);
+      const existing = acc.find((item) => item.month === month);
       if (existing) {
         existing.revenue += parseFloat(apt.totalAmount);
         existing.appointments += 1;
@@ -78,42 +78,44 @@ const DoctorAnalytics = () => {
           month,
           revenue: parseFloat(apt.totalAmount),
           appointments: 1,
-          patients: new Set([apt.patient.id])
+          patients: new Set([apt.patient.id]),
         });
       }
       return acc;
     }, [] as any[]);
 
     // Convert Set to count for chart display
-    const monthlyData = monthlyPerformance.map(item => ({
+    const monthlyData = monthlyPerformance.map((item) => ({
       ...item,
       uniquePatients: item.patients.size,
-      patients: undefined // Remove the Set object
+      patients: undefined, // Remove the Set object
     }));
 
     // Appointment status distribution
     const statusDistribution = [
       {
         name: 'Confirmed',
-        value: appointments.filter(apt => apt.status === 'Confirmed').length,
-        color: '#10B981'
+        value: appointments.filter((apt) => apt.status === 'Confirmed').length,
+        color: '#10B981',
       },
       {
         name: 'Pending',
-        value: appointments.filter(apt => apt.status === 'Pending').length,
-        color: '#F59E0B'
+        value: appointments.filter((apt) => apt.status === 'Pending').length,
+        color: '#F59E0B',
       },
       {
         name: 'Cancelled',
-        value: appointments.filter(apt => apt.status === 'Cancelled').length,
-        color: '#EF4444'
-      }
+        value: appointments.filter((apt) => apt.status === 'Cancelled').length,
+        color: '#EF4444',
+      },
     ];
 
     // Weekly appointment pattern
     const weeklyPattern = appointments.reduce((acc, apt) => {
-      const dayName = new Date(apt.appointmentDate).toLocaleDateString('en-US', { weekday: 'short' });
-      const existing = acc.find(item => item.day === dayName);
+      const dayName = new Date(apt.appointmentDate).toLocaleDateString('en-US', {
+        weekday: 'short',
+      });
+      const existing = acc.find((item) => item.day === dayName);
       if (existing) {
         existing.appointments += 1;
         existing.revenue += parseFloat(apt.totalAmount);
@@ -121,46 +123,53 @@ const DoctorAnalytics = () => {
         acc.push({
           day: dayName,
           appointments: 1,
-          revenue: parseFloat(apt.totalAmount)
+          revenue: parseFloat(apt.totalAmount),
         });
       }
       return acc;
     }, [] as any[]);
 
     // Top patients by visits
-    const patientVisits = appointments.reduce((acc, apt) => {
-      const patientKey = `${apt.patient.name} ${apt.patient.lastName}`;
-      const existing = acc.find(item => item.name === patientKey);
-      if (existing) {
-        existing.visits += 1;
-        existing.totalSpent += parseFloat(apt.totalAmount);
-      } else {
-        acc.push({
-          name: patientKey,
-          email: apt.patient.email,
-          visits: 1,
-          totalSpent: parseFloat(apt.totalAmount)
-        });
-      }
-      return acc;
-    }, [] as any[]).sort((a, b) => b.visits - a.visits).slice(0, 5);
+    const patientVisits = appointments
+      .reduce((acc, apt) => {
+        const patientKey = `${apt.patient.name} ${apt.patient.lastName}`;
+        const existing = acc.find((item) => item.name === patientKey);
+        if (existing) {
+          existing.visits += 1;
+          existing.totalSpent += parseFloat(apt.totalAmount);
+        } else {
+          acc.push({
+            name: patientKey,
+            email: apt.patient.email,
+            visits: 1,
+            totalSpent: parseFloat(apt.totalAmount),
+          });
+        }
+        return acc;
+      }, [] as any[])
+      .sort((a, b) => b.visits - a.visits)
+      .slice(0, 5);
 
     // Prescription analytics
     const prescriptionMetrics = {
       totalPrescriptions: prescriptions.length,
       totalPrescriptionValue: prescriptions.reduce((sum, p) => sum + parseFloat(p.amount), 0),
-      averagePrescriptionValue: prescriptions.length > 0 
-        ? prescriptions.reduce((sum, p) => sum + parseFloat(p.amount), 0) / prescriptions.length 
-        : 0,
-      prescriptionsPerAppointment: prescriptions.length / totalAppointments || 0
+      averagePrescriptionValue:
+        prescriptions.length > 0
+          ? prescriptions.reduce((sum, p) => sum + parseFloat(p.amount), 0) / prescriptions.length
+          : 0,
+      prescriptionsPerAppointment: prescriptions.length / totalAppointments || 0,
     };
 
     // Performance metrics
     const performanceMetrics = {
-      appointmentCompletionRate: (appointments.filter(apt => apt.status === 'Confirmed').length / totalAppointments * 100) || 0,
+      appointmentCompletionRate:
+        (appointments.filter((apt) => apt.status === 'Confirmed').length / totalAppointments) *
+          100 || 0,
       averageAppointmentsPerDay: totalAppointments / 30, // Assuming 30 days
-      patientRetentionRate: (patientVisits.filter(p => p.visits > 1).length / totalPatients * 100) || 0,
-      averageRevenuePerPatient: totalRevenue / totalPatients || 0
+      patientRetentionRate:
+        (patientVisits.filter((p) => p.visits > 1).length / totalPatients) * 100 || 0,
+      averageRevenuePerPatient: totalRevenue / totalPatients || 0,
     };
 
     return {
@@ -169,25 +178,25 @@ const DoctorAnalytics = () => {
         totalAppointments,
         totalPatients,
         averageAppointmentValue,
-        totalPrescriptions: prescriptions.length
+        totalPrescriptions: prescriptions.length,
       },
       monthlyData,
       statusDistribution,
       weeklyPattern,
       patientVisits,
       prescriptionMetrics,
-      performanceMetrics
+      performanceMetrics,
     };
   }, [appointmentsData, prescriptionsData]);
 
-  const StatCard = ({ 
-    title, 
-    value, 
-    icon: Icon, 
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
     color = 'blue',
     prefix = '',
     suffix = '',
-    subtitle = ''
+    subtitle = '',
   }: {
     title: string;
     value: number | string;
@@ -203,20 +212,24 @@ const DoctorAnalytics = () => {
       purple: 'bg-purple-50 text-purple-600 border-purple-200',
       orange: 'bg-orange-50 text-orange-600 border-orange-200',
       teal: 'bg-teal-50 text-teal-600 border-teal-200',
-      pink: 'bg-pink-50 text-pink-600 border-pink-200'
+      pink: 'bg-pink-50 text-pink-600 border-pink-200',
     };
 
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-lg border ${colorClasses[color as keyof typeof colorClasses]}`}>
+          <div
+            className={`p-3 rounded-lg border ${colorClasses[color as keyof typeof colorClasses]}`}
+          >
             <Icon className="h-6 w-6" />
           </div>
         </div>
         <div className="space-y-1">
           <h3 className="text-sm font-medium text-gray-600">{title}</h3>
           <p className="text-2xl font-bold text-gray-900">
-            {prefix}{typeof value === 'number' ? value.toLocaleString() : value}{suffix}
+            {prefix}
+            {typeof value === 'number' ? value.toLocaleString() : value}
+            {suffix}
           </p>
           {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
         </div>
@@ -231,7 +244,9 @@ const DoctorAnalytics = () => {
           <p className="font-medium text-gray-900">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.name.includes('revenue') || entry.name.includes('Revenue') ? 'KSh ' : ''}{entry.value.toLocaleString()}
+              {entry.name}:{' '}
+              {entry.name.includes('revenue') || entry.name.includes('Revenue') ? 'KSh ' : ''}
+              {entry.value.toLocaleString()}
             </p>
           ))}
         </div>
@@ -259,7 +274,8 @@ const DoctorAnalytics = () => {
               My Practice Analytics
             </h1>
             <p className="text-gray-600 mt-1">
-              Welcome back, Dr. {user?.first_name || 'Doctor'}! Here's your practice performance overview
+              Welcome back, Dr. {user?.first_name || 'Doctor'}! Here's your practice performance
+              overview
             </p>
           </div>
           <div className="flex gap-2">
@@ -273,7 +289,13 @@ const DoctorAnalytics = () => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {period === '3months' ? '3M' : period === '6months' ? '6M' : period === '1year' ? '1Y' : 'All'}
+                {period === '3months'
+                  ? '3M'
+                  : period === '6months'
+                    ? '6M'
+                    : period === '1year'
+                      ? '1Y'
+                      : 'All'}
               </button>
             ))}
           </div>
@@ -325,8 +347,8 @@ const DoctorAnalytics = () => {
             <AreaChart data={processedData.monthlyData}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -367,26 +389,24 @@ const DoctorAnalytics = () => {
                 ))}
               </Pie>
               <Tooltip
-            formatter={(value: any, props: any) => { // Recharts provides 'name' directly for PieChart
-             // Ensure payload and payload[0] exist before accessing properties
-              if (props.payload && props.payload.name) {
-                  return [
-                 `${value} appointments`,
-                  props.payload.name // Access directly from payload if it's the pie slice
-               ];
-              }
-              return [`${value} appointments`, 'N/A']; // Fallback
-            }}
-          />
+                formatter={(value: any, props: any) => {
+                  // Recharts provides 'name' directly for PieChart
+                  // Ensure payload and payload[0] exist before accessing properties
+                  if (props.payload && props.payload.name) {
+                    return [
+                      `${value} appointments`,
+                      props.payload.name, // Access directly from payload if it's the pie slice
+                    ];
+                  }
+                  return [`${value} appointments`, 'N/A']; // Fallback
+                }}
+              />
             </PieChart>
           </ResponsiveContainer>
           <div className="grid grid-cols-2 gap-2 mt-4">
             {processedData.statusDistribution.map((status, index) => (
               <div key={index} className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: status.color }}
-                />
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
                 <span className="text-sm text-gray-600">
                   {status.name} ({status.value})
                 </span>
@@ -410,7 +430,12 @@ const DoctorAnalytics = () => {
               <XAxis dataKey="day" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="appointments" fill="#14B8A6" radius={[4, 4, 0, 0]} name="Appointments" />
+              <Bar
+                dataKey="appointments"
+                fill="#14B8A6"
+                radius={[4, 4, 0, 0]}
+                name="Appointments"
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -423,7 +448,10 @@ const DoctorAnalytics = () => {
           </div>
           <div className="space-y-4">
             {processedData.patientVisits.map((patient, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-bold text-teal-600">#{index + 1}</span>
@@ -454,19 +482,27 @@ const DoctorAnalytics = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Completion Rate</span>
-              <span className="font-medium">{processedData.performanceMetrics.appointmentCompletionRate.toFixed(1)}%</span>
+              <span className="font-medium">
+                {processedData.performanceMetrics.appointmentCompletionRate.toFixed(1)}%
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Daily Appointments</span>
-              <span className="font-medium">{processedData.performanceMetrics.averageAppointmentsPerDay.toFixed(1)}</span>
+              <span className="font-medium">
+                {processedData.performanceMetrics.averageAppointmentsPerDay.toFixed(1)}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Patient Retention</span>
-              <span className="font-medium">{processedData.performanceMetrics.patientRetentionRate.toFixed(1)}%</span>
+              <span className="font-medium">
+                {processedData.performanceMetrics.patientRetentionRate.toFixed(1)}%
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Revenue per Patient</span>
-              <span className="font-medium">KSh {processedData.performanceMetrics.averageRevenuePerPatient.toFixed(0)}</span>
+              <span className="font-medium">
+                KSh {processedData.performanceMetrics.averageRevenuePerPatient.toFixed(0)}
+              </span>
             </div>
           </div>
         </div>
@@ -480,19 +516,27 @@ const DoctorAnalytics = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Total Prescriptions</span>
-              <span className="font-medium">{processedData.prescriptionMetrics.totalPrescriptions}</span>
+              <span className="font-medium">
+                {processedData.prescriptionMetrics.totalPrescriptions}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Total Value</span>
-              <span className="font-medium">KSh {processedData.prescriptionMetrics.totalPrescriptionValue.toFixed(0)}</span>
+              <span className="font-medium">
+                KSh {processedData.prescriptionMetrics.totalPrescriptionValue.toFixed(0)}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Average Value</span>
-              <span className="font-medium">KSh {processedData.prescriptionMetrics.averagePrescriptionValue.toFixed(0)}</span>
+              <span className="font-medium">
+                KSh {processedData.prescriptionMetrics.averagePrescriptionValue.toFixed(0)}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Per Appointment</span>
-              <span className="font-medium">{processedData.prescriptionMetrics.prescriptionsPerAppointment.toFixed(1)}</span>
+              <span className="font-medium">
+                {processedData.prescriptionMetrics.prescriptionsPerAppointment.toFixed(1)}
+              </span>
             </div>
           </div>
         </div>
@@ -513,7 +557,7 @@ const DoctorAnalytics = () => {
             <button className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 p-3 rounded-lg text-sm font-medium transition-colors">
               Patient Records
             </button>
-            <button 
+            <button
               onClick={() => setShowReportGenerator(true)}
               className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 p-3 rounded-lg text-sm font-medium transition-colors"
             >
@@ -529,8 +573,8 @@ const DoctorAnalytics = () => {
           <div>
             <h3 className="text-2xl font-bold mb-4">Practice Overview</h3>
             <p className="text-teal-100 mb-6">
-              Your dedication to patient care is reflected in these metrics. 
-              Keep up the excellent work in providing quality healthcare.
+              Your dedication to patient care is reflected in these metrics. Keep up the excellent
+              work in providing quality healthcare.
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
@@ -538,7 +582,9 @@ const DoctorAnalytics = () => {
                 <div className="text-teal-100">Patients Served</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold">KSh {processedData.overview.totalRevenue.toFixed(0)}</div>
+                <div className="text-3xl font-bold">
+                  KSh {processedData.overview.totalRevenue.toFixed(0)}
+                </div>
                 <div className="text-teal-100">Total Revenue</div>
               </div>
             </div>
@@ -556,9 +602,9 @@ const DoctorAnalytics = () => {
       </div>
 
       {/* Report Generator Modal */}
-      <DoctorReportGenerator 
-        isOpen={showReportGenerator} 
-        onClose={() => setShowReportGenerator(false)} 
+      <DoctorReportGenerator
+        isOpen={showReportGenerator}
+        onClose={() => setShowReportGenerator(false)}
       />
     </div>
   );

@@ -1,13 +1,13 @@
 // [imports stay unchanged]
-import { useState, useEffect } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../../../app/store";
-import { appointmentsAPI } from "../../../../reducers/appointments/appointmentsAPI";
-import { doctorsAPI, type TDoctor } from "../../../../reducers/doctors/doctorsAPI";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../../../app/store';
+import { appointmentsAPI } from '../../../../reducers/appointments/appointmentsAPI';
+import { doctorsAPI, type TDoctor } from '../../../../reducers/doctors/doctorsAPI';
+import { toast } from 'sonner';
 
 type CreateAppointmentInputs = {
   doctorId: number;
@@ -20,7 +20,7 @@ const schema = yup.object({
   appointmentDate: yup
     .string()
     .required('Appointment date is required')
-    .test('future-date', 'Appointment date must be in the future', function(value) {
+    .test('future-date', 'Appointment date must be in the future', function (value) {
       if (!value) return false;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -31,11 +31,21 @@ const schema = yup.object({
 });
 
 const timeSlots = [
-  "09:00:00", "09:30:00", "10:00:00", "10:30:00", "11:00:00", "11:30:00",
-  "14:00:00", "14:30:00", "15:00:00", "15:30:00", "16:00:00", "16:30:00"
+  '09:00:00',
+  '09:30:00',
+  '10:00:00',
+  '10:30:00',
+  '11:00:00',
+  '11:30:00',
+  '14:00:00',
+  '14:30:00',
+  '15:00:00',
+  '15:30:00',
+  '16:00:00',
+  '16:30:00',
 ];
 
-const DEFAULT_CONSULTATION_FEE = "6500.00";
+const DEFAULT_CONSULTATION_FEE = '6500.00';
 
 type CreateAppointmentProps = {
   refetch: () => void;
@@ -64,7 +74,9 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
 
   useEffect(() => {
     if (watchedValues.doctorId && doctorsData?.data) {
-      const doctor = doctorsData.data.find(d => d.doctor?.doctorId === Number(watchedValues.doctorId));
+      const doctor = doctorsData.data.find(
+        (d) => d.doctor?.doctorId === Number(watchedValues.doctorId)
+      );
       setSelectedDoctor(doctor || null);
     }
   }, [watchedValues.doctorId, doctorsData]);
@@ -72,7 +84,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
   const onSubmit: SubmitHandler<CreateAppointmentInputs> = async (data) => {
     try {
       if (!userId) {
-        toast.error("User ID not found. Please login again.");
+        toast.error('User ID not found. Please login again.');
         return;
       }
 
@@ -84,13 +96,13 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
       };
 
       await createAppointment(payload).unwrap();
-      toast.success("Appointment booked successfully!");
+      toast.success('Appointment booked successfully!');
       reset();
       refetch();
-      (document.getElementById("create_appointment_modal") as HTMLDialogElement)?.close();
+      (document.getElementById('create_appointment_modal') as HTMLDialogElement)?.close();
     } catch (error) {
-      console.error("Error creating appointment:", error);
-      toast.error("Failed to book appointment. Please try again.");
+      console.error('Error creating appointment:', error);
+      toast.error('Failed to book appointment. Please try again.');
     }
   };
 
@@ -110,7 +122,9 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
   const isDateAvailable = (dateString: string, doctor: TDoctor) => {
     if (!doctor || !doctor.doctor?.availableDays) return false;
     const dayName = getDayName(dateString);
-    return Array.isArray(doctor.doctor.availableDays) && doctor.doctor.availableDays.includes(dayName);
+    return (
+      Array.isArray(doctor.doctor.availableDays) && doctor.doctor.availableDays.includes(dayName)
+    );
   };
 
   return (
@@ -120,8 +134,12 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
           <h3 className="font-bold text-lg text-white">Book New Appointment</h3>
           <p className="text-teal-100 text-sm mt-1">Schedule your consultation with our doctors</p>
         </div>
-        
-        <form onSubmit={handleSubmit(onSubmit)} data-test="create-appointment-form" className="flex flex-col gap-6">
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          data-test="create-appointment-form"
+          className="flex flex-col gap-6"
+        >
           {/* Doctor Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
@@ -130,18 +148,21 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
             ) : (
               <select
                 data-test="doctor-select"
-                {...register("doctorId", { valueAsNumber: true })}
+                {...register('doctorId', { valueAsNumber: true })}
                 className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               >
                 <option value="">Choose a doctor</option>
                 {doctorsData?.data?.map((doctor: TDoctor) => (
                   <option key={doctor.doctor?.doctorId} value={doctor.doctor?.doctorId}>
-                    Dr. {doctor.user?.firstName} {doctor.user?.lastName} - {doctor.doctor?.specialization}
+                    Dr. {doctor.user?.firstName} {doctor.user?.lastName} -{' '}
+                    {doctor.doctor?.specialization}
                   </option>
                 ))}
               </select>
             )}
-            {errors.doctorId && <span className="text-sm text-red-600">{errors.doctorId.message}</span>}
+            {errors.doctorId && (
+              <span className="text-sm text-red-600">{errors.doctorId.message}</span>
+            )}
           </div>
 
           {/* Selected Doctor Info */}
@@ -173,17 +194,21 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
             <input
               data-test="appointment-date-input"
               type="date"
-              {...register("appointmentDate")}
+              {...register('appointmentDate')}
               min={new Date().toISOString().split('T')[0]}
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
-            {errors.appointmentDate && <span className="text-sm text-red-600">{errors.appointmentDate.message}</span>}
-
-            {selectedDoctor && watchedValues.appointmentDate && !isDateAvailable(watchedValues.appointmentDate, selectedDoctor) && (
-              <p className="text-sm text-red-600 mt-1">
-                Doctor is not available on {getDayName(watchedValues.appointmentDate)}.
-              </p>
+            {errors.appointmentDate && (
+              <span className="text-sm text-red-600">{errors.appointmentDate.message}</span>
             )}
+
+            {selectedDoctor &&
+              watchedValues.appointmentDate &&
+              !isDateAvailable(watchedValues.appointmentDate, selectedDoctor) && (
+                <p className="text-sm text-red-600 mt-1">
+                  Doctor is not available on {getDayName(watchedValues.appointmentDate)}.
+                </p>
+              )}
           </div>
 
           {/* Time Selection */}
@@ -191,7 +216,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
             <select
               data-test="appointment-time-slot-select"
-              {...register("timeSlot")}
+              {...register('timeSlot')}
               className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               disabled={!selectedDoctor || !watchedValues.appointmentDate}
             >
@@ -202,7 +227,9 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
                 </option>
               ))}
             </select>
-            {errors.timeSlot && <span className="text-sm text-red-600">{errors.timeSlot.message}</span>}
+            {errors.timeSlot && (
+              <span className="text-sm text-red-600">{errors.timeSlot.message}</span>
+            )}
           </div>
 
           {/* Consultation Fee */}
@@ -218,10 +245,10 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
 
           {/* Actions */}
           <div className="modal-action">
-            <button 
+            <button
               data-test="submit-appointment-btn"
-              type="submit" 
-              className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
+              type="submit"
+              className="btn bg-teal-600 hover:bg-teal-700 text-white border-none"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -229,7 +256,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
                   <span className="loading loading-spinner loading-sm" /> Booking...
                 </>
               ) : (
-                "Book Appointment"
+                'Book Appointment'
               )}
             </button>
             <button
@@ -237,7 +264,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
               type="button"
               className="btn btn-ghost"
               onClick={() => {
-                (document.getElementById("create_appointment_modal") as HTMLDialogElement)?.close();
+                (document.getElementById('create_appointment_modal') as HTMLDialogElement)?.close();
                 reset();
               }}
             >

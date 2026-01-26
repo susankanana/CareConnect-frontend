@@ -1,8 +1,8 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ApiDomain } from "../../utils/ApiDomain";
-import type { RootState } from "../../app/store";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { ApiDomain } from '../../utils/ApiDomain';
+import type { RootState } from '../../app/store';
 
-export type AppointmentStatus = "Pending" | "Confirmed" | "Cancelled";
+export type AppointmentStatus = 'Pending' | 'Confirmed' | 'Cancelled';
 
 export type TAppointment = {
   appointmentId: number;
@@ -37,41 +37,40 @@ export type TDetailedAppointment = {
   };
 };
 
-
 export const appointmentsAPI = createApi({
-  reducerPath: "appointmentsAPI",
+  reducerPath: 'appointmentsAPI',
   baseQuery: fetchBaseQuery({
     baseUrl: ApiDomain,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).user.token;
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
-      headers.set("Content-Type", "application/json");
+      headers.set('Content-Type', 'application/json');
       return headers;
     },
   }),
-  tagTypes: ["Appointments"],
+  tagTypes: ['Appointments'],
   endpoints: (builder) => ({
     // POST /appointment/register
     createAppointment: builder.mutation<{ data: TAppointment }, Partial<TAppointment>>({
       query: (newAppointment) => ({
-        url: "/appointment/register",
-        method: "POST",
+        url: '/appointment/register',
+        method: 'POST',
         body: newAppointment,
       }),
-      invalidatesTags: ["Appointments"],
+      invalidatesTags: ['Appointments'],
     }),
 
     // GET /appointments
     getAppointments: builder.query<{ data: TAppointment[] }, void>({
-      query: () => "/appointments",
-      providesTags: ["Appointments"],
+      query: () => '/appointments',
+      providesTags: ['Appointments'],
     }),
 
     // GET /appointments/detailed
     getDetailedAppointments: builder.query<{ data: TDetailedAppointment[] }, void>({
-      query: () => "/appointments/detailed",
+      query: () => '/appointments/detailed',
     }),
 
     // GET /appointment/:id
@@ -98,29 +97,32 @@ export const appointmentsAPI = createApi({
     updateAppointment: builder.mutation<TAppointment, Partial<TAppointment> & { id: number }>({
       query: ({ id, ...rest }) => ({
         url: `/appointment/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: rest,
       }),
-      invalidatesTags: ["Appointments"],
+      invalidatesTags: ['Appointments'],
     }),
 
     // PATCH /appointment/status/:id
-    updateAppointmentStatus: builder.mutation<{ message: string }, { id: number; status: AppointmentStatus }>({
+    updateAppointmentStatus: builder.mutation<
+      { message: string },
+      { id: number; status: AppointmentStatus }
+    >({
       query: ({ id, status }) => ({
         url: `/appointment/status/${id}`,
-        method: "PATCH",
+        method: 'PATCH',
         body: { status },
       }),
-      invalidatesTags: ["Appointments"],
+      invalidatesTags: ['Appointments'],
     }),
 
     // DELETE /appointment/:id
     deleteAppointment: builder.mutation<{ message: string }, number>({
       query: (id) => ({
         url: `/appointment/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["Appointments"],
+      invalidatesTags: ['Appointments'],
     }),
   }),
 });

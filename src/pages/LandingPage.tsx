@@ -1,16 +1,15 @@
-import Footer from "../components/footer/Footer"
-import Hero  from "../components/home/Hero"
-import Navbar from "../components/nav/Navbar"
+import Footer from '../components/footer/Footer';
+import Hero from '../components/home/Hero';
+import Navbar from '../components/nav/Navbar';
 
 const LandingPage = () => {
-    return (
-        <div>
-            <Navbar />
-            <Hero />     
-            <Footer />
+  return (
+    <div>
+      <Navbar />
+      <Hero />
+      <Footer />
+    </div>
+  );
+};
 
-        </div>
-    )
-}
-
-export default LandingPage
+export default LandingPage;

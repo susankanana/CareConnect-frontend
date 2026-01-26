@@ -11,7 +11,7 @@ import {
   Pie,
   Cell,
   AreaChart,
-  Area
+  Area,
 } from 'recharts';
 import {
   TrendingUp,
@@ -26,7 +26,7 @@ import {
   MapPin,
   BarChart3,
   PieChart as PieChartIcon,
-  LineChart as LineChartIcon
+  LineChart as LineChartIcon,
 } from 'lucide-react';
 
 // Import APIs
@@ -71,7 +71,7 @@ const AdminAnalytics = () => {
     // Monthly revenue data
     const monthlyData = appointments.reduce((acc, apt) => {
       const month = new Date(apt.appointmentDate).toLocaleDateString('en-US', { month: 'short' });
-      const existing = acc.find(item => item.month === month);
+      const existing = acc.find((item) => item.month === month);
       if (existing) {
         existing.revenue += parseFloat(apt.totalAmount);
         existing.appointments += 1;
@@ -79,7 +79,7 @@ const AdminAnalytics = () => {
         acc.push({
           month,
           revenue: parseFloat(apt.totalAmount),
-          appointments: 1
+          appointments: 1,
         });
       }
       return acc;
@@ -89,71 +89,79 @@ const AdminAnalytics = () => {
     const statusData = [
       {
         name: 'Confirmed',
-        value: appointments.filter(apt => apt.status === 'Confirmed').length,
-        color: '#10B981'
+        value: appointments.filter((apt) => apt.status === 'Confirmed').length,
+        color: '#10B981',
       },
       {
         name: 'Pending',
-        value: appointments.filter(apt => apt.status === 'Pending').length,
-        color: '#F59E0B'
+        value: appointments.filter((apt) => apt.status === 'Pending').length,
+        color: '#F59E0B',
       },
       {
         name: 'Cancelled',
-        value: appointments.filter(apt => apt.status === 'Cancelled').length,
-        color: '#EF4444'
-      }
+        value: appointments.filter((apt) => apt.status === 'Cancelled').length,
+        color: '#EF4444',
+      },
     ];
 
     // Doctor specialization distribution
     const specializationData = doctors.reduce((acc, doctor) => {
       const spec = doctor.doctor.specialization;
-      const existing = acc.find(item => item.name === spec);
+      const existing = acc.find((item) => item.name === spec);
       if (existing) {
         existing.value += 1;
       } else {
         acc.push({
           name: spec,
           value: 1,
-          color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+          color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
         });
       }
       return acc;
     }, [] as any[]);
 
     // Top performing doctors
-    const doctorPerformance = doctors.map(doctor => {
-      const doctorAppointments = appointments.filter(apt => apt.doctor?.id === doctor.user.userId);
-      const revenue = doctorAppointments.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0);
-      return {
-        name: `Dr. ${doctor.user.firstName} ${doctor.user.lastName}`,
-        specialization: doctor.doctor.specialization,
-        appointments: doctorAppointments.length,
-        revenue
-      };
-    }).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+    const doctorPerformance = doctors
+      .map((doctor) => {
+        const doctorAppointments = appointments.filter(
+          (apt) => apt.doctor?.id === doctor.user.userId
+        );
+        const revenue = doctorAppointments.reduce(
+          (sum, apt) => sum + parseFloat(apt.totalAmount),
+          0
+        );
+        return {
+          name: `Dr. ${doctor.user.firstName} ${doctor.user.lastName}`,
+          specialization: doctor.doctor.specialization,
+          appointments: doctorAppointments.length,
+          revenue,
+        };
+      })
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
 
     // Complaint status distribution
     const complaintStatusData = [
       {
         name: 'Open',
-        value: complaints.filter(c => c.status === 'Open').length,
-        color: '#EF4444'
+        value: complaints.filter((c) => c.status === 'Open').length,
+        color: '#EF4444',
       },
       {
         name: 'In Progress',
-        value: complaints.filter(c => c.status === 'In Progress').length,
-        color: '#F59E0B'
+        value: complaints.filter((c) => c.status === 'In Progress').length,
+        color: '#F59E0B',
       },
       {
         name: 'Resolved',
-        value: complaints.filter(c => c.status === 'Resolved').length,
-        color: '#10B981'
+        value: complaints.filter((c) => c.status === 'Resolved').length,
+        color: '#10B981',
       },
       {
         name: 'Closed',
-        value: complaints.filter(c => c.status === 'Closed').length,
-        color: '#6B7280'
-      }
+        value: complaints.filter((c) => c.status === 'Closed').length,
+        color: '#6B7280',
+      },
     ];
 
     return {
@@ -167,24 +175,24 @@ const AdminAnalytics = () => {
         averageAppointmentValue: totalRevenue / totalAppointments || 0,
         revenueGrowth: 12.5, // You can calculate this based on historical data
         appointmentGrowth: 8.3,
-        userGrowth: 15.7
+        userGrowth: 15.7,
       },
       monthlyData,
       statusData,
       specializationData,
       doctorPerformance,
-      complaintStatusData
+      complaintStatusData,
     };
   }, [appointmentsData, usersData, doctorsData, complaintsData, prescriptionsData, paymentsData]);
 
-  const StatCard = ({ 
-    title, 
-    value, 
-    growth, 
-    icon: Icon, 
+  const StatCard = ({
+    title,
+    value,
+    growth,
+    icon: Icon,
     color = 'blue',
     prefix = '',
-    suffix = '' 
+    suffix = '',
   }: {
     title: string;
     value: number | string;
@@ -200,20 +208,28 @@ const AdminAnalytics = () => {
       green: 'bg-green-50 text-green-600 border-green-200',
       purple: 'bg-purple-50 text-purple-600 border-purple-200',
       orange: 'bg-orange-50 text-orange-600 border-orange-200',
-      teal: 'bg-teal-50 text-teal-600 border-teal-200'
+      teal: 'bg-teal-50 text-teal-600 border-teal-200',
     };
 
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-lg border ${colorClasses[color as keyof typeof colorClasses]}`}>
+          <div
+            className={`p-3 rounded-lg border ${colorClasses[color as keyof typeof colorClasses]}`}
+          >
             <Icon className="h-6 w-6" />
           </div>
           {growth !== undefined && (
-            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-              isPositive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-            }`}>
-              {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+            <div
+              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                isPositive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+              }`}
+            >
+              {isPositive ? (
+                <TrendingUp className="h-3 w-3" />
+              ) : (
+                <TrendingDown className="h-3 w-3" />
+              )}
               {Math.abs(growth)}%
             </div>
           )}
@@ -221,7 +237,9 @@ const AdminAnalytics = () => {
         <div className="space-y-1">
           <h3 className="text-sm font-medium text-gray-600">{title}</h3>
           <p className="text-2xl font-bold text-gray-900">
-            {prefix}{typeof value === 'number' ? value.toLocaleString() : value}{suffix}
+            {prefix}
+            {typeof value === 'number' ? value.toLocaleString() : value}
+            {suffix}
           </p>
         </div>
       </div>
@@ -235,7 +253,8 @@ const AdminAnalytics = () => {
           <p className="font-medium text-gray-900">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.name.includes('Revenue') ? 'KSh ' : ''}{entry.value.toLocaleString()}
+              {entry.name}: {entry.name.includes('Revenue') ? 'KSh ' : ''}
+              {entry.value.toLocaleString()}
             </p>
           ))}
         </div>
@@ -277,7 +296,13 @@ const AdminAnalytics = () => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {period === '1month' ? '1M' : period === '3months' ? '3M' : period === '6months' ? '6M' : '1Y'}
+                {period === '1month'
+                  ? '1M'
+                  : period === '3months'
+                    ? '3M'
+                    : period === '6months'
+                      ? '6M'
+                      : '1Y'}
               </button>
             ))}
           </div>
@@ -328,8 +353,8 @@ const AdminAnalytics = () => {
             <AreaChart data={processedData.monthlyData}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -369,10 +394,10 @@ const AdminAnalytics = () => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip 
+              <Tooltip
                 formatter={(value: any, props: any) => [
-                  `${value} appointments`, 
-                  props.payload.name
+                  `${value} appointments`,
+                  props.payload.name,
                 ]}
               />
             </PieChart>
@@ -380,10 +405,7 @@ const AdminAnalytics = () => {
           <div className="grid grid-cols-2 gap-2 mt-4">
             {processedData.statusData.map((status, index) => (
               <div key={index} className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: status.color }}
-                />
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
                 <span className="text-sm text-gray-600">
                   {status.name} ({status.value})
                 </span>
@@ -420,7 +442,10 @@ const AdminAnalytics = () => {
           </div>
           <div className="space-y-4">
             {processedData.doctorPerformance.map((doctor, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-bold text-teal-600">#{index + 1}</span>
@@ -431,7 +456,9 @@ const AdminAnalytics = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">KSh {doctor.revenue.toLocaleString()}</p>
+                  <p className="font-semibold text-gray-900">
+                    KSh {doctor.revenue.toLocaleString()}
+                  </p>
                   <p className="text-sm text-gray-600">{doctor.appointments} appointments</p>
                 </div>
               </div>
@@ -451,7 +478,9 @@ const AdminAnalytics = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Average Appointment Value</span>
-              <span className="font-semibold">KSh {processedData.overview.averageAppointmentValue.toFixed(0)}</span>
+              <span className="font-semibold">
+                KSh {processedData.overview.averageAppointmentValue.toFixed(0)}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Total Prescriptions</span>
@@ -464,7 +493,13 @@ const AdminAnalytics = () => {
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Doctor Utilization</span>
               <span className="font-semibold">
-                {((processedData.overview.totalAppointments / processedData.overview.totalDoctors) * 100 / 30).toFixed(1)}%
+                {(
+                  ((processedData.overview.totalAppointments /
+                    processedData.overview.totalDoctors) *
+                    100) /
+                  30
+                ).toFixed(1)}
+                %
               </span>
             </div>
           </div>
@@ -480,10 +515,7 @@ const AdminAnalytics = () => {
             {processedData.complaintStatusData.map((status, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: status.color }}
-                  />
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
                   <span className="text-sm text-gray-600">{status.name}</span>
                 </div>
                 <span className="font-medium">{status.value}</span>
@@ -499,7 +531,7 @@ const AdminAnalytics = () => {
             <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
           </div>
           <div className="space-y-3">
-            <button 
+            <button
               onClick={() => setShowReportGenerator(true)}
               className="w-full bg-teal-50 hover:bg-teal-100 text-teal-700 p-3 rounded-lg text-sm font-medium transition-colors"
             >
@@ -519,9 +551,9 @@ const AdminAnalytics = () => {
       </div>
 
       {/* Report Generator Modal */}
-      <AdminSystemReport 
-        isOpen={showReportGenerator} 
-        onClose={() => setShowReportGenerator(false)} 
+      <AdminSystemReport
+        isOpen={showReportGenerator}
+        onClose={() => setShowReportGenerator(false)}
       />
     </div>
   );

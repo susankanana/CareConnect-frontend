@@ -1,11 +1,21 @@
-import { Heart, Phone, Mail, MapPin, Clock, Facebook, Twitter, Instagram, Calendar} from 'lucide-react';
+import {
+  Heart,
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Facebook,
+  Twitter,
+  Instagram,
+  Calendar,
+} from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 const Footer = () => {
   const navigate = useNavigate();
   const navigateTo = (path: string) => {
-       navigate(path);
-    };
+    navigate(path);
+  };
 
   return (
     <footer className="bg-gray-900 text-white">
@@ -23,8 +33,8 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-gray-300 leading-relaxed">
-              With passion we deliver healthcare. Your trusted partner for 
-              comprehensive medical care and wellness services in Kenya.
+              With passion we deliver healthcare. Your trusted partner for comprehensive medical
+              care and wellness services in Kenya.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-teal-400 transition-colors">
@@ -43,12 +53,39 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4 text-teal-400">Quick Links</h3>
             <ul className="space-y-2">
-              <li><a href="/" className="text-gray-300 hover:text-white transition-colors">Home</a></li>
-              <li><a href="/about" className="text-gray-300 hover:text-white transition-colors">About Us</a></li>
-              <li><a href="#services" className="text-gray-300 hover:text-white transition-colors">Services</a></li>
-              <li><a href="#doctors" className="text-gray-300 hover:text-white transition-colors">Our Doctors</a></li>
-              <li><a href="/appointments" className="text-gray-300 hover:text-white transition-colors">Book Appointment</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Patient Portal</a></li>
+              <li>
+                <a href="/" className="text-gray-300 hover:text-white transition-colors">
+                  Home
+                </a>
+              </li>
+              <li>
+                <a href="/about" className="text-gray-300 hover:text-white transition-colors">
+                  About Us
+                </a>
+              </li>
+              <li>
+                <a href="#services" className="text-gray-300 hover:text-white transition-colors">
+                  Services
+                </a>
+              </li>
+              <li>
+                <a href="#doctors" className="text-gray-300 hover:text-white transition-colors">
+                  Our Doctors
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/appointments"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Book Appointment
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                  Patient Portal
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -56,12 +93,36 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4 text-teal-400">Medical Services</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Cardiology</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Neurology</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Pediatrics</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Orthopedics</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Emergency Care</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Laboratory Services</a></li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                  Cardiology
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                  Neurology
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                  Pediatrics
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                  Orthopedics
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                  Emergency Care
+                </a>
+              </li>
+              <li>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                  Laboratory Services
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -112,11 +173,14 @@ const Footer = () => {
         <div className="mt-12 bg-gradient-to-r from-teal-600 to-pink-600 rounded-2xl p-8 text-center">
           <h3 className="text-2xl font-bold mb-4">Need Medical Attention?</h3>
           <p className="text-teal-100 mb-6 max-w-2xl mx-auto">
-            Don't wait when it comes to your health. Book an appointment with our 
-            experienced medical professionals today.
+            Don't wait when it comes to your health. Book an appointment with our experienced
+            medical professionals today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button onClick={() => navigateTo('/appointments')} className="bg-white text-teal-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors font-semibold flex items-center justify-center gap-2">
+            <button
+              onClick={() => navigateTo('/appointments')}
+              className="bg-white text-teal-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors font-semibold flex items-center justify-center gap-2"
+            >
               <Calendar className="h-5 w-5" />
               Book Appointment
             </button>
@@ -134,9 +198,15 @@ const Footer = () => {
               © 2024 CareConnect Hospital. All rights reserved.
             </div>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</a>
-              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Terms of Service</a>
-              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Medical Disclaimer</a>
+              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Privacy Policy
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Terms of Service
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Medical Disclaimer
+              </a>
             </div>
           </div>
         </div>

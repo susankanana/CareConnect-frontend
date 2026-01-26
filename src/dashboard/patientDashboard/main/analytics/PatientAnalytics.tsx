@@ -13,7 +13,7 @@ import {
   Pie,
   Cell,
   AreaChart,
-  Area
+  Area,
 } from 'recharts';
 import {
   TrendingUp,
@@ -27,7 +27,7 @@ import {
   CreditCard,
   Stethoscope,
   Heart,
-  Shield
+  Shield,
 } from 'lucide-react';
 
 // Import APIs
@@ -43,14 +43,12 @@ const PatientAnalytics = () => {
   const userId = user?.user_id;
 
   // Fetch user-specific data
-  const { data: appointmentsData } = appointmentsAPI.useGetAppointmentsByUserIdQuery(
-    userId ?? 0,
-    { skip: !userId }
-  );
-  const { data: complaintsData } = complaintsAPI.useGetComplaintsByUserIdQuery(
-    userId ?? 0,
-    { skip: !userId }
-  );
+  const { data: appointmentsData } = appointmentsAPI.useGetAppointmentsByUserIdQuery(userId ?? 0, {
+    skip: !userId,
+  });
+  const { data: complaintsData } = complaintsAPI.useGetComplaintsByUserIdQuery(userId ?? 0, {
+    skip: !userId,
+  });
   const { data: prescriptionsData } = prescriptionsAPI.useGetPrescriptionsByPatientIdQuery(
     userId ?? 0,
     { skip: !userId }
@@ -74,7 +72,7 @@ const PatientAnalytics = () => {
     // Monthly spending data
     const monthlySpending = appointments.reduce((acc, apt) => {
       const month = new Date(apt.appointmentDate).toLocaleDateString('en-US', { month: 'short' });
-      const existing = acc.find(item => item.month === month);
+      const existing = acc.find((item) => item.month === month);
       if (existing) {
         existing.amount += parseFloat(apt.totalAmount);
         existing.appointments += 1;
@@ -82,7 +80,7 @@ const PatientAnalytics = () => {
         acc.push({
           month,
           amount: parseFloat(apt.totalAmount),
-          appointments: 1
+          appointments: 1,
         });
       }
       return acc;
@@ -92,25 +90,25 @@ const PatientAnalytics = () => {
     const appointmentStatus = [
       {
         name: 'Confirmed',
-        value: appointments.filter(apt => apt.status === 'Confirmed').length,
-        color: '#10B981'
+        value: appointments.filter((apt) => apt.status === 'Confirmed').length,
+        color: '#10B981',
       },
       {
         name: 'Pending',
-        value: appointments.filter(apt => apt.status === 'Pending').length,
-        color: '#F59E0B'
+        value: appointments.filter((apt) => apt.status === 'Pending').length,
+        color: '#F59E0B',
       },
       {
         name: 'Cancelled',
-        value: appointments.filter(apt => apt.status === 'Cancelled').length,
-        color: '#EF4444'
-      }
+        value: appointments.filter((apt) => apt.status === 'Cancelled').length,
+        color: '#EF4444',
+      },
     ];
 
     // Doctor specializations visited
     const specializationVisits = appointments.reduce((acc, apt) => {
       const spec = apt.doctor.specialization;
-      const existing = acc.find(item => item.name === spec);
+      const existing = acc.find((item) => item.name === spec);
       if (existing) {
         existing.visits += 1;
         existing.amount += parseFloat(apt.totalAmount);
@@ -118,7 +116,7 @@ const PatientAnalytics = () => {
         acc.push({
           name: spec,
           visits: 1,
-          amount: parseFloat(apt.totalAmount)
+          amount: parseFloat(apt.totalAmount),
         });
       }
       return acc;
@@ -128,36 +126,36 @@ const PatientAnalytics = () => {
     const recentAppointments = [...appointments] // Create a shallow copy here
       .sort((a, b) => new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime())
       .slice(0, 5)
-      .map(apt => ({
+      .map((apt) => ({
         doctor: `Dr. ${apt.doctor.name} ${apt.doctor.lastName}`,
         specialization: apt.doctor.specialization,
         date: apt.appointmentDate,
         amount: parseFloat(apt.totalAmount),
-        status: apt.status
+        status: apt.status,
       }));
 
     // Complaint status distribution
     const complaintStatus = [
       {
         name: 'Open',
-        value: complaints.filter(c => c.status === 'Open').length,
-        color: '#EF4444'
+        value: complaints.filter((c) => c.status === 'Open').length,
+        color: '#EF4444',
       },
       {
         name: 'In Progress',
-        value: complaints.filter(c => c.status === 'In Progress').length,
-        color: '#F59E0B'
+        value: complaints.filter((c) => c.status === 'In Progress').length,
+        color: '#F59E0B',
       },
       {
         name: 'Resolved',
-        value: complaints.filter(c => c.status === 'Resolved').length,
-        color: '#10B981'
+        value: complaints.filter((c) => c.status === 'Resolved').length,
+        color: '#10B981',
       },
       {
         name: 'Closed',
-        value: complaints.filter(c => c.status === 'Closed').length,
-        color: '#6B7280'
-      }
+        value: complaints.filter((c) => c.status === 'Closed').length,
+        color: '#6B7280',
+      },
     ];
 
     // Health metrics
@@ -165,7 +163,7 @@ const PatientAnalytics = () => {
       appointmentFrequency: totalAppointments / 12, // per month
       averageWaitTime: '2.3 days', // You can calculate this from appointment booking to confirmation
       satisfactionScore: 4.8, // Based on complaint resolution rate
-      prescriptionCount: prescriptions.length
+      prescriptionCount: prescriptions.length,
     };
 
     return {
@@ -174,25 +172,25 @@ const PatientAnalytics = () => {
         totalAppointments,
         averageAppointmentCost,
         totalComplaints: complaints.length,
-        totalPrescriptions: prescriptions.length
+        totalPrescriptions: prescriptions.length,
       },
       monthlySpending,
       appointmentStatus,
       specializationVisits,
       recentAppointments,
       complaintStatus,
-      healthMetrics
+      healthMetrics,
     };
   }, [appointmentsData, complaintsData, prescriptionsData, user]);
 
-  const StatCard = ({ 
-    title, 
-    value, 
-    icon: Icon, 
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
     color = 'blue',
     prefix = '',
     suffix = '',
-    subtitle = ''
+    subtitle = '',
   }: {
     title: string;
     value: number | string;
@@ -208,20 +206,24 @@ const PatientAnalytics = () => {
       purple: 'bg-purple-50 text-purple-600 border-purple-200',
       orange: 'bg-orange-50 text-orange-600 border-orange-200',
       teal: 'bg-teal-50 text-teal-600 border-teal-200',
-      pink: 'bg-pink-50 text-pink-600 border-pink-200'
+      pink: 'bg-pink-50 text-pink-600 border-pink-200',
     };
 
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-lg border ${colorClasses[color as keyof typeof colorClasses]}`}>
+          <div
+            className={`p-3 rounded-lg border ${colorClasses[color as keyof typeof colorClasses]}`}
+          >
             <Icon className="h-6 w-6" />
           </div>
         </div>
         <div className="space-y-1">
           <h3 className="text-sm font-medium text-gray-600">{title}</h3>
           <p className="text-2xl font-bold text-gray-900">
-            {prefix}{typeof value === 'number' ? value.toLocaleString() : value}{suffix}
+            {prefix}
+            {typeof value === 'number' ? value.toLocaleString() : value}
+            {suffix}
           </p>
           {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
         </div>
@@ -236,7 +238,9 @@ const PatientAnalytics = () => {
           <p className="font-medium text-gray-900">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.name.includes('amount') || entry.name.includes('Amount') ? 'KSh ' : ''}{entry.value.toLocaleString()}
+              {entry.name}:{' '}
+              {entry.name.includes('amount') || entry.name.includes('Amount') ? 'KSh ' : ''}
+              {entry.value.toLocaleString()}
             </p>
           ))}
         </div>
@@ -278,7 +282,13 @@ const PatientAnalytics = () => {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {period === '3months' ? '3M' : period === '6months' ? '6M' : period === '1year' ? '1Y' : 'All'}
+                {period === '3months'
+                  ? '3M'
+                  : period === '6months'
+                    ? '6M'
+                    : period === '1year'
+                      ? '1Y'
+                      : 'All'}
               </button>
             ))}
           </div>
@@ -331,8 +341,8 @@ const PatientAnalytics = () => {
             <AreaChart data={processedData.monthlySpending}>
               <defs>
                 <linearGradient id="spendingGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -372,10 +382,10 @@ const PatientAnalytics = () => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip 
+              <Tooltip
                 formatter={(value: any, props: any) => [
-                  `${value} appointments`, 
-                  props.payload.name
+                  `${value} appointments`,
+                  props.payload.name,
                 ]}
               />
             </PieChart>
@@ -383,10 +393,7 @@ const PatientAnalytics = () => {
           <div className="grid grid-cols-2 gap-2 mt-4">
             {processedData.appointmentStatus.map((status, index) => (
               <div key={index} className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: status.color }}
-                />
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
                 <span className="text-sm text-gray-600">
                   {status.name} ({status.value})
                 </span>
@@ -423,7 +430,10 @@ const PatientAnalytics = () => {
           </div>
           <div className="space-y-4">
             {processedData.recentAppointments.map((appointment, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
                     <Stethoscope className="h-5 w-5 text-teal-600" />
@@ -431,16 +441,24 @@ const PatientAnalytics = () => {
                   <div>
                     <p className="font-medium text-gray-900">{appointment.doctor}</p>
                     <p className="text-sm text-gray-600">{appointment.specialization}</p>
-                    <p className="text-xs text-gray-500">{new Date(appointment.date).toLocaleDateString()}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(appointment.date).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">KSh {appointment.amount.toLocaleString()}</p>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    appointment.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
-                    appointment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
+                  <p className="font-semibold text-gray-900">
+                    KSh {appointment.amount.toLocaleString()}
+                  </p>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      appointment.status === 'Confirmed'
+                        ? 'bg-green-100 text-green-800'
+                        : appointment.status === 'Pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {appointment.status}
                   </span>
                 </div>
@@ -461,7 +479,9 @@ const PatientAnalytics = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Visit Frequency</span>
-              <span className="font-medium">{processedData.healthMetrics.appointmentFrequency.toFixed(1)}/month</span>
+              <span className="font-medium">
+                {processedData.healthMetrics.appointmentFrequency.toFixed(1)}/month
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Avg. Wait Time</span>
@@ -491,10 +511,7 @@ const PatientAnalytics = () => {
             {processedData.complaintStatus.map((status, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: status.color }}
-                  />
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
                   <span className="text-sm text-gray-600">{status.name}</span>
                 </div>
                 <span className="font-medium">{status.value}</span>
@@ -516,7 +533,7 @@ const PatientAnalytics = () => {
             <button className="w-full bg-green-50 hover:bg-green-100 text-green-700 p-3 rounded-lg text-sm font-medium transition-colors">
               View Medical History
             </button>
-            <button 
+            <button
               onClick={() => setShowHealthReport(true)}
               className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 p-3 rounded-lg text-sm font-medium transition-colors"
             >
@@ -535,8 +552,7 @@ const PatientAnalytics = () => {
           <div>
             <h3 className="text-2xl font-bold mb-4">Your CareConnect Journey</h3>
             <p className="text-teal-100 mb-6">
-              You've been a valued member.
-              Thank you for trusting us with your healthcare needs.
+              You've been a valued member. Thank you for trusting us with your healthcare needs.
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
@@ -544,7 +560,9 @@ const PatientAnalytics = () => {
                 <div className="text-teal-100">Total Visits</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold">KSh {processedData.overview.totalSpent.toFixed(0)}</div>
+                <div className="text-3xl font-bold">
+                  KSh {processedData.overview.totalSpent.toFixed(0)}
+                </div>
                 <div className="text-teal-100">Healthcare Investment</div>
               </div>
             </div>
@@ -562,10 +580,7 @@ const PatientAnalytics = () => {
       </div>
 
       {/* Health Report Generator Modal */}
-      <PatientHealthReport 
-        isOpen={showHealthReport} 
-        onClose={() => setShowHealthReport(false)} 
-      />
+      <PatientHealthReport isOpen={showHealthReport} onClose={() => setShowHealthReport(false)} />
     </div>
   );
 };

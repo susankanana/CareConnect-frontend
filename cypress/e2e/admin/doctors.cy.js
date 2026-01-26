@@ -2,8 +2,8 @@
 
 // describe('Doctors CRUD E2E Test', () => {
 //   beforeEach(() => {
-//     cy.loginAsAdmin(); 
-//     cy.visit('/admin/dashboard/doctors'); 
+//     cy.loginAsAdmin();
+//     cy.visit('/admin/dashboard/doctors');
 //   });
 
 //   it('should insert and delete a doctor via the UI', () => {
@@ -39,8 +39,8 @@
 
 describe('Doctors CRUD E2E Test', () => {
   beforeEach(() => {
-    cy.loginAsAdmin(); 
-    cy.visit('/admin/dashboard/doctors'); 
+    cy.loginAsAdmin();
+    cy.visit('/admin/dashboard/doctors');
   });
 
   it('should insert, update, and delete a doctor via the UI', () => {
@@ -63,9 +63,11 @@ describe('Doctors CRUD E2E Test', () => {
     cy.contains(`Dr. Cypress Test`).should('be.visible');
 
     // UPDATE DOCTOR
-    cy.contains(`Dr. Cypress Test`).parents('[class*="shadow-md"]').within(() => {
-      cy.get('[data-test="edit-doctor-button"]').click();
-    });
+    cy.contains(`Dr. Cypress Test`)
+      .parents('[class*="shadow-md"]')
+      .within(() => {
+        cy.get('[data-test="edit-doctor-button"]').click();
+      });
 
     cy.get('[data-test="update-doctor-firstname-input"]').clear().type(updatedFirstName);
     cy.get('[data-test="update-doctor-submit-button"]').click();
@@ -75,9 +77,11 @@ describe('Doctors CRUD E2E Test', () => {
     // DELETE DOCTOR
     cy.intercept('DELETE', '/user/*').as('deleteDoctor');
 
-    cy.contains(`Dr. ${updatedFirstName} Test`).parents('[class*="shadow-md"]').within(() => {
-      cy.get('button').contains('Delete').click();
-    });
+    cy.contains(`Dr. ${updatedFirstName} Test`)
+      .parents('[class*="shadow-md"]')
+      .within(() => {
+        cy.get('button').contains('Delete').click();
+      });
 
     cy.get('[data-test="delete-doctor-confirm-button"]').click();
     cy.wait('@deleteDoctor');

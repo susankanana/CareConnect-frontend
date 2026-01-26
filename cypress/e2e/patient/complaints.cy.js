@@ -2,7 +2,7 @@
 
 describe('Complaints CRUD E2E Test', () => {
   beforeEach(() => {
-    cy.loginAsPatient(); 
+    cy.loginAsPatient();
     cy.visit('/user/dashboard/complaints');
   });
 
@@ -10,7 +10,9 @@ describe('Complaints CRUD E2E Test', () => {
     cy.get('[data-test="open-create-complaint-btn"]').click();
 
     cy.get('[data-test="complaint-subject-input"]').type('Delayed Appointment');
-    cy.get('[data-test="complaint-description-input"]').type('My appointment started 45 minutes late and no explanation was provided.');
+    cy.get('[data-test="complaint-description-input"]').type(
+      'My appointment started 45 minutes late and no explanation was provided.'
+    );
     cy.get('[data-test="complaint-appointment-id-input"]').type('33');
 
     cy.get('[data-test="complaint-submit-btn"]').click();

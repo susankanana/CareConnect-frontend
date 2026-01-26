@@ -2,8 +2,8 @@
 
 describe('Users CRUD E2E Test', () => {
   beforeEach(() => {
-    cy.loginAsAdmin(); 
-    cy.visit('/admin/dashboard/users'); 
+    cy.loginAsAdmin();
+    cy.visit('/admin/dashboard/users');
   });
 
   it('should change the role of a user via the UI', () => {

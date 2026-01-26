@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Outlet } from "react-router";
-import Navbar from "../../../src/components/nav/Navbar";
-import AdminDrawer from "./aside/AdminDrawer";
-import { FaBars } from "react-icons/fa";
-import { IoCloseSharp } from "react-icons/io5";
-import Footer from "../../components/footer/Footer";
+import { useState } from 'react';
+import { Outlet } from 'react-router';
+import Navbar from '../../../src/components/nav/Navbar';
+import AdminDrawer from './aside/AdminDrawer';
+import { FaBars } from 'react-icons/fa';
+import { IoCloseSharp } from 'react-icons/io5';
+import Footer from '../../components/footer/Footer';
 
 const AdminDashboard = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -24,7 +24,7 @@ const AdminDashboard = () => {
         <aside
           className={`
             bg-gradient-to-b from-teal-700 to-pink-700 text-white w-64 
-            lg:block ${drawerOpen ? "block fixed z-50 h-full" : "hidden"} 
+            lg:block ${drawerOpen ? 'block fixed z-50 h-full' : 'hidden'} 
             lg:static
           `}
         >
@@ -44,10 +44,7 @@ const AdminDashboard = () => {
         <div className="flex flex-col flex-1">
           {/* Top bar */}
           <div className="flex items-center px-4 py-4 bg-gray-900">
-            <button
-              className="mr-4 text-white text-2xl lg:hidden"
-              onClick={handleDrawerToggle}
-            >
+            <button className="mr-4 text-white text-2xl lg:hidden" onClick={handleDrawerToggle}>
               {drawerOpen ? <IoCloseSharp /> : <FaBars />}
             </button>
             <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-pink-400 text-2xl font-extrabold shadow-md">

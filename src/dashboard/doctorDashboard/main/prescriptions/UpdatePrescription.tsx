@@ -1,9 +1,12 @@
-import { useEffect } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { prescriptionsAPI, type TPrescription } from "../../../../reducers/prescriptions/prescriptionsAPI";
-import { toast } from "sonner";
+import { useEffect } from 'react';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import {
+  prescriptionsAPI,
+  type TPrescription,
+} from '../../../../reducers/prescriptions/prescriptionsAPI';
+import { toast } from 'sonner';
 
 type UpdatePrescriptionProps = {
   prescription: TPrescription | null;
@@ -16,17 +19,17 @@ type UpdatePrescriptionInputs = {
 };
 
 const schema: yup.ObjectSchema<UpdatePrescriptionInputs> = yup.object({
-  notes: yup.string().required("Prescription notes are required"),
+  notes: yup.string().required('Prescription notes are required'),
   amount: yup
     .number()
-    .typeError("Amount must be a number")
-    .positive("Amount must be positive")
-    .required("Amount is required"),
+    .typeError('Amount must be a number')
+    .positive('Amount must be positive')
+    .required('Amount is required'),
 });
 
 const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) => {
-  const [updatePrescription, { isLoading }] = prescriptionsAPI.useUpdatePrescriptionMutation({ 
-    fixedCacheKey: "updatePrescription" 
+  const [updatePrescription, { isLoading }] = prescriptionsAPI.useUpdatePrescriptionMutation({
+    fixedCacheKey: 'updatePrescription',
   });
 
   const {
@@ -41,8 +44,8 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
 
   useEffect(() => {
     if (prescription) {
-      setValue("notes", prescription.notes);
-      setValue("amount", parseFloat(prescription.amount));
+      setValue('notes', prescription.notes);
+      setValue('amount', parseFloat(prescription.amount));
     } else {
       reset();
     }
@@ -51,7 +54,7 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
   const onSubmit: SubmitHandler<UpdatePrescriptionInputs> = async (data) => {
     try {
       if (!prescription) {
-        toast.error("No prescription selected for update.");
+        toast.error('No prescription selected for update.');
         return;
       }
 
@@ -62,13 +65,13 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
       };
 
       await updatePrescription(payload).unwrap();
-      toast.success("Prescription updated successfully!");
+      toast.success('Prescription updated successfully!');
       refetch();
       reset();
-      (document.getElementById("update_prescription_modal") as HTMLDialogElement)?.close();
+      (document.getElementById('update_prescription_modal') as HTMLDialogElement)?.close();
     } catch (error) {
-      console.error("Error updating prescription:", error);
-      toast.error("Failed to update prescription. Please try again.");
+      console.error('Error updating prescription:', error);
+      toast.error('Failed to update prescription. Please try again.');
     }
   };
 
@@ -77,11 +80,9 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
       <div className="modal-box bg-white w-full max-w-xs sm:max-w-lg mx-auto rounded-lg border border-gray-200">
         <div className="bg-gradient-to-r from-teal-500 to-pink-500 -m-6 mb-6 p-6 rounded-t-lg">
           <h3 className="font-bold text-lg text-white">Update Prescription</h3>
-          <p className="text-teal-100 text-sm mt-1">
-            Prescription #{prescription?.prescriptionId}
-          </p>
+          <p className="text-teal-100 text-sm mt-1">Prescription #{prescription?.prescriptionId}</p>
         </div>
-        
+
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -89,7 +90,7 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
             </label>
             <textarea
               data-test="update-notes"
-              {...register("notes")}
+              {...register('notes')}
               placeholder="Enter detailed prescription notes, medications, dosage, etc."
               className="textarea textarea-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               rows={4}
@@ -100,14 +101,12 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Amount (KSh)
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Amount (KSh)</label>
             <input
               data-test="update-amount"
               type="number"
               step="0.01"
-              {...register("amount")}
+              {...register('amount')}
               placeholder="0.00"
               className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
             />
@@ -117,10 +116,10 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
           </div>
 
           <div className="modal-action">
-            <button 
+            <button
               data-test="submit-update-prescription"
-              type="submit" 
-              className="btn bg-teal-600 hover:bg-teal-700 text-white border-none" 
+              type="submit"
+              className="btn bg-teal-600 hover:bg-teal-700 text-white border-none"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -128,7 +127,7 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
                   <span className="loading loading-spinner loading-sm" /> Updating...
                 </>
               ) : (
-                "Update Prescription"
+                'Update Prescription'
               )}
             </button>
             <button
@@ -136,7 +135,9 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
               className="btn btn-ghost"
               type="button"
               onClick={() => {
-                (document.getElementById("update_prescription_modal") as HTMLDialogElement)?.close();
+                (
+                  document.getElementById('update_prescription_modal') as HTMLDialogElement
+                )?.close();
                 reset();
               }}
             >

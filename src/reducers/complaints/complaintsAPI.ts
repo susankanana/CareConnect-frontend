@@ -1,9 +1,8 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { ApiDomain } from "../../utils/ApiDomain";
-import type { RootState } from "../../app/store";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { ApiDomain } from '../../utils/ApiDomain';
+import type { RootState } from '../../app/store';
 
-export type ComplaintStatus = "Open" | "In Progress" | "Resolved" | "Closed";
-
+export type ComplaintStatus = 'Open' | 'In Progress' | 'Resolved' | 'Closed';
 
 export type TComplaint = {
   complaintId: number;
@@ -17,34 +16,34 @@ export type TComplaint = {
 };
 
 export const complaintsAPI = createApi({
-  reducerPath: "complaintsAPI",
+  reducerPath: 'complaintsAPI',
   baseQuery: fetchBaseQuery({
     baseUrl: ApiDomain,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).user.token;
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
-      headers.set("Content-Type", "application/json");
+      headers.set('Content-Type', 'application/json');
       return headers;
     },
   }),
-  tagTypes: ["Complaints"],
+  tagTypes: ['Complaints'],
   endpoints: (builder) => ({
     // POST /complaint/register
     createComplaint: builder.mutation<TComplaint, Partial<TComplaint>>({
       query: (newComplaint) => ({
-        url: "/complaint/register",
-        method: "POST",
+        url: '/complaint/register',
+        method: 'POST',
         body: newComplaint,
       }),
-      invalidatesTags: ["Complaints"],
+      invalidatesTags: ['Complaints'],
     }),
 
     // GET /complaints
     getComplaints: builder.query<{ data: TComplaint[] }, void>({
-      query: () => "/complaints",
-      providesTags: ["Complaints"],
+      query: () => '/complaints',
+      providesTags: ['Complaints'],
     }),
 
     // GET /complaint/:id
@@ -66,29 +65,32 @@ export const complaintsAPI = createApi({
     updateComplaint: builder.mutation<TComplaint, Partial<TComplaint> & { id: number }>({
       query: ({ id, ...rest }) => ({
         url: `/complaint/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: rest,
       }),
-      invalidatesTags: ["Complaints"],
+      invalidatesTags: ['Complaints'],
     }),
 
     // PATCH /complaint/status/:id
-    updateComplaintStatus: builder.mutation<{ message: string }, { id: number; status: ComplaintStatus }>({
+    updateComplaintStatus: builder.mutation<
+      { message: string },
+      { id: number; status: ComplaintStatus }
+    >({
       query: ({ id, status }) => ({
         url: `/complaint/status/${id}`,
-        method: "PATCH",
+        method: 'PATCH',
         body: { status },
       }),
-      invalidatesTags: ["Complaints"],
+      invalidatesTags: ['Complaints'],
     }),
 
     // DELETE /complaint/:id
     deleteComplaint: builder.mutation<{ message: string }, number>({
       query: (id) => ({
         url: `/complaint/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["Complaints"],
+      invalidatesTags: ['Complaints'],
     }),
   }),
 });

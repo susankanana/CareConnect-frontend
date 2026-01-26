@@ -12,8 +12,9 @@ import {
   DollarSign,
   TrendingUp,
   FileText,
-  ArrowUpRight} from 'lucide-react';
-import { useGetAllPaymentsQuery ,type TPayment } from '../../../../reducers/payments/paymentsAPI';
+  ArrowUpRight,
+} from 'lucide-react';
+import { useGetAllPaymentsQuery, type TPayment } from '../../../../reducers/payments/paymentsAPI';
 
 const Payments = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,7 +23,11 @@ const Payments = () => {
   const [showDetails, setShowDetails] = useState(false);
 
   // Fetch payments data
-  const { data: paymentsData, isLoading, error } = useGetAllPaymentsQuery(undefined, {
+  const {
+    data: paymentsData,
+    isLoading,
+    error,
+  } = useGetAllPaymentsQuery(undefined, {
     refetchOnMountOrArgChange: true,
     pollingInterval: 30000, // Refresh every 30 seconds
   });
@@ -31,24 +36,27 @@ const Payments = () => {
 
   // Filter and search payments
   const filteredPayments = useMemo(() => {
-    return payments.filter(payment => {
-      const matchesSearch = 
+    return payments.filter((payment) => {
+      const matchesSearch =
         payment.transactionId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         payment.paymentId.toString().includes(searchTerm) ||
         payment.appointmentId.toString().includes(searchTerm);
-      
+
       const matchesStatus = statusFilter === 'All' || payment.paymentStatus === statusFilter;
-      
+
       return matchesSearch && matchesStatus;
     });
   }, [payments, searchTerm, statusFilter]);
 
   // Calculate payment statistics
   const paymentStats = useMemo(() => {
-    const totalAmount = payments.reduce((sum, payment) => sum + parseFloat(payment.amount || '0'), 0);
-    const successfulPayments = payments.filter(p => p.paymentStatus === 'Paid').length;
-    const pendingPayments = payments.filter(p => p.paymentStatus === 'Pending').length;
-    const failedPayments = payments.filter(p => p.paymentStatus === 'Failed').length;
+    const totalAmount = payments.reduce(
+      (sum, payment) => sum + parseFloat(payment.amount || '0'),
+      0
+    );
+    const successfulPayments = payments.filter((p) => p.paymentStatus === 'Paid').length;
+    const pendingPayments = payments.filter((p) => p.paymentStatus === 'Pending').length;
+    const failedPayments = payments.filter((p) => p.paymentStatus === 'Failed').length;
 
     return {
       totalAmount,
@@ -56,7 +64,8 @@ const Payments = () => {
       successfulPayments,
       pendingPayments,
       failedPayments,
-      successRate: payments.length > 0 ? ((successfulPayments / payments.length) * 100).toFixed(1) : '0'
+      successRate:
+        payments.length > 0 ? ((successfulPayments / payments.length) * 100).toFixed(1) : '0',
     };
   }, [payments]);
 
@@ -93,7 +102,7 @@ const Payments = () => {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -143,7 +152,9 @@ const Payments = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Payment History</h1>
-              <p className="text-gray-600 mt-1">Track and manage your medical payment transactions</p>
+              <p className="text-gray-600 mt-1">
+                Track and manage your medical payment transactions
+              </p>
             </div>
             <div className="flex items-center space-x-3">
               <button className="bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center gap-2">
@@ -296,7 +307,10 @@ const Payments = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 md:table-row-group block">
                   {filteredPayments.map((payment) => (
-                    <tr key={payment.paymentId} className="hover:bg-gray-50 transition-colors text-sm md:table-row block w-full border-b border-gray-100 md:border-0">
+                    <tr
+                      key={payment.paymentId}
+                      className="hover:bg-gray-50 transition-colors text-sm md:table-row block w-full border-b border-gray-100 md:border-0"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap block md:table-cell">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
@@ -318,7 +332,9 @@ const Payments = () => {
                       <td className="px-6 py-4 whitespace-nowrap block md:table-cell">
                         <div className="flex items-center space-x-2">
                           {getStatusIcon(payment.paymentStatus)}
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.paymentStatus)}`}>
+                          <span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.paymentStatus)}`}
+                          >
                             {payment.paymentStatus || 'Unknown'}
                           </span>
                         </div>
@@ -392,7 +408,9 @@ const Payments = () => {
                 <span className="text-gray-600">Status:</span>
                 <div className="flex items-center space-x-2">
                   {getStatusIcon(selectedPayment.paymentStatus)}
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedPayment.paymentStatus)}`}>
+                  <span
+                    className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedPayment.paymentStatus)}`}
+                  >
                     {selectedPayment.paymentStatus || 'Unknown'}
                   </span>
                 </div>

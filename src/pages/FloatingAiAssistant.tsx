@@ -35,60 +35,60 @@ const ChatInterface = () => {
    * Sends the user's prompt to the backend server.
    */
   const handleSubmit = async (e: FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!prompt.trim()) {
-    toast.error("Please enter a prompt.");
-    return;
-  }
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt.');
+      return;
+    }
 
-  const userPrompt = prompt;
-  const userMessage: ChatMessage = { sender: 'user', text: userPrompt };
+    const userPrompt = prompt;
+    const userMessage: ChatMessage = { sender: 'user', text: userPrompt };
 
-  setMessages((prevMessages) => [...prevMessages, userMessage]);
-  setPrompt('');
-  setLoading(true);
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setPrompt('');
+    setLoading(true);
 
-  try {
-    const res = await fetch("https://careconnect-backend-c2he.onrender.com/api/ai-assistant", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userPrompt }),
-    });
-    console.log("Sending to AI:", userPrompt);
+    try {
+      const res = await fetch('https://careconnect-backend-c2he.onrender.com/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userPrompt }),
+      });
+      console.log('Sending to AI:', userPrompt);
 
-
-    if (!res.ok) {
-      const text = await res.text();
-      try {
-        const errObj = JSON.parse(text);
-        throw new Error(errObj.error || `Request failed: ${res.status}`);
-      } catch {
-        throw new Error(`Request failed: ${res.status} ${text}`);
+      if (!res.ok) {
+        const text = await res.text();
+        try {
+          const errObj = JSON.parse(text);
+          throw new Error(errObj.error || `Request failed: ${res.status}`);
+        } catch {
+          throw new Error(`Request failed: ${res.status} ${text}`);
+        }
       }
+
+      const data = await res.json();
+      const aiMessage: ChatMessage = { sender: 'ai', text: data.reply };
+      setMessages((prevMessages) => [...prevMessages, aiMessage]);
+    } catch (err) {
+      console.error('API call failed:', err);
+      let errorMessage = 'Failed to get a response from the AI assistant. Please try again.';
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-
-    const data = await res.json();
-    const aiMessage: ChatMessage = { sender: "ai", text: data.reply };
-    setMessages((prevMessages) => [...prevMessages, aiMessage]);
-
-  } catch (err) {
-    console.error("API call failed:", err);
-    let errorMessage = "Failed to get a response from the AI assistant. Please try again.";
-    if (err instanceof Error) {
-      errorMessage = err.message;
-    }
-    toast.error(errorMessage);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="flex flex-col h-full">
       <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">
-        CareConnect <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-pink-600">AI Assistant</span>
+        CareConnect{' '}
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-pink-600">
+          AI Assistant
+        </span>
       </h1>
 
       {/* Chat History Container */}
@@ -110,15 +110,15 @@ const ChatInterface = () => {
           </div>
         ))}
         {loading && (
-            <div className="flex justify-start">
-              <div className="max-w-[75%] px-4 py-2 rounded-xl shadow-md bg-pink-100 text-pink-900 rounded-bl-none">
-                <div className="animate-pulse flex space-x-2">
-                  <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
-                  <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
-                  <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
-                </div>
+          <div className="flex justify-start">
+            <div className="max-w-[75%] px-4 py-2 rounded-xl shadow-md bg-pink-100 text-pink-900 rounded-bl-none">
+              <div className="animate-pulse flex space-x-2">
+                <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
+                <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
+                <div className="h-2 w-2 bg-pink-400 rounded-full"></div>
               </div>
             </div>
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -167,7 +167,7 @@ const FloatingAiAssistant = () => {
 
       {/* Modal Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/70 flex items-end justify-end p-4 z-50 transition-opacity duration-300" // Higher z-index
           onClick={() => setIsOpen(false)}
         >
