@@ -101,10 +101,10 @@ const PatientComplaints = () => {
           {complaintsData.data.map((complaint: TComplaint) => (
             <div
               key={complaint.complaintId}
-              className="bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden"
+              className="bg-white rounded-4xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden"
             >
               {/* Header with gradient to match booking vibe */}
-              <div className="bg-gradient-to-r from-gray-50 to-white p-6 border-b border-gray-50">
+              <div className="bg-linear-to-r from-gray-50 to-white p-6 border-b border-gray-50">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="bg-white p-2 rounded-xl border border-gray-100 shadow-sm">

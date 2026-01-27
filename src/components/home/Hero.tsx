@@ -21,12 +21,12 @@ const Hero = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data: doctorsData, isLoading: doctorsLoading, error: doctorsError } = useGetDoctorsQuery(undefined, {
+  const { data: doctorsData } = useGetDoctorsQuery(undefined, {
     refetchOnMountOrArgChange: true,
     pollingInterval: 60000,
   });
 
-  const { data: servicesData, isLoading: servicesLoading, error: servicesError } = useGetAllServicesQuery(undefined, {
+  const { data: servicesData} = useGetAllServicesQuery(undefined, {
     refetchOnMountOrArgChange: true,
     pollingInterval: 60000,
   });
@@ -49,7 +49,7 @@ const Hero = () => {
     <div className="min-h-screen bg-white font-sans">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-white pt-8 pb-20">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[16px_16px] mask-[radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="lg:w-1/2 space-y-10">
@@ -60,7 +60,7 @@ const Hero = () => {
                       <Star key={i} className="h-3 w-3 fill-current" />
                     ))}
                   </div>
-                  <span className="text-[#00a18e] text-[10px] font-black uppercase tracking-[0.1em]">
+                  <span className="text-[#00a18e] text-[10px] font-black uppercase tracking-widest">
                     5.0 Rating • 50,000+ Patients
                   </span>
                 </div>
@@ -70,7 +70,7 @@ const Hero = () => {
                   className="text-5xl lg:text-7xl font-black text-[#003d3d] leading-[1.1] tracking-tight"
                 >
                   Your Health is Our
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00a18e] to-[#f43f8e] block">
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-[#00a18e] to-[#f43f8e] block">
                     Priority
                   </span>
                 </h1>
@@ -84,7 +84,7 @@ const Hero = () => {
               <div className="flex flex-col sm:flex-row gap-5">
                 <button
                   onClick={() => navigateTo('/appointments')}
-                  className="bg-gradient-to-r from-[#00a18e] to-[#f43f8e] text-white px-10 py-5 rounded-2xl hover:scale-105 transition-all font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-pink-200"
+                  className="bg-linear-to-r from-[#00a18e] to-[#f43f8e] text-white px-10 py-5 rounded-2xl hover:scale-105 transition-all font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-pink-200"
                 >
                   <Calendar className="h-6 w-6" />
                   Book Appointment
@@ -121,16 +121,16 @@ const Hero = () => {
                 <img
                   src="https://images.pexels.com/photos/18252410/pexels-photo-18252410.jpeg"
                   alt="Medical professionals"
-                  className="w-full h-[550px] object-cover object-top rounded-[40px] shadow-2xl border-8 border-white relative z-10"
+                  className="w-full h-137.5 object-cover object-top rounded-[40px] shadow-2xl border-8 border-white relative z-10"
                 />
-                <div className="absolute top-8 right-8 bg-white/95 backdrop-blur-md p-5 rounded-[24px] shadow-2xl border border-pink-100 flex items-center gap-4 animate-bounce z-20">
+                <div className="absolute top-8 right-8 bg-white/95 backdrop-blur-md p-5 rounded-3xl shadow-2xl border border-pink-100 flex items-center gap-4 animate-bounce z-20">
                     <div className="bg-[#f43f8e] p-2.5 rounded-xl">
                         <Video className="h-5 w-5 text-white" />
                     </div>
                     <p className="text-xs font-black text-[#003d3d]">Telemedicine <br/><span className="text-[#f43f8e] uppercase tracking-tighter">Now Active</span></p>
                 </div>
-                
-                <div className="absolute -bottom-8 -left-8 bg-white p-8 rounded-[32px] shadow-2xl z-20 border border-gray-50">
+
+                <div className="absolute -bottom-8 -left-8 bg-white p-8 rounded-4xl shadow-2xl z-20 border border-gray-50">
                   <div className="flex items-center space-x-4">
                     <div className="bg-teal-500 p-3.5 rounded-2xl">
                       <Heart className="h-6 w-6 text-white" />
@@ -152,14 +152,14 @@ const Hero = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-4xl font-black text-[#003d3d] tracking-tight mb-4">Our Medical Services</h2>
-            <div className="w-20 h-1.5 bg-gradient-to-r from-[#00a18e] to-[#f43f8e] mx-auto rounded-full"></div>
+            <div className="w-20 h-1.5 bg-linear-to-r from-[#00a18e] to-[#f43f8e] mx-auto rounded-full"></div>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
             {servicesData?.map((service: TService, index: number) => (
               <div key={index} className="bg-white rounded-[40px] p-10 border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
                 {service.title.toLowerCase().includes('consultation') && (
-                    <div className="absolute top-0 right-0 bg-[#f43f8e] text-white text-[10px] font-black px-4 py-1.5 rounded-bl-2xl uppercase tracking-[0.1em]">
+                    <div className="absolute top-0 right-0 bg-[#f43f8e] text-white text-[10px] font-black px-4 py-1.5 rounded-bl-2xl uppercase tracking-widest">
                         Video Available
                     </div>
                 )}
@@ -206,7 +206,7 @@ const Hero = () => {
             <div className="grid md:grid-cols-3 gap-10">
               {doctorsData.data.map((doctor: TDoctor) => (
                 <div key={doctor.doctor?.doctorId} className="group cursor-pointer">
-                  <div className="relative h-[450px] overflow-hidden rounded-[40px] mb-6">
+                  <div className="relative h-112.5 overflow-hidden rounded-[40px] mb-6">
                     <img
                       src={doctor.user?.image_url || 'https://via.placeholder.com/400'}
                       alt="Doctor"

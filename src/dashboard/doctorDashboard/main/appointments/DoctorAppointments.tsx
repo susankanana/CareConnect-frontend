@@ -6,17 +6,11 @@ import {
   type TDetailedAppointment,
 } from '../../../../reducers/appointments/appointmentsAPI';
 import {
-  Edit,
   Calendar,
   User,
   Clock,
-  CreditCard,
-  CheckCircle,
   XCircle,
-  Phone,
-  Mail,
   Video,
-  TrendingUp,
 } from 'lucide-react';
 import ChangeStatus from './ChangeStatus';
 import UpdateAppointment from './UpdateAppointment';
@@ -186,7 +180,14 @@ const DoctorAppointments = () => {
 };
 
 // ... AppointmentCard Component remains the same as your updated version ...
-const AppointmentCard = ({ appointment, onEdit, onChangeStatus, getStatusColor, formatTimeSlot, currentTime }: any) => {
+const AppointmentCard = ({
+  appointment,
+  onEdit,
+  onChangeStatus,
+  getStatusColor,
+  formatTimeSlot,
+  currentTime,
+}: any) => {
   const isConfirmed = appointment.status === 'Confirmed';
   const hasLink = !!appointment.videoUrl;
 
@@ -203,28 +204,38 @@ const AppointmentCard = ({ appointment, onEdit, onChangeStatus, getStatusColor, 
   const isLive = isLiveNow();
 
   return (
-    <div className={`bg-white rounded-2xl border-2 transition-all duration-300 overflow-hidden flex flex-col ${isLive ? 'border-teal-500 shadow-teal-100 shadow-xl' : 'border-gray-100 shadow-sm'}`}>
-      <div className={`p-4 border-b flex justify-between items-center ${isLive ? 'bg-teal-50' : 'bg-gray-50'}`}>
+    <div
+      className={`bg-white rounded-2xl border-2 transition-all duration-300 overflow-hidden flex flex-col ${isLive ? 'border-teal-500 shadow-teal-100 shadow-xl' : 'border-gray-100 shadow-sm'}`}
+    >
+      <div
+        className={`p-4 border-b flex justify-between items-center ${isLive ? 'bg-teal-50' : 'bg-gray-50'}`}
+      >
         <div className="flex items-center gap-2">
-          <span className="text-xs font-black text-gray-400">APPOINTMENT ID #{appointment.appointmentId}</span>
+          <span className="text-xs font-black text-gray-400">
+            APPOINTMENT ID #{appointment.appointmentId}
+          </span>
           {isLive && (
             <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black animate-pulse flex items-center gap-1">
               <span className="w-1 h-1 bg-white rounded-full"></span> LIVE
             </span>
           )}
         </div>
-        <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase ${getStatusColor(appointment.status)}`}>
+        <div
+          className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase ${getStatusColor(appointment.status)}`}
+        >
           {appointment.status}
         </div>
       </div>
 
-      <div className="p-5 flex-grow space-y-4">
+      <div className="p-5 grow space-y-4">
         <div className="flex items-start gap-3">
           <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
             <User size={20} />
           </div>
           <div>
-            <h3 className="font-bold text-gray-900">{appointment.patient?.name} {appointment.patient?.lastName}</h3>
+            <h3 className="font-bold text-gray-900">
+              {appointment.patient?.name} {appointment.patient?.lastName}
+            </h3>
             <p className="text-xs text-gray-500">{appointment.patient?.contactPhone}</p>
           </div>
         </div>
@@ -254,10 +265,16 @@ const AppointmentCard = ({ appointment, onEdit, onChangeStatus, getStatusColor, 
         ) : null}
 
         <div className="flex gap-2">
-          <button onClick={() => onChangeStatus(appointment)} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 rounded-lg text-xs font-bold border border-gray-200 transition-colors">
+          <button
+            onClick={() => onChangeStatus(appointment)}
+            className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 rounded-lg text-xs font-bold border border-gray-200 transition-colors"
+          >
             Update Status
           </button>
-          <button onClick={() => onEdit(appointment)} className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 rounded-lg text-xs font-bold border border-gray-200 transition-colors">
+          <button
+            onClick={() => onEdit(appointment)}
+            className="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 py-2 rounded-lg text-xs font-bold border border-gray-200 transition-colors"
+          >
             Edit Details
           </button>
         </div>

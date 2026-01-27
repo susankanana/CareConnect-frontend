@@ -12,7 +12,6 @@ import {
   DollarSign,
   TrendingUp,
   FileText,
-  ArrowUpRight,
   ChevronDown,
 } from 'lucide-react';
 import { useGetAllPaymentsQuery, type TPayment } from '../../../../reducers/payments/paymentsAPI';
@@ -26,7 +25,6 @@ const Payments = () => {
   const {
     data: paymentsData,
     isLoading,
-    error,
   } = useGetAllPaymentsQuery(undefined, {
     refetchOnMountOrArgChange: true,
     pollingInterval: 30000,
@@ -142,7 +140,7 @@ const Payments = () => {
           ].map((stat, i) => (
             <div
               key={i}
-              className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow group"
+              className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className={`p-3 rounded-2xl bg-${stat.color}-50 text-${stat.color}-600`}>
@@ -161,7 +159,7 @@ const Payments = () => {
         </div>
 
         {/* Search & Filters */}
-        <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-[2rem] border border-gray-100 shadow-sm">
+        <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-4xl border border-gray-100 shadow-sm">
           <div className="relative flex-1 group">
             <Search
               className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-teal-500 transition-colors"

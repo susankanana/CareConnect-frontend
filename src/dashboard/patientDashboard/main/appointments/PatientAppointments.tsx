@@ -326,7 +326,7 @@ const PatientAppointments = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Total Card */}
-            <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm transition-all hover:shadow-md">
+            <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-teal-50 rounded-2xl text-teal-600">
                   <Calendar size={20} />
@@ -340,7 +340,7 @@ const PatientAppointments = () => {
             </div>
 
             {/* Confirmed Card */}
-            <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm transition-all hover:shadow-md">
+            <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-green-50 rounded-2xl text-green-600">
                   <CheckCircle size={20} />
@@ -354,7 +354,7 @@ const PatientAppointments = () => {
             </div>
 
             {/* Pending Card */}
-            <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm transition-all hover:shadow-md">
+            <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-amber-50 rounded-2xl text-amber-600">
                   <Clock size={20} />
@@ -368,7 +368,7 @@ const PatientAppointments = () => {
             </div>
 
             {/* Total Spent Card - Highlighted */}
-            <div className="bg-[#003d3d] p-6 rounded-[2rem] shadow-lg shadow-teal-900/20">
+            <div className="bg-[#003d3d] p-6 rounded-4xl shadow-lg shadow-teal-900/20">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-3 bg-white/10 rounded-2xl text-teal-400">
                   <CreditCard size={20} />

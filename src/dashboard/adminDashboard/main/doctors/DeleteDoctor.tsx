@@ -32,7 +32,7 @@ const DeleteDoctor = ({ doctor, refetch }: DeleteDoctorProps) => {
   return (
     <dialog id="delete_doctor_modal" className="modal sm:modal-middle">
       <div className="modal-box bg-white w-full max-w-xs sm:max-w-lg mx-auto rounded-lg border border-gray-200">
-        <div className="bg-gradient-to-r from-red-500 to-pink-500 -m-6 mb-6 p-6 rounded-t-lg">
+        <div className="bg-linear-to-r from-red-500 to-pink-500 -m-6 mb-6 p-6 rounded-t-lg">
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-6 w-6 text-white" />
             <h3 className="font-bold text-lg text-white">Delete Doctor</h3>

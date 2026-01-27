@@ -78,7 +78,7 @@ const UpdatePrescription = ({ prescription, refetch }: UpdatePrescriptionProps) 
   return (
     <dialog id="update_prescription_modal" className="modal sm:modal-middle">
       <div className="modal-box bg-white w-full max-w-xs sm:max-w-lg mx-auto rounded-lg border border-gray-200">
-        <div className="bg-gradient-to-r from-teal-500 to-pink-500 -m-6 mb-6 p-6 rounded-t-lg">
+        <div className="bg-linear-to-r from-teal-500 to-pink-500 -m-6 mb-6 p-6 rounded-t-lg">
           <h3 className="font-bold text-lg text-white">Update Prescription</h3>
           <p className="text-teal-100 text-sm mt-1">Prescription #{prescription?.prescriptionId}</p>
         </div>

@@ -5,7 +5,6 @@ import {
   Calendar,
   User,
   Stethoscope,
-  XCircle,
   Clock,
   Phone,
   Mail,
@@ -21,7 +20,6 @@ const AdminAppointments = () => {
   const {
     data: appointmentsData,
     isLoading,
-    error,
     refetch,
   } = appointmentsAPI.useGetDetailedAppointmentsQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -67,7 +65,7 @@ const AdminAppointments = () => {
   };
 
   if (isLoading) return (
-    <div className="flex justify-center items-center min-h-[400px]">
+    <div className="flex justify-center items-center min-h-100">
       <Loader className="animate-spin text-teal-600" size={40} />
     </div>
   );
@@ -105,7 +103,7 @@ const AdminAppointments = () => {
       {/* Grid using Filtered Results */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredAppointments.map((apt: any) => (
-          <div key={apt.appointmentId} className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all">
+          <div key={apt.appointmentId} className="bg-white rounded-4xl border border-gray-100 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all">
             
             <div className="p-4 border-b bg-gray-50/30 flex justify-between items-center">
               <div className="flex items-center gap-2 text-gray-400">

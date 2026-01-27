@@ -5,8 +5,6 @@ import {
   MessageSquare,
   User,
   Calendar,
-  CheckCircle,
-  XCircle,
   Clock,
   AlertCircle,
   Hash,
@@ -22,7 +20,6 @@ const Complaints = () => {
   const {
     data: complaintsData,
     isLoading,
-    error,
     refetch,
   } = complaintsAPI.useGetComplaintsQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -62,7 +59,7 @@ const Complaints = () => {
   };
 
   if (isLoading) return (
-    <div className="flex flex-col justify-center items-center min-h-[400px]">
+    <div className="flex flex-col justify-center items-center min-h-100">
       <Loader className="animate-spin text-teal-600" size={40} />
       <p className="text-gray-500 font-bold mt-4">Retrieving Patient Feedback...</p>
     </div>
@@ -187,7 +184,7 @@ const Complaints = () => {
       </div>
 
       {/* Chique Footer Summary - Teal Gradient (No Black) */}
-      <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
+      <div className="bg-linear-to-r from-[#004d4d] to-[#006666] rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl -mr-40 -mt-40"></div>
         <h3 className="text-xl font-black mb-10 flex items-center gap-3 tracking-tighter uppercase">
           <div className="w-1.5 h-6 bg-teal-400 rounded-full"></div> 

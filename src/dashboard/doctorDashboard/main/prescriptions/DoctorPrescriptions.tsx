@@ -14,9 +14,7 @@ import {
   Calendar, 
   XCircle, 
   FileText, 
-  Hash, 
-  TrendingUp, 
-  Users 
+  Hash
 } from 'lucide-react';
 import CreatePrescription from './CreatePrescription';
 import UpdatePrescription from './UpdatePrescription';
@@ -163,7 +161,7 @@ const PrescriptionCard = ({ prescription, onEdit, onDelete }: any) => {
         </div>
       </div>
 
-      <div className="p-5 flex-grow space-y-4">
+      <div className="p-5 grow space-y-4">
         {/* Patient & Context */}
         <div className="space-y-3">
           <div className="flex items-center gap-3">
@@ -193,7 +191,7 @@ const PrescriptionCard = ({ prescription, onEdit, onDelete }: any) => {
             <FileText size={14} />
             <span className="text-[10px] font-bold uppercase">Clinical Notes</span>
           </div>
-          <div className="bg-gray-50 rounded-xl p-3 min-h-[80px]">
+          <div className="bg-gray-50 rounded-xl p-3 min-h-20">
             <p className="text-xs text-gray-600 italic leading-relaxed">
               "{prescription.notes || 'No specific instructions provided.'}"
             </p>
