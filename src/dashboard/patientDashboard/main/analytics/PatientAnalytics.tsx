@@ -2,35 +2,15 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../../../app/store';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, AreaChart, Area,
 } from 'recharts';
 import {
-  TrendingUp,
-  Calendar,
-  DollarSign,
-  Star,
-  Activity,
-  Target,
-  BarChart3,
-  User,
-  CreditCard,
-  Stethoscope,
-  Heart,
-  Shield,
+  TrendingUp, Calendar, Star, Activity, Target, BarChart3,
+  User, CreditCard, Stethoscope, Heart, Shield, Download, ArrowRight, Zap
 } from 'lucide-react';
 
-// Import APIs
+// API Imports (kept as provided)
 import { appointmentsAPI } from '../../../../reducers/appointments/appointmentsAPI';
 import { complaintsAPI } from '../../../../reducers/complaints/complaintsAPI';
 import { prescriptionsAPI } from '../../../../reducers/prescriptions/prescriptionsAPI';
@@ -42,544 +22,193 @@ const PatientAnalytics = () => {
   const user = useSelector((state: RootState) => state.user.user);
   const userId = user?.user_id;
 
-  // Fetch user-specific data
-  const { data: appointmentsData } = appointmentsAPI.useGetAppointmentsByUserIdQuery(userId ?? 0, {
-    skip: !userId,
-  });
-  const { data: complaintsData } = complaintsAPI.useGetComplaintsByUserIdQuery(userId ?? 0, {
-    skip: !userId,
-  });
-  const { data: prescriptionsData } = prescriptionsAPI.useGetPrescriptionsByPatientIdQuery(
-    userId ?? 0,
-    { skip: !userId }
-  );
+  const { data: appointmentsData } = appointmentsAPI.useGetAppointmentsByUserIdQuery(userId ?? 0, { skip: !userId });
+  const { data: complaintsData } = complaintsAPI.useGetComplaintsByUserIdQuery(userId ?? 0, { skip: !userId });
+  const { data: prescriptionsData } = prescriptionsAPI.useGetPrescriptionsByPatientIdQuery(userId ?? 0, { skip: !userId });
 
-  // Process data for analytics
   const processedData = React.useMemo(() => {
-    if (!appointmentsData?.data) {
-      return null;
-    }
-
+    if (!appointmentsData?.data) return null;
     const appointments = appointmentsData.data;
-    const complaints = complaintsData?.data || [];
-    const prescriptions = prescriptionsData?.data || [];
-
-    // Calculate overview metrics
-    const totalSpent = appointments.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0);
-    const totalAppointments = appointments.length;
-    const averageAppointmentCost = totalSpent / totalAppointments || 0;
-
-    // Monthly spending data
-    const monthlySpending = appointments.reduce((acc, apt) => {
-      const month = new Date(apt.appointmentDate).toLocaleDateString('en-US', { month: 'short' });
-      const existing = acc.find((item) => item.month === month);
-      if (existing) {
-        existing.amount += parseFloat(apt.totalAmount);
-        existing.appointments += 1;
-      } else {
-        acc.push({
-          month,
-          amount: parseFloat(apt.totalAmount),
-          appointments: 1,
-        });
-      }
-      return acc;
-    }, [] as any[]);
-
-    // Appointment status distribution
-    const appointmentStatus = [
-      {
-        name: 'Confirmed',
-        value: appointments.filter((apt) => apt.status === 'Confirmed').length,
-        color: '#10B981',
-      },
-      {
-        name: 'Pending',
-        value: appointments.filter((apt) => apt.status === 'Pending').length,
-        color: '#F59E0B',
-      },
-      {
-        name: 'Cancelled',
-        value: appointments.filter((apt) => apt.status === 'Cancelled').length,
-        color: '#EF4444',
-      },
-    ];
-
-    // Doctor specializations visited
-    const specializationVisits = appointments.reduce((acc, apt) => {
-      const spec = apt.doctor.specialization;
-      const existing = acc.find((item) => item.name === spec);
-      if (existing) {
-        existing.visits += 1;
-        existing.amount += parseFloat(apt.totalAmount);
-      } else {
-        acc.push({
-          name: spec,
-          visits: 1,
-          amount: parseFloat(apt.totalAmount),
-        });
-      }
-      return acc;
-    }, [] as any[]);
-
-    // Recent appointments
-    const recentAppointments = [...appointments] // Create a shallow copy here
-      .sort((a, b) => new Date(b.appointmentDate).getTime() - new Date(a.appointmentDate).getTime())
-      .slice(0, 5)
-      .map((apt) => ({
-        doctor: `Dr. ${apt.doctor.name} ${apt.doctor.lastName}`,
-        specialization: apt.doctor.specialization,
-        date: apt.appointmentDate,
-        amount: parseFloat(apt.totalAmount),
-        status: apt.status,
-      }));
-
-    // Complaint status distribution
-    const complaintStatus = [
-      {
-        name: 'Open',
-        value: complaints.filter((c) => c.status === 'Open').length,
-        color: '#EF4444',
-      },
-      {
-        name: 'In Progress',
-        value: complaints.filter((c) => c.status === 'In Progress').length,
-        color: '#F59E0B',
-      },
-      {
-        name: 'Resolved',
-        value: complaints.filter((c) => c.status === 'Resolved').length,
-        color: '#10B981',
-      },
-      {
-        name: 'Closed',
-        value: complaints.filter((c) => c.status === 'Closed').length,
-        color: '#6B7280',
-      },
-    ];
-
-    // Health metrics
-    const healthMetrics = {
-      appointmentFrequency: totalAppointments / 12, // per month
-      averageWaitTime: '2.3 days', // You can calculate this from appointment booking to confirmation
-      satisfactionScore: 4.8, // Based on complaint resolution rate
-      prescriptionCount: prescriptions.length,
-    };
-
+    
     return {
       overview: {
-        totalSpent,
-        totalAppointments,
-        averageAppointmentCost,
-        totalComplaints: complaints.length,
-        totalPrescriptions: prescriptions.length,
+        totalSpent: appointments.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0),
+        totalAppointments: appointments.length,
+        totalPrescriptions: prescriptionsData?.data?.length || 0,
       },
-      monthlySpending,
-      appointmentStatus,
-      specializationVisits,
-      recentAppointments,
-      complaintStatus,
-      healthMetrics,
+      monthlySpending: appointments.reduce((acc, apt) => {
+        const month = new Date(apt.appointmentDate).toLocaleDateString('en-US', { month: 'short' });
+        const existing = acc.find((item) => item.month === month);
+        if (existing) existing.amount += parseFloat(apt.totalAmount);
+        else acc.push({ month, amount: parseFloat(apt.totalAmount) });
+        return acc;
+      }, [] as any[]),
+      statusData: [
+        { name: 'completed', value: appointments.filter(a => a.status === 'Confirmed').length, color: '#0d9488' },
+        { name: 'pending', value: appointments.filter(a => a.status === 'Pending').length, color: '#db2777' },
+        { name: 'others', value: appointments.filter(a => a.status === 'Cancelled').length, color: '#94a3b8' },
+      ],
+      recent: appointments.slice(0, 4).map(apt => ({
+        doctor: `dr. ${apt.doctor.name}`,
+        spec: apt.doctor.specialization,
+        date: apt.appointmentDate,
+        amount: parseFloat(apt.totalAmount),
+        status: apt.status
+      }))
     };
-  }, [appointmentsData, complaintsData, prescriptionsData, user]);
+  }, [appointmentsData, prescriptionsData]);
 
-  const StatCard = ({
-    title,
-    value,
-    icon: Icon,
-    color = 'blue',
-    prefix = '',
-    suffix = '',
-    subtitle = '',
-  }: {
-    title: string;
-    value: number | string;
-    icon: any;
-    color?: string;
-    prefix?: string;
-    suffix?: string;
-    subtitle?: string;
-  }) => {
-    const colorClasses = {
-      blue: 'bg-blue-50 text-blue-600 border-blue-200',
-      green: 'bg-green-50 text-green-600 border-green-200',
-      purple: 'bg-purple-50 text-purple-600 border-purple-200',
-      orange: 'bg-orange-50 text-orange-600 border-orange-200',
-      teal: 'bg-teal-50 text-teal-600 border-teal-200',
-      pink: 'bg-pink-50 text-pink-600 border-pink-200',
-    };
-
-    return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-        <div className="flex items-center justify-between mb-4">
-          <div
-            className={`p-3 rounded-lg border ${colorClasses[color as keyof typeof colorClasses]}`}
-          >
-            <Icon className="h-6 w-6" />
-          </div>
-        </div>
-        <div className="space-y-1">
-          <h3 className="text-sm font-medium text-gray-600">{title}</h3>
-          <p className="text-2xl font-bold text-gray-900">
-            {prefix}
-            {typeof value === 'number' ? value.toLocaleString() : value}
-            {suffix}
-          </p>
-          {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
-        </div>
+  const StatCard = ({ title, value, icon: Icon, isCurrency = false }: any) => (
+    <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-pink-500/5 transition-all group">
+      <div className="bg-gray-50 w-12 h-12 rounded-2xl flex items-center justify-center text-gray-400 group-hover:bg-pink-50 group-hover:text-pink-500 transition-colors mb-6">
+        <Icon size={22} />
       </div>
-    );
-  };
+      <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">{title}</p>
+      <h2 className="text-3xl font-black text-gray-900 tracking-tighter italic lowercase">
+        {isCurrency ? `kes ${value.toLocaleString()}` : value.toLocaleString()}
+      </h2>
+    </div>
+  );
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-medium text-gray-900">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}:{' '}
-              {entry.name.includes('amount') || entry.name.includes('Amount') ? 'KSh ' : ''}
-              {entry.value.toLocaleString()}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  if (!processedData) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
-      </div>
-    );
-  }
+  if (!processedData) return (
+    <div className="flex flex-col justify-center items-center min-h-[400px]">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600 mb-4"></div>
+      <p className="text-gray-400 font-medium italic lowercase">syncing your health record...</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <BarChart3 className="h-7 w-7 text-teal-600" />
-              My Health Analytics
+    <div className="space-y-10 pb-20">
+      {/* Personalized Header */}
+      <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="text-center md:text-left">
+          <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+            <Heart className="text-pink-500 fill-pink-500" size={20} />
+            <h1 className="text-4xl font-black text-gray-900 tracking-tighter italic lowercase">
+              hello, {user?.first_name || 'friend'}
             </h1>
-            <p className="text-gray-600 mt-1">
-              Welcome back, {user?.first_name || 'User'}! Here's your healthcare journey overview
-            </p>
           </div>
-          <div className="flex gap-2">
-            {['3months', '6months', '1year', 'all'].map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedPeriod === period
-                    ? 'bg-teal-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {period === '3months'
-                  ? '3M'
-                  : period === '6months'
-                    ? '6M'
-                    : period === '1year'
-                      ? '1Y'
-                      : 'All'}
-              </button>
-            ))}
-          </div>
+          <p className="text-gray-400 font-medium tracking-tight">here is your wellness journey at a glance</p>
+        </div>
+        <div className="flex bg-gray-50 p-1.5 rounded-2xl">
+          {['3m', '6m', '1y', 'all'].map((p) => (
+            <button
+              key={p}
+              onClick={() => setSelectedPeriod(p)}
+              className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                selectedPeriod === p ? 'bg-white text-teal-600 shadow-md' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Key Metrics */}
+      {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Appointments"
-          value={processedData.overview.totalAppointments}
-          icon={Calendar}
-          color="blue"
-          subtitle="Lifetime visits"
-        />
-        <StatCard
-          title="Total Spent"
-          value={processedData.overview.totalSpent.toFixed(0)}
-          icon={DollarSign}
-          color="green"
-          prefix="KSh "
-          subtitle="Healthcare investment"
-        />
-        <StatCard
-          title="Average Cost"
-          value={processedData.overview.averageAppointmentCost.toFixed(0)}
-          icon={CreditCard}
-          color="purple"
-          prefix="KSh "
-          subtitle="Per appointment"
-        />
-        <StatCard
-          title="Prescriptions"
-          value={processedData.overview.totalPrescriptions}
-          icon={Heart}
-          color="pink"
-          subtitle="Total received"
-        />
+        <StatCard title="total visits" value={processedData.overview.totalAppointments} icon={Calendar} />
+        <StatCard title="health spend" value={processedData.overview.totalSpent} icon={CreditCard} isCurrency />
+        <StatCard title="prescriptions" value={processedData.overview.totalPrescriptions} icon={Activity} />
+        <StatCard title="wellness score" value="4.8" icon={Star} />
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Monthly Spending Trend */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <TrendingUp className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Healthcare Spending</h3>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Spending Area Chart */}
+        <div className="lg:col-span-2 bg-white rounded-[3rem] p-10 border border-gray-100 shadow-sm">
+          <h3 className="text-xl font-black italic text-gray-900 mb-10 lowercase tracking-tight">spending trajectory</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={processedData.monthlySpending}>
               <defs>
-                <linearGradient id="spendingGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0} />
+                <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#db2777" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#db2777" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="amount"
-                stroke="#14B8A6"
-                strokeWidth={2}
-                fill="url(#spendingGradient)"
-                name="Amount Spent (KSh)"
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 700}} dy={10} />
+              <YAxis hide />
+              <Tooltip 
+                contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                itemStyle={{ color: '#db2777', fontWeight: 900, fontSize: '12px' }}
               />
+              <Area type="monotone" dataKey="amount" stroke="#db2777" strokeWidth={4} fillOpacity={1} fill="url(#colorSpend)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Appointment Status */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Activity className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Appointment Status</h3>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
+        {/* Appointment Status Pie */}
+        <div className="bg-white rounded-[3rem] p-10 border border-gray-100 shadow-sm">
+          <h3 className="text-xl font-black italic text-gray-900 mb-8 lowercase tracking-tight">visit mix</h3>
+          <ResponsiveContainer width="100%" height={200}>
             <PieChart>
-              <Pie
-                data={processedData.appointmentStatus}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {processedData.appointmentStatus.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+              <Pie data={processedData.statusData} innerRadius={60} outerRadius={80} paddingAngle={10} dataKey="value">
+                {processedData.statusData.map((entry: any, index: number) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                 ))}
               </Pie>
-              <Tooltip
-                formatter={(value: any, props: any) => [
-                  `${value} appointments`,
-                  props.payload.name,
-                ]}
-              />
+              <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-          <div className="grid grid-cols-2 gap-2 mt-4">
-            {processedData.appointmentStatus.map((status, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
-                <span className="text-sm text-gray-600">
-                  {status.name} ({status.value})
-                </span>
+          <div className="mt-8 space-y-3">
+            {processedData.statusData.map((s: any, i: number) => (
+              <div key={i} className="flex justify-between items-center bg-gray-50 px-4 py-2 rounded-xl">
+                <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">{s.name}</span>
+                <span className="text-sm font-black italic text-gray-900">{s.value}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Specialization Visits */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Stethoscope className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Medical Specializations Visited</h3>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={processedData.specializationVisits}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="name" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="visits" fill="#14B8A6" radius={[4, 4, 0, 0]} name="Visits" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Recent Appointments */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Calendar className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Recent Appointments</h3>
-          </div>
-          <div className="space-y-4">
-            {processedData.recentAppointments.map((appointment, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
-                    <Stethoscope className="h-5 w-5 text-teal-600" />
+      {/* Recent History & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white rounded-[3rem] p-10 border border-gray-100 shadow-sm">
+          <h3 className="text-xl font-black italic text-gray-900 mb-8 lowercase tracking-tight text-teal-600">recent history</h3>
+          <div className="space-y-6">
+            {processedData.recent.map((apt: any, i: number) => (
+              <div key={i} className="flex items-center justify-between group">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 group-hover:bg-pink-50 group-hover:text-pink-600 transition-colors">
+                    <Stethoscope size={20} />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{appointment.doctor}</p>
-                    <p className="text-sm text-gray-600">{appointment.specialization}</p>
-                    <p className="text-xs text-gray-500">
-                      {new Date(appointment.date).toLocaleDateString()}
-                    </p>
+                    <p className="text-sm font-black text-gray-900 lowercase italic">{apt.doctor}</p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{apt.spec}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">
-                    KSh {appointment.amount.toLocaleString()}
-                  </p>
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full ${
-                      appointment.status === 'Confirmed'
-                        ? 'bg-green-100 text-green-800'
-                        : appointment.status === 'Pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {appointment.status}
-                  </span>
+                <div className="text-right text-[10px] font-black uppercase text-gray-400">
+                  {new Date(apt.date).toLocaleDateString()}
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Additional Insights */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Health Metrics */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Target className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Health Metrics</h3>
-          </div>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Visit Frequency</span>
-              <span className="font-medium">
-                {processedData.healthMetrics.appointmentFrequency.toFixed(1)}/month
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Avg. Wait Time</span>
-              <span className="font-medium">{processedData.healthMetrics.averageWaitTime}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Satisfaction Score</span>
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                <span className="font-medium">{processedData.healthMetrics.satisfactionScore}</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Prescriptions</span>
-              <span className="font-medium">{processedData.healthMetrics.prescriptionCount}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Complaint Status */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Feedback Status</h3>
-          </div>
-          <div className="space-y-3">
-            {processedData.complaintStatus.map((status, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
-                  <span className="text-sm text-gray-600">{status.name}</span>
-                </div>
-                <span className="font-medium">{status.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <User className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
-          </div>
-          <div className="space-y-3">
-            <button className="w-full bg-teal-50 hover:bg-teal-100 text-teal-700 p-3 rounded-lg text-sm font-medium transition-colors">
-              Book New Appointment
-            </button>
-            <button className="w-full bg-green-50 hover:bg-green-100 text-green-700 p-3 rounded-lg text-sm font-medium transition-colors">
-              View Medical History
-            </button>
-            <button
+        {/* Call to Action Card */}
+        <div className="bg-gradient-to-br from-[#004d4d] to-[#006666] rounded-[3rem] p-10 text-white relative overflow-hidden flex flex-col justify-center">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-pink-500/20 rounded-full blur-3xl" />
+          <Zap className="text-pink-500 fill-pink-500 mb-4" size={32} />
+          <h3 className="text-3xl font-black italic lowercase mb-2">take control</h3>
+          <p className="text-teal-100/70 text-sm font-medium mb-10 leading-relaxed">
+            your health data is your power. download your complete medical history or schedule your next check-up today.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <button 
               onClick={() => setShowHealthReport(true)}
-              className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 p-3 rounded-lg text-sm font-medium transition-colors"
+              className="bg-white/10 hover:bg-white/20 border border-white/10 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all"
             >
-              Download Health Report
+              <Download size={20} />
+              <span className="text-[10px] font-black uppercase tracking-widest">full report</span>
             </button>
-            <button className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 p-3 rounded-lg text-sm font-medium transition-colors">
-              Submit Feedback
+            <button className="bg-pink-500 hover:bg-pink-600 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all">
+              <ArrowRight size={20} />
+              <span className="text-[10px] font-black uppercase tracking-widest">book visit</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Membership Info */}
-      <div className="bg-gradient-to-r from-teal-600 to-pink-600 rounded-xl p-8 text-white">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div>
-            <h3 className="text-2xl font-bold mb-4">Your CareConnect Journey</h3>
-            <p className="text-teal-100 mb-6">
-              You've been a valued member. Thank you for trusting us with your healthcare needs.
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-3xl font-bold">{processedData.overview.totalAppointments}</div>
-                <div className="text-teal-100">Total Visits</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">
-                  KSh {processedData.overview.totalSpent.toFixed(0)}
-                </div>
-                <div className="text-teal-100">Healthcare Investment</div>
-              </div>
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6">
-              <h4 className="text-xl font-semibold mb-2">Health Score</h4>
-              <div className="text-4xl font-bold mb-2">
-                {processedData.healthMetrics.satisfactionScore}/5.0
-              </div>
-              <p className="text-teal-100 text-sm">Based on your engagement and feedback</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Health Report Generator Modal */}
       <PatientHealthReport isOpen={showHealthReport} onClose={() => setShowHealthReport(false)} />
     </div>
   );

@@ -1,82 +1,30 @@
-// import { useEffect } from 'react';
-// import { useLocation } from 'react-router';
-// import { useGetServiceByTitleQuery } from '../../../src/reducers/services/servicesAPI';
-// import { CheckCircle } from 'lucide-react';
-// import { slugToTitleMap } from './slug';
-
-// const Neurology = () => {
-//   const location = useLocation();
-
-//   // Extract the slug from the URL (e.g., "emergencycare")
-//   const slug = decodeURIComponent(location.pathname.split('/service/')[1]);
-
-//   // Convert slug to the proper title (e.g., "Emergency Care")
-//   const title = slugToTitleMap[slug];
-
-//   const { data: service, isLoading, isError } = useGetServiceByTitleQuery(title, {
-//     skip: !title, //skip query if title is undefined
-//     refetchOnMountOrArgChange: true,
-//   });
-
-//   useEffect(() => {
-//     window.scrollTo(0, 0);
-//   }, []);
-
-//   if (!title) {
-//     return <div className="text-center mt-10 text-red-500">Invalid service URL.</div>;
-//   }
-
-//   if (isLoading) {
-//     return <div className="text-center mt-10 text-gray-600">Loading service...</div>;
-//   }
-
-//   if (isError || !service) {
-//     return <div className="text-center mt-10 text-red-500">Service not found.</div>;
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-white py-20 px-4 sm:px-6 lg:px-8">
-//       <div className="max-w-4xl mx-auto">
-//         <h1 className="text-4xl font-bold text-gray-900 mb-6">{service.title}</h1>
-//         <p className="text-lg text-gray-700 mb-8">{service.description}</p>
-
-//         <h2 className="text-2xl font-semibold text-gray-900 mb-4">Features</h2>
-//         <ul className="space-y-3">
-//           {service.features?.map((feature: string, index: number) => (
-//             <li key={index} className="flex items-start gap-2 text-gray-800">
-//               <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
-//               {feature}
-//             </li>
-//           ))}
-//         </ul>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Neurology;
 import { useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate, Link } from 'react-router';
 import { useGetServiceByTitleQuery } from '../../../src/reducers/services/servicesAPI';
-import { CheckCircle, Brain, Award, Shield, Scan } from 'lucide-react';
+import {
+  CheckCircle,
+  Brain,
+  Shield,
+  Scan,
+  ArrowLeft,
+  Heart,
+  Activity,
+} from 'lucide-react';
 import { slugToTitleMap } from './slug';
 
 const Neurology = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Extract the slug from the URL (e.g., "neurology")
   const slug = decodeURIComponent(location.pathname.split('/service/')[1]);
-
-  // Convert slug to the proper title (e.g., "Neurology")
   const title = slugToTitleMap[slug];
 
-  // Fetch the service data based on the title
   const {
     data: service,
     isLoading,
     isError,
   } = useGetServiceByTitleQuery(title, {
-    skip: !title, // Skip query if title is undefined
+    skip: !title,
     refetchOnMountOrArgChange: true,
   });
 
@@ -84,80 +32,60 @@ const Neurology = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Define static exhaustive content for Neurology
+  const navigateAndScroll = (sectionId: string) => {
+    if (window.location.pathname === '/') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(`/#${sectionId}`);
+    }
+  };
+
   const exhaustiveNeurologyContent = {
     sections: [
       {
         title: 'The Scope of Neurology',
-        icon: <Brain className="h-8 w-8 text-teal-600" />,
+        icon: <Brain size={24} />,
         paragraphs: [
-          'Neurology is the medical specialty dedicated to diagnosing and treating disorders of the **nervous system**. This intricate system includes the brain, spinal cord, and all the nerves that connect them throughout the body. Neurologists are experts in conditions that affect the brain, spinal cord, and peripheral nerves, and how these impact sensation, movement, memory, and overall bodily functions.',
+          'Neurology is dedicated to diagnosing and treating disorders of the nervous system. This intricate network includes the brain, spinal cord, and all peripheral nerves connecting them to the rest of the body.',
         ],
         features: [
-          '**Epilepsy and Seizure Disorders:** Characterized by recurrent, unprovoked seizures, often managed with medication, lifestyle adjustments, and in some cases, surgery.',
-          '**Stroke:** Occurs when blood flow to a part of the brain is interrupted, causing brain cells to die. Neurologists are crucial in acute stroke management and rehabilitation.',
-          '**Multiple Sclerosis (MS):** A chronic, unpredictable disease that affects the central nervous system, disrupting the flow of information within the brain, and between the brain and body.',
-          "**Parkinson's Disease:** A progressive neurodegenerative disorder affecting movement, characterized by tremors, rigidity, slow movement, and impaired balance.",
-          "**Alzheimer's Disease and Dementia:** Progressive conditions that cause gradual decline in memory, thinking, and reasoning skills, severely impacting daily life.",
-          '**Headaches and Migraines:** Common conditions ranging from tension headaches to debilitating migraines, requiring accurate diagnosis and personalized treatment plans.',
-          '**Neuropathic Pain:** Chronic pain caused by nerve damage, often managed with a combination of medications and therapies.',
-          '**Brain and Spinal Cord Tumors:** Diagnosing and managing both cancerous and non-cancerous growths affecting the nervous system.',
-          '**Peripheral Neuropathy:** Damage to nerves outside of the brain and spinal cord, often leading to weakness, numbness, and pain in the hands and feet.',
+          '**Stroke Management:** Urgent care and long-term rehabilitation for brain health.',
+          '**Seizure Disorders:** Comprehensive management for Epilepsy and related conditions.',
+          '**Neurodegenerative Care:** Specialized support for Parkinson’s and Alzheimer’s.',
+          '**Chronic Migraine:** Targeted treatment plans for debilitating headaches.',
         ],
       },
       {
-        title: 'Diagnostic Approaches in Neurology',
-        icon: <Scan className="h-8 w-8 text-teal-600" />,
+        title: 'Diagnostic Precision',
+        icon: <Scan size={24} />,
         paragraphs: [
-          'Neurologists utilize a variety of advanced diagnostic tools to precisely identify neurological conditions and tailor effective treatment strategies:',
+          'We utilize advanced diagnostic tools to map brain function and identify nerve damage with exceptional accuracy.',
         ],
         features: [
-          '**Magnetic Resonance Imaging (MRI) & Computed Tomography (CT) Scans:** Detailed imaging of the brain and spinal cord to detect tumors, strokes, MS lesions, and other structural abnormalities.',
-          '**Electroencephalogram (EEG):** Records the electrical activity of the brain, primarily used to diagnose epilepsy and other seizure disorders.',
-          '**Electromyography (EMG) & Nerve Conduction Studies (NCS):** Assess the health of muscles and the nerves that control them, useful for diagnosing conditions like carpal tunnel syndrome, peripheral neuropathy, and ALS.',
-          '**Lumbar Puncture (Spinal Tap):** Involves collecting a sample of cerebrospinal fluid (CSF) for analysis, helping diagnose infections, inflammatory conditions, and certain neurological disorders.',
-          '**Evoked Potentials:** Measure the electrical activity in the brain in response to sensory stimulation (visual, auditory, or somatosensory) to evaluate nerve pathways.',
-          '**Carotid Ultrasound:** Uses sound waves to create images of the carotid arteries in the neck, checking for blockages that could lead to stroke.',
-          '**Blood Tests:** Used to identify inflammatory markers, genetic predispositions, infections, and nutrient deficiencies that may impact neurological health.',
-        ],
-      },
-      {
-        title: 'Treatment Modalities in Neurology',
-        icon: <Award className="h-8 w-8 text-teal-600" />,
-        paragraphs: [
-          'Neurological treatment plans are highly individualized, combining various approaches to manage symptoms, slow disease progression, and improve quality of life. These range from medication to advanced therapeutic interventions:',
-        ],
-        features: [
-          "**Pharmacotherapy:** Prescribing medications to manage symptoms (e.g., anti-seizure drugs, pain relievers, drugs for Parkinson's), slow disease progression (e.g., for MS or Alzheimer's), or treat underlying causes.",
-          '**Physical, Occupational, and Speech Therapy:** Essential for rehabilitation, helping patients regain function, manage disabilities, and improve communication after a stroke, brain injury, or in progressive neurological conditions.',
-          "**Deep Brain Stimulation (DBS):** A surgical procedure involving implanting electrodes in specific brain areas to send electrical impulses, often used for Parkinson's disease, essential tremor, and dystonia.",
-          '**Botulinum Toxin Injections:** Used to treat various neurological conditions involving muscle spasms, chronic migraines, and dystonia.',
-          '**Immunotherapies:** For autoimmune neurological disorders like Multiple Sclerosis, these therapies modulate the immune system to reduce inflammation and prevent damage.',
-          '**Lifestyle Management:** Emphasizing a healthy diet, regular exercise, adequate sleep, and stress reduction to support neurological health and manage chronic conditions.',
-          '**Pain Management:** Comprehensive strategies for chronic neuropathic pain, including medications, nerve blocks, and alternative therapies.',
-        ],
-      },
-      {
-        title: 'Prevention and Advancements',
-        icon: <Shield className="h-8 w-8 text-teal-600" />,
-        paragraphs: [
-          'Prevention in neurology focuses on managing risk factors for conditions like stroke (e.g., controlling blood pressure, diabetes, cholesterol) and promoting brain health through healthy living. Early diagnosis and intervention are critical for better outcomes in many neurological disorders.',
-          'The field of neurology is at the forefront of medical research, with exciting advancements continually emerging. Innovations in genetic therapies, neuroimaging, and personalized medicine are transforming the outlook for many neurological patients, offering new hope and improved quality of life.',
+          '**Neuroimaging:** High-resolution MRI and CT scans of the nervous system.',
+          '**EEG Studies:** Recording electrical activity to monitor seizure patterns.',
+          '**Nerve Conduction:** Assessing muscle health and peripheral nerve response.',
+          '**Lumbar Puncture:** Analyzing cerebrospinal fluid for inflammatory markers.',
         ],
       },
     ],
   };
 
-  // --- Render Logic ---
-
-  if (!title) {
+  if (!title || isError || (!isLoading && !service)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <p className="text-2xl text-red-600 font-semibold mb-4">Invalid Service URL</p>
-          <p className="text-gray-700">
-            The URL you're trying to access is not a recognized service. Please check and try again.
-          </p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-black text-[#003d3d] uppercase italic">Service Not Found</h2>
+          <div
+            onClick={() => navigateAndScroll('services')}
+            className="inline-flex items-center gap-2 text-[#00a18e] text-[10px] font-black uppercase tracking-widest mt-4 hover:text-pink-500 transition-colors cursor-pointer group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Back to all services
+          </div>
         </div>
       </div>
     );
@@ -165,113 +93,115 @@ const Neurology = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <span className="loading loading-spinner loading-lg text-teal-600"></span>
-          <p className="text-xl text-gray-700 mt-4">Loading service details...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#003d3d]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#00a18e] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-white font-black uppercase tracking-widest text-xs">Mapping Neural Pathways</p>
         </div>
       </div>
     );
   }
 
-  // Handle case where service is not found after loading
-  if (isError || !service) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <p className="text-2xl text-red-600 font-semibold mb-4">Service Not Found</p>
-          <p className="text-gray-700">
-            The service "{title}" could not be found. It might not exist or there was an issue
-            fetching it.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Assuming 'service' now contains the fetched Neurology data
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {/* === Fetched Service Details Section (Hero/Header Card) === */}
-        <div className="relative bg-gradient-to-br from-teal-500 to-pink-500 text-white p-8 md:p-12 lg:p-16">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left flex-1">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">
-                {service.title}
+    <div className="min-h-screen bg-[#fcfcfc]">
+      {/* --- PREMIUM HERO SECTION --- */}
+      <div className="bg-[#003d3d] pt-24 pb-16 px-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#00a18e] rounded-full blur-[150px] opacity-10"></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div
+            onClick={() => navigateAndScroll('services')}
+            className="inline-flex items-center gap-2 text-[#00a18e] text-[10px] font-black uppercase tracking-widest mb-8 hover:text-white transition-colors cursor-pointer group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+            Back to all services
+          </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-3xl">
+              <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase mb-4">
+                {service.title}<span className="text-[#00a18e]">.</span>
               </h1>
-              <p className="text-lg sm:text-xl opacity-90 max-w-3xl">{service.description}</p>
+              <p className="text-teal-100/60 text-lg font-medium leading-relaxed">
+                {service.description}
+              </p>
             </div>
-            <div className="hidden md:block">
-              <Brain className="w-24 h-24 opacity-20" />
+            <div className="hidden lg:block bg-white/5 p-8 rounded-[40px] border border-white/10 backdrop-blur-sm">
+              <Brain size={64} className="text-[#00a18e] animate-pulse" />
             </div>
           </div>
-          {service.features && service.features.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-white border-opacity-30">
-              <h2 className="text-2xl font-semibold text-white mb-4">Our Key Features</h2>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-lg">
-                {service.features.map((feature: string, index: number) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-teal-200" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
+      </div>
 
-        {/* === Exhaustive Static Content Sections === */}
-        <div className="p-8 md:p-12 lg:p-16 space-y-12">
-          {exhaustiveNeurologyContent.sections.map((section, sectionIndex) => (
-            <div
-              key={sectionIndex}
-              className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100"
-            >
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 pb-3 flex items-center gap-3 border-b border-gray-200">
-                {section.icon}
-                {section.title}
-              </h2>
-              {section.paragraphs &&
-                section.paragraphs.map((paragraph, pIndex) => (
-                  <p key={`p-${pIndex}`} className="text-lg text-gray-700 mb-4 leading-relaxed">
-                    {paragraph}
-                  </p>
+      {/* --- CONTENT AREA --- */}
+      <div className="max-w-7xl mx-auto px-4 -mt-10 pb-24 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <div className="lg:col-span-2 space-y-8">
+            {/* Care Highlights */}
+            {service.features && (
+              <div className="bg-white rounded-[40px] shadow-2xl shadow-gray-200/50 p-8 md:p-12 border border-gray-100">
+                <h2 className="text-2xl font-black text-[#003d3d] uppercase tracking-tight mb-8 flex items-center gap-3">
+                  <div className="bg-teal-50 p-2 rounded-xl text-[#00a18e]"><Shield size={20}/></div>
+                  Neurological Specializations
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {service.features.map((feature: string, i: number) => (
+                    <div key={i} className="flex items-center gap-4 p-5 bg-gray-50 rounded-3xl border border-gray-100 hover:border-[#00a18e]/30 transition-all group">
+                      <CheckCircle className="text-[#00a18e] group-hover:scale-110 transition-transform" size={20} />
+                      <span className="font-bold text-[#003d3d] text-sm uppercase">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Comprehensive Content */}
+            {exhaustiveNeurologyContent.sections.map((section, idx) => (
+              <div key={idx} className="bg-white rounded-[40px] shadow-xl p-8 md:p-12 border border-gray-100">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="bg-[#003d3d] text-white p-3 rounded-2xl shadow-lg shadow-teal-900/20">
+                    {section.icon}
+                  </div>
+                  <h3 className="text-2xl font-black text-[#003d3d] uppercase tracking-tight">{section.title}</h3>
+                </div>
+                
+                {section.paragraphs.map((p, pi) => (
+                  <p key={pi} className="text-gray-600 text-lg leading-relaxed mb-8">{p}</p>
                 ))}
 
-              {section.features && section.features.length > 0 && (
-                <ul className="space-y-4 text-lg mt-6">
-                  {section.features.map((feature: string, featureIndex: number) => (
-                    <li
-                      key={`feature-${featureIndex}`}
-                      className="flex items-start gap-3 text-gray-800 p-3 bg-gray-50 rounded-lg shadow-sm"
-                    >
-                      <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
-                      {/* Using dangerouslySetInnerHTML to render bold markdown within strings */}
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: feature.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
-                        }}
+                <div className="space-y-4">
+                  {section.features.map((feature, fi) => (
+                    <div key={fi} className="flex gap-4 items-start p-4 rounded-2xl bg-teal-50/30 border-l-4 border-[#00a18e]">
+                      <span className="text-sm text-gray-700 leading-relaxed" 
+                        dangerouslySetInnerHTML={{ __html: feature.replace(/\*\*(.*?)\*\*/g, '<b class="text-[#003d3d] font-black uppercase text-[12px]">$1</b>') }} 
                       />
-                    </li>
+                    </div>
                   ))}
-                </ul>
-              )}
-            </div>
-          ))}
-
-          {/* Concluding Section for overall Neurology */}
-          <div className="text-center mt-16 bg-gradient-to-r from-teal-50 to-pink-50 p-8 rounded-2xl shadow-inner">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Advancing Understanding of the Human Nervous System
-            </h3>
-            <p className="text-xl text-gray-700 max-w-4xl mx-auto">
-              Neurology is a dynamic and critical field, continuously evolving with new research and
-              technological breakthroughs. It plays a pivotal role in understanding and treating
-              conditions that affect the very essence of human function, striving to improve the
-              lives of those impacted by neurological disorders.
-            </p>
+                </div>
+              </div>
+            ))}
           </div>
+
+          {/* Sidebar */}
+          <div className="space-y-8">
+            <div className="bg-[#f43f8e] rounded-[40px] p-10 text-white shadow-2xl shadow-pink-200 sticky top-24">
+              <Heart className="mb-6 opacity-50" size={40} />
+              <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">Book Specialist Visit</h3>
+              <p className="text-pink-100 font-medium mb-8">
+                Early intervention is key to neurological health. Connect with our neurologists today.
+              </p>
+              <Link to="/appointments" className="block w-full bg-white text-[#f43f8e] text-center py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-pink-50 transition-colors shadow-lg">
+                Schedule Now
+              </Link>
+            </div>
+
+            <div className="bg-[#003d3d] rounded-[40px] p-10 text-white overflow-hidden relative">
+              <Activity className="absolute -bottom-4 -right-4 text-white/5 w-32 h-32" />
+              <h4 className="text-xs font-black uppercase tracking-[0.3em] text-[#00a18e] mb-2">Innovation</h4>
+              <p className="text-xl font-bold italic mb-0">Cutting-Edge Neuro Care</p>
+              <p className="text-3xl font-black mt-2">DBS & Advanced EEG</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

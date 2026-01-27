@@ -29,6 +29,7 @@ import PatientDashboard from './dashboard/patientDashboard/PatientDashboard';
 import PatientAnalytics from './dashboard/patientDashboard/main/analytics/PatientAnalytics';
 import PatientAppointments from './dashboard/patientDashboard/main/appointments/PatientAppointments';
 import PatientDoctors from './dashboard/patientDashboard/main/doctors/PatientDoctors';
+import PatientPrescriptions from './dashboard/patientDashboard/main/prescriptions/PatientPrescriptions';
 import PatientComplaints from './dashboard/patientDashboard/main/complaints/PatientComplaints';
 import Cardiology from './pages/services/Cardiology';
 import EmergencyCare from './pages/services/EmergencyCare';
@@ -164,6 +165,10 @@ function App() {
         {
           path: 'doctors',
           element: <PatientDoctors />,
+        },
+        {
+          path: 'prescriptions',
+          element: <PatientPrescriptions />,
         },
         {
           path: 'complaints',

@@ -1,35 +1,15 @@
 import React, { useState } from 'react';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, AreaChart, Area,
 } from 'recharts';
 import {
-  TrendingUp,
-  TrendingDown,
-  Users,
-  DollarSign,
-  Calendar,
-  Activity,
-  Target,
-  Award,
-  Clock,
-  MapPin,
-  BarChart3,
-  PieChart as PieChartIcon,
-  LineChart as LineChartIcon,
+  TrendingUp, TrendingDown, Users, Calendar, Activity, Target,
+  Award, Clock, BarChart3, PieChart as PieChartIcon,
+  LineChart as LineChartIcon, Zap, ArrowRight, Download
 } from 'lucide-react';
 
-// Import APIs
+// API Imports (kept as provided)
 import { appointmentsAPI } from '../../../../reducers/appointments/appointmentsAPI';
 import { usersAPI } from '../../../../reducers/users/usersAPI';
 import { doctorsAPI } from '../../../../reducers/doctors/doctorsAPI';
@@ -42,519 +22,235 @@ const AdminAnalytics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('6months');
   const [showReportGenerator, setShowReportGenerator] = useState(false);
 
-  // Fetch all data
   const { data: appointmentsData } = appointmentsAPI.useGetDetailedAppointmentsQuery();
   const { data: usersData } = usersAPI.useGetUsersQuery();
   const { data: doctorsData } = doctorsAPI.useGetDoctorsQuery();
   const { data: complaintsData } = complaintsAPI.useGetComplaintsQuery();
   const { data: prescriptionsData } = prescriptionsAPI.useGetPrescriptionsQuery();
-  const { data: paymentsData } = paymentsAPI.useGetAllPaymentsQuery();
 
-  // Process data for analytics
   const processedData = React.useMemo(() => {
-    if (!appointmentsData?.data || !usersData || !doctorsData?.data) {
-      return null;
-    }
+    if (!appointmentsData?.data || !usersData || !doctorsData?.data) return null;
 
     const appointments = appointmentsData.data;
-    const users = usersData;
-    const doctors = doctorsData.data;
-    const complaints = complaintsData?.data || [];
-    const prescriptions = prescriptionsData?.data || [];
-
-    // Calculate overview metrics
     const totalRevenue = appointments.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0);
-    const totalAppointments = appointments.length;
-    const totalUsers = users.length;
-    const totalDoctors = doctors.length;
-
-    // Monthly revenue data
+    
+    // Monthly data with specific brand colors
     const monthlyData = appointments.reduce((acc, apt) => {
       const month = new Date(apt.appointmentDate).toLocaleDateString('en-US', { month: 'short' });
       const existing = acc.find((item) => item.month === month);
       if (existing) {
         existing.revenue += parseFloat(apt.totalAmount);
-        existing.appointments += 1;
       } else {
-        acc.push({
-          month,
-          revenue: parseFloat(apt.totalAmount),
-          appointments: 1,
-        });
+        acc.push({ month, revenue: parseFloat(apt.totalAmount) });
       }
       return acc;
     }, [] as any[]);
 
-    // Appointment status distribution
-    const statusData = [
-      {
-        name: 'Confirmed',
-        value: appointments.filter((apt) => apt.status === 'Confirmed').length,
-        color: '#10B981',
-      },
-      {
-        name: 'Pending',
-        value: appointments.filter((apt) => apt.status === 'Pending').length,
-        color: '#F59E0B',
-      },
-      {
-        name: 'Cancelled',
-        value: appointments.filter((apt) => apt.status === 'Cancelled').length,
-        color: '#EF4444',
-      },
-    ];
-
-    // Doctor specialization distribution
-    const specializationData = doctors.reduce((acc, doctor) => {
-      const spec = doctor.doctor.specialization;
-      const existing = acc.find((item) => item.name === spec);
-      if (existing) {
-        existing.value += 1;
-      } else {
-        acc.push({
-          name: spec,
-          value: 1,
-          color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-        });
-      }
-      return acc;
-    }, [] as any[]);
-
-    // Top performing doctors
-    const doctorPerformance = doctors
-      .map((doctor) => {
-        const doctorAppointments = appointments.filter(
-          (apt) => apt.doctor?.id === doctor.user.userId
-        );
-        const revenue = doctorAppointments.reduce(
-          (sum, apt) => sum + parseFloat(apt.totalAmount),
-          0
-        );
-        return {
-          name: `Dr. ${doctor.user.firstName} ${doctor.user.lastName}`,
-          specialization: doctor.doctor.specialization,
-          appointments: doctorAppointments.length,
-          revenue,
-        };
-      })
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5);
-
-    // Complaint status distribution
-    const complaintStatusData = [
-      {
-        name: 'Open',
-        value: complaints.filter((c) => c.status === 'Open').length,
-        color: '#EF4444',
-      },
-      {
-        name: 'In Progress',
-        value: complaints.filter((c) => c.status === 'In Progress').length,
-        color: '#F59E0B',
-      },
-      {
-        name: 'Resolved',
-        value: complaints.filter((c) => c.status === 'Resolved').length,
-        color: '#10B981',
-      },
-      {
-        name: 'Closed',
-        value: complaints.filter((c) => c.status === 'Closed').length,
-        color: '#6B7280',
-      },
-    ];
+    const doctorPerformance = doctorsData.data
+      .map((doc) => ({
+        name: `dr. ${doc.user.firstName} ${doc.user.lastName}`,
+        spec: doc.doctor.specialization,
+        rev: appointments.filter(a => a.doctor?.id === doc.user.userId).reduce((s, a) => s + parseFloat(a.totalAmount), 0)
+      }))
+      .sort((a, b) => b.rev - a.rev).slice(0, 5);
 
     return {
       overview: {
         totalRevenue,
-        totalAppointments,
-        totalUsers,
-        totalDoctors,
-        totalComplaints: complaints.length,
-        totalPrescriptions: prescriptions.length,
-        averageAppointmentValue: totalRevenue / totalAppointments || 0,
-        revenueGrowth: 12.5, // You can calculate this based on historical data
-        appointmentGrowth: 8.3,
-        userGrowth: 15.7,
+        totalAppointments: appointments.length,
+        totalUsers: usersData.length,
+        totalDoctors: doctorsData.data.length,
+        growth: 14.2
       },
       monthlyData,
-      statusData,
-      specializationData,
       doctorPerformance,
-      complaintStatusData,
+      statusData: [
+        { name: 'confirmed', value: appointments.filter(a => a.status === 'Confirmed').length, color: '#0d9488' },
+        { name: 'pending', value: appointments.filter(a => a.status === 'Pending').length, color: '#db2777' },
+        { name: 'cancelled', value: appointments.filter(a => a.status === 'Cancelled').length, color: '#94a3b8' },
+      ]
     };
-  }, [appointmentsData, usersData, doctorsData, complaintsData, prescriptionsData, paymentsData]);
+  }, [appointmentsData, usersData, doctorsData]);
 
-  const StatCard = ({
-    title,
-    value,
-    growth,
-    icon: Icon,
-    color = 'blue',
-    prefix = '',
-    suffix = '',
-  }: {
-    title: string;
-    value: number | string;
-    growth?: number;
-    icon: any;
-    color?: string;
-    prefix?: string;
-    suffix?: string;
-  }) => {
-    const isPositive = growth ? growth >= 0 : true;
-    const colorClasses = {
-      blue: 'bg-blue-50 text-blue-600 border-blue-200',
-      green: 'bg-green-50 text-green-600 border-green-200',
-      purple: 'bg-purple-50 text-purple-600 border-purple-200',
-      orange: 'bg-orange-50 text-orange-600 border-orange-200',
-      teal: 'bg-teal-50 text-teal-600 border-teal-200',
-    };
-
-    return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-        <div className="flex items-center justify-between mb-4">
-          <div
-            className={`p-3 rounded-lg border ${colorClasses[color as keyof typeof colorClasses]}`}
-          >
-            <Icon className="h-6 w-6" />
+  const StatCard = ({ title, value, growth, icon: Icon, isCurrency = false }: any) => (
+    <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-teal-500/5 transition-all group">
+      <div className="flex justify-between items-start mb-6">
+        <div className="bg-gray-50 p-4 rounded-2xl group-hover:bg-teal-50 group-hover:text-teal-600 transition-colors">
+          <Icon size={24} />
+        </div>
+        {growth && (
+          <div className="flex items-center gap-1 text-[11px] font-black text-teal-600 bg-teal-50 px-3 py-1 rounded-full uppercase italic">
+            <TrendingUp size={12} /> {growth}%
           </div>
-          {growth !== undefined && (
-            <div
-              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                isPositive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-              }`}
-            >
-              {isPositive ? (
-                <TrendingUp className="h-3 w-3" />
-              ) : (
-                <TrendingDown className="h-3 w-3" />
-              )}
-              {Math.abs(growth)}%
-            </div>
-          )}
-        </div>
-        <div className="space-y-1">
-          <h3 className="text-sm font-medium text-gray-600">{title}</h3>
-          <p className="text-2xl font-bold text-gray-900">
-            {prefix}
-            {typeof value === 'number' ? value.toLocaleString() : value}
-            {suffix}
-          </p>
-        </div>
+        )}
       </div>
-    );
-  };
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="font-medium text-gray-900">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.name.includes('Revenue') ? 'KSh ' : ''}
-              {entry.value.toLocaleString()}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  if (!processedData) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+      <div>
+        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1">{title}</p>
+        <h2 className="text-3xl font-black text-gray-900 tracking-tight italic lowercase">
+          {isCurrency ? `kes ${value.toLocaleString()}` : value.toLocaleString()}
+        </h2>
       </div>
-    );
-  }
+    </div>
+  );
+
+  if (!processedData) return (
+    <div className="flex flex-col justify-center items-center min-h-[400px]">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mb-4"></div>
+      <p className="text-gray-400 font-medium italic">assembling your intelligence...</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <BarChart3 className="h-7 w-7 text-teal-600" />
-              System Analytics
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Comprehensive insights into CareConnect's performance and operations
-            </p>
+    <div className="space-y-10 pb-20">
+      {/* Executive Header */}
+      <div className="flex flex-col md:flex-row justify-between items-end gap-6 bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <Zap className="text-pink-500 fill-pink-500" size={20} />
+            <h1 className="text-4xl font-black text-gray-900 tracking-tighter italic">system intelligence</h1>
           </div>
-          <div className="flex gap-2">
-            {['1month', '3months', '6months', '1year'].map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedPeriod === period
-                    ? 'bg-teal-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {period === '1month'
-                  ? '1M'
-                  : period === '3months'
-                    ? '3M'
-                    : period === '6months'
-                      ? '6M'
-                      : '1Y'}
-              </button>
-            ))}
-          </div>
+          <p className="text-gray-400 font-medium">real-time operational metrics for CareConnect</p>
+        </div>
+        <div className="flex bg-gray-100 p-1.5 rounded-2xl">
+          {['1m', '3m', '6m', '1y'].map((p) => (
+            <button
+              key={p}
+              onClick={() => setSelectedPeriod(p)}
+              className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                selectedPeriod === p ? 'bg-white text-teal-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Key Metrics */}
+      {/* Primary Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Revenue"
-          value={processedData.overview.totalRevenue}
-          growth={processedData.overview.revenueGrowth}
-          icon={DollarSign}
-          color="green"
-          prefix="KSh "
-        />
-        <StatCard
-          title="Total Appointments"
-          value={processedData.overview.totalAppointments}
-          growth={processedData.overview.appointmentGrowth}
-          icon={Calendar}
-          color="blue"
-        />
-        <StatCard
-          title="Total Users"
-          value={processedData.overview.totalUsers}
-          growth={processedData.overview.userGrowth}
-          icon={Users}
-          color="purple"
-        />
-        <StatCard
-          title="Medical Staff"
-          value={processedData.overview.totalDoctors}
-          icon={Activity}
-          color="teal"
-        />
+        <StatCard title="total liquidity" value={processedData.overview.totalRevenue} growth={12} icon={Activity} isCurrency />
+        <StatCard title="active patients" value={processedData.overview.totalUsers} growth={8} icon={Users} />
+        <StatCard title="appointments" value={processedData.overview.totalAppointments} growth={14} icon={Calendar} />
+        <StatCard title="medical staff" value={processedData.overview.totalDoctors} icon={Award} />
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Trend */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <LineChartIcon className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Revenue Trend</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Revenue Chart */}
+        <div className="lg:col-span-2 bg-white rounded-[3rem] p-10 border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center mb-10">
+            <h3 className="text-xl font-black italic text-gray-900 lowercase">revenue trajectory</h3>
+            <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
+              <div className="w-2 h-2 rounded-full bg-teal-500" /> performance index
+            </div>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={350}>
             <AreaChart data={processedData.monthlyData}>
               <defs>
-                <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#14B8A6" stopOpacity={0} />
+                <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0d9488" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#0d9488" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="revenue"
-                stroke="#14B8A6"
-                strokeWidth={2}
-                fill="url(#revenueGradient)"
-                name="Revenue (KSh)"
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 700}} dy={10} />
+              <YAxis hide />
+              <Tooltip 
+                contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                itemStyle={{ color: '#0d9488', fontWeight: 900, fontSize: '12px' }}
               />
+              <Area type="monotone" dataKey="revenue" stroke="#0d9488" strokeWidth={4} fillOpacity={1} fill="url(#colorRev)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Appointment Status Distribution */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <PieChartIcon className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Appointment Status</h3>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
+        {/* Status Breakdown */}
+        <div className="bg-white rounded-[3rem] p-10 border border-gray-100 shadow-sm">
+          <h3 className="text-xl font-black italic text-gray-900 mb-10 lowercase">status mix</h3>
+          <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
                 data={processedData.statusData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={5}
+                innerRadius={70}
+                outerRadius={90}
+                paddingAngle={8}
                 dataKey="value"
               >
-                {processedData.statusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
+                {processedData.statusData.map((entry: any, index: number) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                 ))}
               </Pie>
-              <Tooltip
-                formatter={(value: any, props: any) => [
-                  `${value} appointments`,
-                  props.payload.name,
-                ]}
-              />
+              <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-          <div className="grid grid-cols-2 gap-2 mt-4">
-            {processedData.statusData.map((status, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
-                <span className="text-sm text-gray-600">
-                  {status.name} ({status.value})
-                </span>
+          <div className="space-y-4 mt-8">
+            {processedData.statusData.map((s: any, i: number) => (
+              <div key={i} className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{s.name}</span>
+                </div>
+                <span className="text-sm font-black italic">{s.value}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Doctor Specializations */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Activity className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Medical Specializations</h3>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={processedData.specializationData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="name" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="value" fill="#14B8A6" radius={[4, 4, 0, 0]} name="Doctors" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Top Performing Doctors */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Award className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Top Performing Doctors</h3>
-          </div>
-          <div className="space-y-4">
-            {processedData.doctorPerformance.map((doctor, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-teal-600">#{index + 1}</span>
+      {/* Bottom Performance & Actions Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Top Doctors */}
+        <div className="bg-white rounded-[3rem] p-10 border border-gray-100 shadow-sm">
+          <h3 className="text-xl font-black italic text-gray-900 mb-8 lowercase text-teal-600">elite performers</h3>
+          <div className="space-y-6">
+            {processedData.doctorPerformance.map((doc: any, i: number) => (
+              <div key={i} className="flex items-center justify-between group cursor-default">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 font-black italic group-hover:bg-pink-50 group-hover:text-pink-600 transition-colors">
+                    {i + 1}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{doctor.name}</p>
-                    <p className="text-sm text-gray-600">{doctor.specialization}</p>
+                    <p className="text-sm font-black text-gray-900 lowercase">{doc.name}</p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{doc.spec}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">
-                    KSh {doctor.revenue.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-600">{doctor.appointments} appointments</p>
+                  <p className="text-sm font-black italic text-gray-900">kes {doc.rev.toLocaleString()}</p>
+                  <p className="text-[10px] font-bold text-teal-500 uppercase">growth positive</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Additional Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* System Health */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Target className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">System Health</h3>
-          </div>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Average Appointment Value</span>
-              <span className="font-semibold">
-                KSh {processedData.overview.averageAppointmentValue.toFixed(0)}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Total Prescriptions</span>
-              <span className="font-semibold">{processedData.overview.totalPrescriptions}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Total Complaints</span>
-              <span className="font-semibold">{processedData.overview.totalComplaints}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Doctor Utilization</span>
-              <span className="font-semibold">
-                {(
-                  ((processedData.overview.totalAppointments /
-                    processedData.overview.totalDoctors) *
-                    100) /
-                  30
-                ).toFixed(1)}
-                %
-              </span>
+        {/* Quick Intelligence Actions */}
+        <div className="bg-gradient-to-br from-[#004d4d] to-[#006666] rounded-[3rem] p-10 text-white flex flex-col justify-between shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+          <div className="relative z-10">
+            <h3 className="text-2xl font-black italic mb-2 lowercase tracking-tight">intelligence tools</h3>
+            <p className="text-teal-100/60 text-sm font-medium mb-8">generate and export detailed system audits</p>
+            
+            <div className="space-y-3">
+              <button 
+                onClick={() => setShowReportGenerator(true)}
+                className="w-full bg-white/10 hover:bg-white/20 border border-white/10 p-4 rounded-2xl flex items-center justify-between group transition-all"
+              >
+                <span className="text-sm font-bold lowercase italic">generate system audit</span>
+                <Download size={18} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button className="w-full bg-pink-500 hover:bg-pink-600 p-4 rounded-2xl flex items-center justify-between group transition-all">
+                <span className="text-sm font-bold lowercase italic text-white">export financial ledger</span>
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
           </div>
-        </div>
-
-        {/* Complaint Status */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Complaint Status</h3>
-          </div>
-          <div className="space-y-3">
-            {processedData.complaintStatusData.map((status, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
-                  <span className="text-sm text-gray-600">{status.name}</span>
-                </div>
-                <span className="font-medium">{status.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <MapPin className="h-5 w-5 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
-          </div>
-          <div className="space-y-3">
-            <button
-              onClick={() => setShowReportGenerator(true)}
-              className="w-full bg-teal-50 hover:bg-teal-100 text-teal-700 p-3 rounded-lg text-sm font-medium transition-colors"
-            >
-              Generate Monthly Report
-            </button>
-            <button className="w-full bg-green-50 hover:bg-green-100 text-green-700 p-3 rounded-lg text-sm font-medium transition-colors">
-              Export Financial Data
-            </button>
-            <button className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 p-3 rounded-lg text-sm font-medium transition-colors">
-              View Detailed Analytics
-            </button>
-            <button className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 p-3 rounded-lg text-sm font-medium transition-colors">
-              System Performance
-            </button>
+          <div className="mt-8 pt-8 border-t border-white/10 flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-teal-200/50">
+            <span>reconciliation active</span>
+            <span>sync: 100%</span>
           </div>
         </div>
       </div>
 
-      {/* Report Generator Modal */}
-      <AdminSystemReport
-        isOpen={showReportGenerator}
-        onClose={() => setShowReportGenerator(false)}
-      />
+      <AdminSystemReport isOpen={showReportGenerator} onClose={() => setShowReportGenerator(false)} />
     </div>
   );
 };

@@ -1,88 +1,30 @@
-// import { useEffect } from 'react';
-// import { useLocation } from 'react-router';
-// import { useGetServiceByTitleQuery } from '../../../src/reducers/services/servicesAPI';
-// import { CheckCircle } from 'lucide-react';
-// import { slugToTitleMap } from './slug';
-
-// const Orthopedics = () => {
-//   const location = useLocation();
-
-//   // Extract the slug from the URL (e.g., "emergencycare")
-//   const slug = decodeURIComponent(location.pathname.split('/service/')[1]);
-
-//   // Convert slug to the proper title (e.g., "Emergency Care")
-//   const title = slugToTitleMap[slug];
-
-//   const { data: service, isLoading, isError } = useGetServiceByTitleQuery(title, {
-//     skip: !title, //skip query if title is undefined
-//     refetchOnMountOrArgChange: true,
-//   });
-
-//   useEffect(() => {
-//     window.scrollTo(0, 0);
-//   }, []);
-
-//   if (!title) {
-//     return <div className="text-center mt-10 text-red-500">Invalid service URL.</div>;
-//   }
-
-//   if (isLoading) {
-//     return <div className="text-center mt-10 text-gray-600">Loading service...</div>;
-//   }
-
-//   if (isError || !service) {
-//     return <div className="text-center mt-10 text-red-500">Service not found.</div>;
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-white py-20 px-4 sm:px-6 lg:px-8">
-//       <div className="max-w-4xl mx-auto">
-//         <h1 className="text-4xl font-bold text-gray-900 mb-6">{service.title}</h1>
-//         <p className="text-lg text-gray-700 mb-8">{service.description}</p>
-
-//         <h2 className="text-2xl font-semibold text-gray-900 mb-4">Features</h2>
-//         <ul className="space-y-3">
-//           {service.features?.map((feature: string, index: number) => (
-//             <li key={index} className="flex items-start gap-2 text-gray-800">
-//               <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
-//               {feature}
-//             </li>
-//           ))}
-//         </ul>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Orthopedics;
 import { useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate, Link } from 'react-router';
 import { useGetServiceByTitleQuery } from '../../../src/reducers/services/servicesAPI';
 import {
   CheckCircle,
-  Bone, // Main icon for Orthopedics
-  Award,
+  Bone,
   Footprints,
   Scan,
+  ArrowLeft,
+  Activity,
+  Zap,
 } from 'lucide-react';
 import { slugToTitleMap } from './slug';
 
 const Orthopedics = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Extract the slug from the URL (e.g., "orthopedics")
   const slug = decodeURIComponent(location.pathname.split('/service/')[1]);
-
-  // Convert slug to the proper title (e.g., "Orthopedics")
   const title = slugToTitleMap[slug];
 
-  // Fetch the service data based on the title
   const {
     data: service,
     isLoading,
     isError,
   } = useGetServiceByTitleQuery(title, {
-    skip: !title, // Skip query if title is undefined
+    skip: !title,
     refetchOnMountOrArgChange: true,
   });
 
@@ -90,81 +32,60 @@ const Orthopedics = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Define static exhaustive content for Orthopedics
+  const navigateAndScroll = (sectionId: string) => {
+    if (window.location.pathname === '/') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(`/#${sectionId}`);
+    }
+  };
+
   const exhaustiveOrthopedicsContent = {
     sections: [
       {
         title: 'The Scope of Orthopedics',
-        icon: <Bone className="h-8 w-8 text-teal-600" />,
+        icon: <Bone size={24} />,
         paragraphs: [
-          "Orthopedics is the medical specialty focused on the **musculoskeletal system**, which includes bones, joints, ligaments, tendons, muscles, and nerves. Orthopedic surgeons (often simply called orthopedists) diagnose, treat, prevent, and rehabilitate injuries and diseases that affect this vital system, enabling patients to regain mobility and reduce pain. It's a field dedicated to restoring function and improving quality of life for individuals of all ages.",
+          'Orthopedics focuses on the musculoskeletal system—bones, joints, ligaments, and muscles. Our specialists work to restore mobility and reduce pain through advanced surgical and non-surgical interventions.',
         ],
         features: [
-          '**Fractures and Trauma:** Managing and treating broken bones, dislocations, and other acute injuries resulting from accidents or falls.',
-          '**Arthritis:** Treating various forms of arthritis (e.g., osteoarthritis, rheumatoid arthritis) that cause joint pain, stiffness, and inflammation, often leading to joint replacement surgery.',
-          '**Sports Injuries:** Diagnosing and treating injuries common in athletes, such as ACL tears, meniscus tears, rotator cuff tears, sprains, and strains.',
-          '**Spinal Disorders:** Addressing conditions of the spine, including scoliosis, disc herniations, spinal stenosis, and degenerative disc disease, which can cause back and neck pain.',
-          '**Joint Pain and Disorders:** Managing chronic pain and dysfunction in joints like the knees, hips, shoulders, and ankles, often requiring arthroscopy or joint reconstruction.',
-          '**Ligament and Tendon Injuries:** Repairing or reconstructing damaged ligaments (e.g., ACL, MCL) and tendons (e.g., Achilles tendon, rotator cuff).',
-          '**Bone Tumors:** Diagnosing and treating cancerous and non-cancerous tumors affecting bone tissue.',
-          '**Congenital Conditions:** Addressing musculoskeletal deformities present at birth, such as clubfoot or developmental dysplasia of the hip.',
-          '**Osteoporosis:** Managing this bone-weakening disease to prevent fractures and maintain bone density.',
+          '**Fracture Care:** Precision stabilization and healing for acute bone injuries.',
+          '**Sports Medicine:** Treatment for ACL tears, rotator cuff injuries, and sprains.',
+          '**Arthritis Care:** Comprehensive management of joint inflammation and wear.',
+          '**Spinal Health:** Addressing disc herniations, scoliosis, and chronic back pain.',
         ],
       },
       {
-        title: 'Diagnostic Tools and Techniques',
-        icon: <Scan className="h-8 w-8 text-teal-600" />,
+        title: 'Advanced Diagnostics',
+        icon: <Scan size={24} />,
         paragraphs: [
-          'Orthopedists utilize a range of diagnostic tools to accurately assess musculoskeletal conditions, guiding precise treatment plans:',
+          'We use high-resolution imaging and minimally invasive techniques to accurately map musculoskeletal damage.',
         ],
         features: [
-          '**X-rays:** The most common diagnostic tool for visualizing bones, identifying fractures, dislocations, and arthritic changes.',
-          '**Magnetic Resonance Imaging (MRI):** Provides detailed images of soft tissues (ligaments, tendons, muscles, cartilage), crucial for diagnosing sports injuries, disc herniations, and certain tumors.',
-          '**Computed Tomography (CT) Scans:** Offers cross-sectional images of bone and soft tissue, valuable for complex fractures, spinal conditions, and surgical planning.',
-          '**Ultrasound:** Used to visualize soft tissue structures like tendons, ligaments, and muscles, and can guide injections.',
-          '**Bone Scans:** Detects bone abnormalities, infections, fractures, and tumors by identifying areas of increased bone metabolism.',
-          '**Arthroscopy:** A minimally invasive procedure where a small camera is inserted into a joint to visualize, diagnose, and treat internal joint problems.',
-          '**Electromyography (EMG) & Nerve Conduction Studies (NCS):** Evaluate nerve and muscle function, used for diagnosing nerve impingement or muscle disorders.',
-        ],
-      },
-      {
-        title: 'Treatment Approaches in Orthopedics',
-        icon: <Footprints className="h-8 w-8 text-teal-600" />, // Changed icon
-        paragraphs: [
-          'Orthopedic treatment plans are highly tailored, ranging from conservative management to advanced surgical interventions, with the goal of restoring function and alleviating pain:',
-        ],
-        features: [
-          '**Non-Surgical Management:** Includes physical therapy, occupational therapy, bracing, casting, anti-inflammatory medications, pain relievers, and corticosteroid injections.',
-          '**Arthroscopy:** Minimally invasive surgery to diagnose and treat joint problems (e.g., knee, shoulder, hip) with smaller incisions and faster recovery.',
-          '**Joint Replacement Surgery (Arthroplasty):** Replacing damaged joint surfaces with artificial implants, commonly performed for hips, knees, and shoulders affected by severe arthritis.',
-          '**Fracture Repair:** Surgical fixation of broken bones using plates, screws, rods, or pins to stabilize and promote healing.',
-          '**Spinal Surgery:** Procedures for disc herniations (discectomy), spinal fusion, laminectomy, and correction of spinal deformities (e.g., scoliosis).',
-          '**Ligament and Tendon Repair/Reconstruction:** Surgical procedures to repair torn ligaments (e.g., ACL reconstruction) or tendons (e.g., rotator cuff repair).',
-          '**Hand and Wrist Surgery:** Addressing conditions like carpal tunnel syndrome, trigger finger, and fractures.',
-          '**Foot and Ankle Surgery:** Treating bunions, hammertoes, Achilles tendon ruptures, and various foot deformities.',
-        ],
-      },
-      {
-        title: 'Rehabilitation and Prevention',
-        icon: <Award className="h-8 w-8 text-teal-600" />,
-        paragraphs: [
-          'Rehabilitation is a cornerstone of orthopedic care, often involving physical therapy, occupational therapy, and pain management to restore strength, flexibility, and function after injury or surgery. Prevention focuses on maintaining bone health, practicing proper ergonomics, warming up before exercise, and using protective gear during sports.',
-          'The field of orthopedics is continuously advancing, with innovations in minimally invasive surgery, biologic treatments (like PRP and stem cell therapy), custom implants, and robotic-assisted surgery leading to better patient outcomes, faster recovery times, and more personalized care. These advancements are transforming the lives of countless individuals suffering from musculoskeletal conditions.',
+          '**Digital X-Ray:** Instant visualization of bone structure and alignment.',
+          '**High-Field MRI:** Detailed views of ligaments, tendons, and cartilage.',
+          '**Arthroscopy:** Minimally invasive internal visualization of joint health.',
+          '**Bone Density Scans:** Monitoring osteoporosis and fracture risks.',
         ],
       },
     ],
   };
 
-  // --- Render Logic ---
-
-  if (!title) {
+  if (!title || isError || (!isLoading && !service)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <p className="text-2xl text-red-600 font-semibold mb-4">Invalid Service URL</p>
-          <p className="text-700">
-            The URL you're trying to access is not a recognized service. Please check and try again.
-          </p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-black text-[#003d3d] uppercase italic">Service Not Found</h2>
+          <div
+            onClick={() => navigateAndScroll('services')}
+            className="inline-flex items-center gap-2 text-[#00a18e] text-[10px] font-black uppercase tracking-widest mt-4 hover:text-pink-500 transition-colors cursor-pointer group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Back to all services
+          </div>
         </div>
       </div>
     );
@@ -172,114 +93,115 @@ const Orthopedics = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <span className="loading loading-spinner loading-lg text-teal-600"></span>
-          <p className="text-xl text-gray-700 mt-4">Loading service details...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#003d3d]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#00a18e] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-white font-black uppercase tracking-widest text-xs">Analyzing Structural Integrity</p>
         </div>
       </div>
     );
   }
 
-  // Handle case where service is not found after loading
-  if (isError || !service) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <p className="text-2xl text-red-600 font-semibold mb-4">Service Not Found</p>
-          <p className="text-gray-700">
-            The service "{title}" could not be found. It might not exist or there was an issue
-            fetching it.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Assuming 'service' now contains the fetched Orthopedics data
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {/* === Fetched Service Details Section (Hero/Header Card) === */}
-        <div className="relative bg-gradient-to-br from-teal-500 to-pink-500 text-white p-8 md:p-12 lg:p-16">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left flex-1">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">
-                {service.title}
+    <div className="min-h-screen bg-[#fcfcfc]">
+      {/* --- PREMIUM HERO SECTION --- */}
+      <div className="bg-[#003d3d] pt-24 pb-16 px-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#00a18e] rounded-full blur-[150px] opacity-10"></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div
+            onClick={() => navigateAndScroll('services')}
+            className="inline-flex items-center gap-2 text-[#00a18e] text-[10px] font-black uppercase tracking-widest mb-8 hover:text-white transition-colors cursor-pointer group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+            Back to all services
+          </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-3xl">
+              <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase mb-4">
+                {service.title}<span className="text-[#00a18e]">.</span>
               </h1>
-              <p className="text-lg sm:text-xl opacity-90 max-w-3xl">{service.description}</p>
+              <p className="text-teal-100/60 text-lg font-medium leading-relaxed">
+                {service.description}
+              </p>
             </div>
-            <div className="hidden md:block">
-              <Bone className="w-24 h-24 opacity-20" /> {/* Main icon for Orthopedics */}
+            <div className="hidden lg:block bg-white/5 p-8 rounded-[40px] border border-white/10 backdrop-blur-sm">
+              <Bone size={64} className="text-[#00a18e] animate-pulse" />
             </div>
           </div>
-          {service.features && service.features.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-white border-opacity-30">
-              <h2 className="text-2xl font-semibold text-white mb-4">Our Key Features</h2>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-lg">
-                {service.features.map((feature: string, index: number) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-teal-200" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
+      </div>
 
-        {/* === Exhaustive Static Content Sections === */}
-        <div className="p-8 md:p-12 lg:p-16 space-y-12">
-          {exhaustiveOrthopedicsContent.sections.map((section, sectionIndex) => (
-            <div
-              key={sectionIndex}
-              className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100"
-            >
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 pb-3 flex items-center gap-3 border-b border-gray-200">
-                {section.icon}
-                {section.title}
-              </h2>
-              {section.paragraphs &&
-                section.paragraphs.map((paragraph, pIndex) => (
-                  <p key={`p-${pIndex}`} className="text-lg text-gray-700 mb-4 leading-relaxed">
-                    {paragraph}
-                  </p>
+      {/* --- CONTENT AREA --- */}
+      <div className="max-w-7xl mx-auto px-4 -mt-10 pb-24 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <div className="lg:col-span-2 space-y-8">
+            {/* Orthopedic Highlights */}
+            {service.features && (
+              <div className="bg-white rounded-[40px] shadow-2xl shadow-gray-200/50 p-8 md:p-12 border border-gray-100">
+                <h2 className="text-2xl font-black text-[#003d3d] uppercase tracking-tight mb-8 flex items-center gap-3">
+                  <div className="bg-teal-50 p-2 rounded-xl text-[#00a18e]"><Zap size={20}/></div>
+                  Mobility & Recovery
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {service.features.map((feature: string, i: number) => (
+                    <div key={i} className="flex items-center gap-4 p-5 bg-gray-50 rounded-3xl border border-gray-100 hover:border-[#00a18e]/30 transition-all group">
+                      <CheckCircle className="text-[#00a18e] group-hover:scale-110 transition-transform" size={20} />
+                      <span className="font-bold text-[#003d3d] text-sm uppercase">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Exhaustive Content Sections */}
+            {exhaustiveOrthopedicsContent.sections.map((section, idx) => (
+              <div key={idx} className="bg-white rounded-[40px] shadow-xl p-8 md:p-12 border border-gray-100">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="bg-[#003d3d] text-white p-3 rounded-2xl shadow-lg shadow-teal-900/20">
+                    {section.icon}
+                  </div>
+                  <h3 className="text-2xl font-black text-[#003d3d] uppercase tracking-tight">{section.title}</h3>
+                </div>
+                
+                {section.paragraphs.map((p, pi) => (
+                  <p key={pi} className="text-gray-600 text-lg leading-relaxed mb-8">{p}</p>
                 ))}
 
-              {section.features && section.features.length > 0 && (
-                <ul className="space-y-4 text-lg mt-6">
-                  {section.features.map((feature: string, featureIndex: number) => (
-                    <li
-                      key={`feature-${featureIndex}`}
-                      className="flex items-start gap-3 text-gray-800 p-3 bg-gray-50 rounded-lg shadow-sm"
-                    >
-                      <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
-                      {/* Using dangerouslySetInnerHTML to render bold markdown within strings */}
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: feature.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
-                        }}
+                <div className="space-y-4">
+                  {section.features.map((feature, fi) => (
+                    <div key={fi} className="flex gap-4 items-start p-4 rounded-2xl bg-teal-50/30 border-l-4 border-[#00a18e]">
+                      <span className="text-sm text-gray-700 leading-relaxed" 
+                        dangerouslySetInnerHTML={{ __html: feature.replace(/\*\*(.*?)\*\*/g, '<b class="text-[#003d3d] font-black uppercase text-[12px]">$1</b>') }} 
                       />
-                    </li>
+                    </div>
                   ))}
-                </ul>
-              )}
-            </div>
-          ))}
-
-          {/* Concluding Section for overall Orthopedics */}
-          <div className="text-center mt-16 bg-gradient-to-r from-teal-50 to-pink-50 p-8 rounded-2xl shadow-inner">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Restoring Movement, Relieving Pain, Enhancing Life
-            </h3>
-            <p className="text-xl text-gray-700 max-w-4xl mx-auto">
-              Orthopedics is a dynamic and essential field dedicated to improving the lives of
-              individuals by addressing disorders of the musculoskeletal system. Through continuous
-              innovation in surgical techniques, rehabilitation, and preventive strategies,
-              orthopedists strive to restore mobility, alleviate pain, and enable patients to return
-              to their active lives.
-            </p>
+                </div>
+              </div>
+            ))}
           </div>
+
+          {/* Sidebar */}
+          <div className="space-y-8">
+            <div className="bg-[#f43f8e] rounded-[40px] p-10 text-white shadow-2xl shadow-pink-200 sticky top-24">
+              <Footprints className="mb-6 opacity-50" size={40} />
+              <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">Regain Your Strength</h3>
+              <p className="text-pink-100 font-medium mb-8">
+                Don't let joint pain hold you back. Schedule a consultation with our surgical experts.
+              </p>
+              <Link to="/appointments" className="block w-full bg-white text-[#f43f8e] text-center py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-pink-50 transition-colors shadow-lg">
+                Book Consultation
+              </Link>
+            </div>
+
+            <div className="bg-[#003d3d] rounded-[40px] p-10 text-white overflow-hidden relative">
+              <Activity className="absolute -bottom-4 -right-4 text-white/5 w-32 h-32" />
+              <h4 className="text-xs font-black uppercase tracking-[0.3em] text-[#00a18e] mb-2">Advancement</h4>
+              <p className="text-xl font-bold italic mb-0">Joint Restoration</p>
+              <p className="text-3xl font-black mt-2">Robotic Surgery</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

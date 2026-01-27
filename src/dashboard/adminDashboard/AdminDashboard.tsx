@@ -14,52 +14,74 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Navbar */}
+    <div className="flex flex-col min-h-screen bg-white">
+      {/* Top Navbar */}
       <Navbar />
 
-      {/* Content layout wrapper */}
-      <div className="flex flex-1">
-        {/* Sidebar */}
+      <div className="flex flex-1 relative">
+        {/* Mobile Sidebar Overlay */}
+        {drawerOpen && (
+          <div 
+            className="fixed inset-0 bg-black/40 z-40 lg:hidden backdrop-blur-sm"
+            onClick={handleDrawerToggle}
+          />
+        )}
+
+        {/* Sidebar - Deep Teal #003d3d */}
         <aside
           className={`
-            bg-gradient-to-b from-teal-700 to-pink-700 text-white w-64 
-            lg:block ${drawerOpen ? 'block fixed z-50 h-full' : 'hidden'} 
+            bg-[#003d3d] text-white w-72 transition-all duration-300
+            lg:block ${drawerOpen ? 'fixed inset-y-0 left-0 z-50' : 'hidden'} 
             lg:static
           `}
         >
-          {/* Close button for mobile */}
-          <div className="relative h-full">
-            <button
-              className="absolute top-4 right-4 text-white text-2xl lg:hidden"
-              onClick={handleDrawerToggle}
-            >
-              <IoCloseSharp />
-            </button>
+          <div className="h-full flex flex-col">
             <AdminDrawer />
           </div>
         </aside>
 
-        {/* Main section */}
-        <div className="flex flex-col flex-1">
-          {/* Top bar */}
-          <div className="flex items-center px-4 py-4 bg-gray-900">
-            <button className="mr-4 text-white text-2xl lg:hidden" onClick={handleDrawerToggle}>
-              {drawerOpen ? <IoCloseSharp /> : <FaBars />}
-            </button>
-            <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-pink-400 text-2xl font-extrabold shadow-md">
-              Welcome to your Admin dashboard
-            </h1>
-          </div>
+        {/* Main Content Area */}
+        <div className="flex flex-col flex-1 min-w-0">
+          {/* Dashboard Sub-Header */}
+          <header className="flex items-center justify-between px-8 py-6 bg-white border-b border-gray-100">
+            <div className="flex items-center gap-4">
+              <button 
+                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg lg:hidden" 
+                onClick={handleDrawerToggle}
+              >
+                {drawerOpen ? <IoCloseSharp size={24} /> : <FaBars size={22} />}
+              </button>
+              
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 leading-none">
+                  Welcome to your <span className="text-[#d91e5b]">Admin dashboard</span>
+                </h1>
+                <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest mt-2">
+                  CARECONNECT MANAGEMENT SUITE
+                </p>
+              </div>
+            </div>
 
-          {/* Main content */}
-          <main className="flex-1 bg-gradient-to-br from-teal-50 to-pink-50 p-4">
-            <Outlet />
+            <div className="hidden md:block text-right">
+              <p className="text-sm font-medium text-gray-600">
+                {new Date().toLocaleDateString('en-GB', { 
+                  weekday: 'long', 
+                  day: 'numeric', 
+                  month: 'long' 
+                })}
+              </p>
+            </div>
+          </header>
+
+          {/* Main Content Area */}
+          <main className="flex-1 bg-[#f9fafb] p-6 lg:p-10 overflow-y-auto">
+            <div className="max-w-400 mx-auto">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

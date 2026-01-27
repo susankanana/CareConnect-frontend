@@ -7,9 +7,11 @@ import {
   Stethoscope,
   XCircle,
   Clock,
-  CreditCard,
   Phone,
   Mail,
+  Loader,
+  Receipt,
+  Search,
 } from 'lucide-react';
 import { useState } from 'react';
 import UpdateAppointment from './UpdateAppointment';
@@ -28,6 +30,14 @@ const AdminAppointments = () => {
 
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [appointmentToDelete, setAppointmentToDelete] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState(''); // State for search
+
+  const appointments = appointmentsData?.data || [];
+
+  // FILTER LOGIC: Search by Appointment ID
+  const filteredAppointments = appointments.filter((apt: any) =>
+    apt.appointmentId.toString().includes(searchTerm.trim())
+  );
 
   const handleEdit = (appointment: any) => {
     setSelectedAppointment(appointment);
@@ -39,16 +49,12 @@ const AdminAppointments = () => {
     (document.getElementById('delete_appointment_modal') as HTMLDialogElement)?.showModal();
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusStyles = (status: string) => {
     switch (status) {
-      case 'Confirmed':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'Pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Cancelled':
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'Confirmed': return 'bg-white border-green-200 text-green-600';
+      case 'Pending': return 'bg-white border-yellow-200 text-yellow-600';
+      case 'Cancelled': return 'bg-white border-red-200 text-red-600';
+      default: return 'bg-white border-blue-200 text-blue-600';
     }
   };
 
@@ -60,208 +66,123 @@ const AdminAppointments = () => {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-        <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <p className="text-red-700 text-lg font-semibold">Error fetching appointments</p>
-        <p className="text-red-600 mt-2">Please try again later</p>
-      </div>
-    );
-  }
+  if (isLoading) return (
+    <div className="flex justify-center items-center min-h-[400px]">
+      <Loader className="animate-spin text-teal-600" size={40} />
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Calendar className="h-7 w-7 text-teal-600" />
-              Appointments Management
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Manage patient appointments - {appointmentsData?.data?.length || 0} total appointments
-            </p>
+    <div className="max-w-7xl mx-auto p-4 space-y-8">
+      {/* Chique Header */}
+      <div className="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-2xl border border-gray-100 shadow-sm gap-6">
+        <div className="flex items-center gap-5">
+          <div className="bg-teal-50 p-4 rounded-2xl">
+            <Calendar className="h-8 w-8 text-teal-600" />
           </div>
+          <div>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Clinic Schedule</h1>
+            <p className="text-gray-500 text-sm font-medium">Managing {filteredAppointments.length} records</p>
+          </div>
+        </div>
+        
+        {/* Search Bar Implementation */}
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-teal-500" size={18} />
+          <input 
+            type="text" 
+            placeholder="Search Appointment ID..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-teal-100 rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-teal-500/10 transition-all" 
+          />
         </div>
       </div>
 
-      {/* Modals */}
       <UpdateAppointment appointment={selectedAppointment} refetch={refetch} />
       <DeleteAppointment appointment={appointmentToDelete} refetch={refetch} />
 
-      {/* Appointments Grid */}
-      {appointmentsData && appointmentsData.data && appointmentsData.data.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {appointmentsData.data.map((appointment: any) => (
-            <div
-              key={appointment.appointmentId}
-              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden"
-            >
-              {/* Appointment Header */}
-              <div className="bg-gradient-to-r from-teal-50 to-pink-50 p-4 border-b">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">
-                      Appointment #{appointment.appointmentId}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Calendar className="h-4 w-4 text-teal-600" />
-                      <span className="text-sm text-gray-600">
-                        {new Date(appointment.appointmentDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <span
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(appointment.appointmentStatus)}`}
-                  >
-                    <Clock className="h-3 w-3" />
-                    {appointment.appointmentStatus}
-                  </span>
-                </div>
+      {/* Grid using Filtered Results */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {filteredAppointments.map((apt: any) => (
+          <div key={apt.appointmentId} className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-all">
+            
+            <div className="p-4 border-b bg-gray-50/30 flex justify-between items-center">
+              <div className="flex items-center gap-2 text-gray-400">
+                <Receipt size={14} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Record #{apt.appointmentId}</span>
               </div>
-
-              {/* Appointment Details */}
-              <div className="p-6">
-                {/* Patient Information */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <User className="h-4 w-4 text-teal-600" />
-                    Patient Information
-                  </h4>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="font-medium text-gray-900">
-                      {appointment.patient?.name} {appointment.patient?.lastName}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Mail className="h-3 w-3 text-gray-400" />
-                      <span className="text-sm text-gray-600">{appointment.patient?.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Phone className="h-3 w-3 text-gray-400" />
-                      <span className="text-sm text-gray-600">
-                        {appointment.patient?.contactPhone}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Doctor Information */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <Stethoscope className="h-4 w-4 text-teal-600" />
-                    Doctor Information
-                  </h4>
-                  <div className="bg-teal-50 rounded-lg p-3">
-                    <p className="font-medium text-gray-900">
-                      Dr. {appointment.doctor?.name} {appointment.doctor?.lastName}
-                    </p>
-                    <p className="text-sm text-teal-600 font-medium">
-                      {appointment.doctor?.specialization}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Appointment Details */}
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <Clock className="h-4 w-4 text-teal-500" />
-                    <span className="text-sm">
-                      <span className="font-medium">Time:</span>{' '}
-                      {formatTimeSlot(appointment.timeSlot)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <CreditCard className="h-4 w-4 text-teal-500" />
-                    <span className="text-sm">
-                      <span className="font-medium">Amount:</span>
-                      <span className="text-lg font-bold text-teal-600 ml-1">
-                        KSh {parseFloat(appointment.totalAmount).toFixed(2)}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    data-test="edit-appointment-button"
-                    onClick={() => handleEdit(appointment)}
-                    className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-teal-200"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </button>
-                  <button
-                    data-test="delete-appointment-button"
-                    onClick={() => handleDelete(appointment)}
-                    className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-red-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </button>
-                </div>
+              <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusStyles(apt.appointmentStatus)}`}>
+                {apt.appointmentStatus}
               </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-          <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No appointments found</h3>
-          <p className="text-gray-600 mb-6">
-            Appointments will appear here once patients start booking
-          </p>
-        </div>
-      )}
 
-      {/* Summary Stats */}
-      {appointmentsData && appointmentsData.data && appointmentsData.data.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Appointments Summary</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-teal-50 rounded-lg">
-              <div className="text-2xl font-bold text-teal-600">{appointmentsData.data.length}</div>
-              <div className="text-sm text-gray-600">Total Appointments</div>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                {
-                  appointmentsData.data.filter((apt: any) => apt.appointmentStatus === 'Confirmed')
-                    .length
-                }
+            <div className="p-6 space-y-5 grow">
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 shrink-0">
+                  <User size={24} />
+                </div>
+                <div>
+                  <h3 className="font-black text-gray-900 text-lg uppercase leading-tight">
+                    {apt.patient?.name} {apt.patient?.lastName}
+                  </h3>
+                  <div className="flex flex-col mt-1 gap-0.5">
+                    <span className="text-xs text-gray-400 font-medium flex items-center gap-1"><Mail size={12} /> {apt.patient?.email}</span>
+                    <span className="text-xs text-gray-400 font-medium flex items-center gap-1"><Phone size={12} /> {apt.patient?.contactPhone}</span>
+                  </div>
+                </div>
               </div>
-              <div className="text-sm text-gray-600">Confirmed</div>
-            </div>
-            <div className="text-center p-4 bg-yellow-50 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600">
-                {
-                  appointmentsData.data.filter((apt: any) => apt.appointmentStatus === 'Pending')
-                    .length
-                }
+
+              <div className="grid grid-cols-2 gap-2 py-4 border-y border-dashed border-gray-100">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Calendar size={14} className="text-teal-500" />
+                  <span className="text-xs font-bold uppercase">{new Date(apt.appointmentDate).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-600 justify-end">
+                  <Clock size={14} className="text-teal-500" />
+                  <span className="text-xs font-bold">{formatTimeSlot(apt.timeSlot)}</span>
+                </div>
               </div>
-              <div className="text-sm text-gray-600">Pending</div>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-gray-600">
-                KSh{' '}
-                {appointmentsData.data
-                  .reduce((total: number, apt: any) => total + parseFloat(apt.totalAmount), 0)
-                  .toFixed(0)}
+
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-pink-50 rounded-lg">
+                  <Stethoscope size={16} className="text-pink-500" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Doctor</p>
+                  <p className="text-sm font-bold text-gray-800">Dr. {apt.doctor?.name} {apt.doctor?.lastName}</p>
+                </div>
               </div>
-              <div className="text-sm text-gray-600">Total Revenue</div>
+
+              <div className="pt-2">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Total Fee</p>
+                <p className="text-2xl font-black text-gray-900">KSh {parseFloat(apt.totalAmount).toLocaleString()}</p>
+              </div>
+            </div>
+
+            {/* UPDATED: Buttons matching requested color */}
+            <div className="p-6 pt-0 mt-auto flex gap-3">
+              <button
+                onClick={() => handleEdit(apt)}
+                className="flex-1 border border-teal-400 text-teal-600 bg-teal-50/30 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-teal-50 transition-all flex items-center justify-center gap-2 active:scale-95"
+              >
+                <Edit size={16} /> Edit Record
+              </button>
+              <button
+                onClick={() => handleDelete(apt)}
+                className="px-4 py-3 bg-white text-red-500 border border-red-100 rounded-2xl font-black hover:bg-red-50 transition-all active:scale-95"
+              >
+                <Trash2 size={18} />
+              </button>
             </div>
           </div>
+        ))}
+      </div>
+      
+      {/* Show message if search has no results */}
+      {filteredAppointments.length === 0 && (
+        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+          <p className="text-gray-400 font-bold uppercase tracking-widest">No matching IDs found</p>
         </div>
       )}
     </div>

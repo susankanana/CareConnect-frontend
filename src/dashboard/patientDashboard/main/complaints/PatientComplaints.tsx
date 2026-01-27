@@ -9,6 +9,7 @@ import {
   AlertCircle,
   Clock,
   CheckCircle,
+  Hash,
 } from 'lucide-react';
 import CreateComplaint from './CreateComplaint';
 
@@ -27,246 +28,180 @@ const PatientComplaints = () => {
     pollingInterval: 60000,
   });
 
-  const getStatusColor = (status: string) => {
+  const getStatusStyles = (status: string) => {
     switch (status) {
       case 'Open':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-50 text-red-600 border-red-100';
       case 'In Progress':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-amber-50 text-amber-600 border-amber-100';
       case 'Resolved':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
       case 'Closed':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-50 text-gray-500 border-gray-100';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-50 text-gray-500 border-gray-100';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'Open':
-        return <AlertCircle className="h-3 w-3" />;
-      case 'In Progress':
-        return <Clock className="h-3 w-3" />;
-      case 'Resolved':
-        return <CheckCircle className="h-3 w-3" />;
-      case 'Closed':
-        return <XCircle className="h-3 w-3" />;
-      default:
-        return <AlertCircle className="h-3 w-3" />;
+      case 'Open': return <AlertCircle size={14} />;
+      case 'In Progress': return <Clock size={14} />;
+      case 'Resolved': return <CheckCircle size={14} />;
+      case 'Closed': return <XCircle size={14} />;
+      default: return <AlertCircle size={14} />;
     }
   };
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+        <span className="loading loading-spinner text-teal-600 w-12"></span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-        <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <p className="text-red-700 text-lg font-semibold">Error fetching complaints</p>
-        <p className="text-red-600 mt-2">Please try again later</p>
+      <div className="bg-white border border-red-100 rounded-[2.5rem] p-12 text-center shadow-sm">
+        <XCircle className="h-16 w-16 text-red-400 mx-auto mb-4" />
+        <h2 className="text-xl font-black text-gray-900">Connection Issue</h2>
+        <p className="text-gray-500 mt-2 font-medium">We couldn't load your complaints. Please check your internet.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <MessageSquare className="h-7 w-7 text-teal-600" />
-              My Complaints
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Submit and track your feedback - {complaintsData?.data?.length || 0} total complaints
-            </p>
+    <div className="max-w-7xl mx-auto space-y-8 pb-10">
+      {/* Premium Header */}
+      <section className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="bg-teal-600 p-3 rounded-2xl text-white shadow-lg shadow-teal-100">
+            <MessageSquare size={24} />
           </div>
-          <button
-            data-test="open-create-complaint-btn"
-            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-md"
-            onClick={() =>
-              (document.getElementById('create_complaint_modal') as HTMLDialogElement)?.showModal()
-            }
-          >
-            <Plus className="h-5 w-5" />
-            Submit New Complaint
-          </button>
+          <div>
+            <h1 className="text-2xl font-black text-gray-900">Support & Feedback</h1>
+            <p className="text-gray-500 text-sm font-medium">Track and manage your submitted concerns</p>
+          </div>
         </div>
-      </div>
 
-      {/* Modal */}
+        <button
+          className="w-full md:w-auto bg-teal-600 hover:bg-teal-700 text-white px-8 py-4 rounded-2xl font-black transition-all shadow-lg shadow-teal-100 flex items-center justify-center gap-2 active:scale-95"
+          onClick={() => (document.getElementById('create_complaint_modal') as HTMLDialogElement)?.showModal()}
+        >
+          <Plus size={20} /> Submit New Complaint
+        </button>
+      </section>
+
       <CreateComplaint refetch={refetch} />
 
       {/* Complaints Grid */}
-      {complaintsData && complaintsData.data && complaintsData.data.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {complaintsData?.data && complaintsData.data.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {complaintsData.data.map((complaint: TComplaint) => (
             <div
               key={complaint.complaintId}
-              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden"
+              className="bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden"
             >
-              {/* Complaint Header */}
-              <div className="bg-gradient-to-r from-teal-50 to-pink-50 p-4 border-b">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">
-                      Complaint #{complaint.complaintId}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Calendar className="h-4 w-4 text-teal-600" />
-                      <span className="text-sm text-gray-600">
-                        {complaint.createdAt
-                          ? new Date(complaint.createdAt).toLocaleDateString()
-                          : 'N/A'}
-                      </span>
+              {/* Header with gradient to match booking vibe */}
+              <div className="bg-gradient-to-r from-gray-50 to-white p-6 border-b border-gray-50">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white p-2 rounded-xl border border-gray-100 shadow-sm">
+                      <Hash size={16} className="text-teal-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-gray-900 tracking-tight">Case #{complaint.complaintId}</h3>
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                        <Calendar size={12} /> {complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString() : 'N/A'}
+                      </div>
                     </div>
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(complaint.status)}`}
-                  >
+                  <span className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${getStatusStyles(complaint.status)}`}>
                     {getStatusIcon(complaint.status)}
                     {complaint.status}
                   </span>
                 </div>
               </div>
 
-              {/* Complaint Details */}
-              <div className="p-6">
-                {/* Subject */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-teal-600" />
-                    Subject
-                  </h4>
-                  <p className="font-medium text-gray-900 bg-gray-50 rounded-lg p-3">
-                    {complaint.subject}
-                  </p>
+              <div className="p-8 space-y-6">
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Subject</label>
+                  <div className="bg-gray-50/50 rounded-2xl p-4 border border-gray-100 group-hover:border-teal-100 transition-colors">
+                    <p className="font-black text-gray-900">{complaint.subject}</p>
+                  </div>
                 </div>
 
-                {/* Description */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Description</h4>
-                  <p className="text-gray-700 bg-gray-50 rounded-lg p-3 text-sm leading-relaxed">
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Description</label>
+                  <p className="text-gray-600 text-sm leading-relaxed font-medium px-1">
                     {complaint.description}
                   </p>
                 </div>
 
-                {/* Related Appointment */}
                 {complaint.relatedAppointmentId && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                      Related Appointment
-                    </h4>
-                    <div className="bg-teal-50 rounded-lg p-3">
-                      <p className="text-sm text-teal-700">
-                        Appointment #{complaint.relatedAppointmentId}
-                      </p>
+                  <div className="flex items-center justify-between bg-teal-50/50 rounded-2xl p-4 border border-teal-50">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={16} className="text-teal-600" />
+                      <span className="text-xs font-bold text-teal-800 uppercase tracking-tight">Related Appointment</span>
                     </div>
+                    <span className="text-xs font-black text-teal-900 bg-white px-3 py-1 rounded-lg border border-teal-100">
+                      #{complaint.relatedAppointmentId}
+                    </span>
                   </div>
                 )}
 
-                {/* Status Message */}
-                <div
-                  className={`p-3 rounded-lg text-center ${
-                    complaint.status === 'Resolved'
-                      ? 'bg-green-50 border border-green-200'
-                      : complaint.status === 'In Progress'
-                        ? 'bg-yellow-50 border border-yellow-200'
-                        : complaint.status === 'Open'
-                          ? 'bg-red-50 border border-red-200'
-                          : 'bg-gray-50 border border-gray-200'
-                  }`}
-                >
-                  <p
-                    className={`text-sm font-medium ${
-                      complaint.status === 'Resolved'
-                        ? 'text-green-800'
-                        : complaint.status === 'In Progress'
-                          ? 'text-yellow-800'
-                          : complaint.status === 'Open'
-                            ? 'text-red-800'
-                            : 'text-gray-800'
-                    }`}
-                  >
-                    {complaint.status === 'Open' &&
-                      'Your complaint has been received and is being reviewed'}
-                    {complaint.status === 'In Progress' &&
-                      'We are actively working on your complaint'}
-                    {complaint.status === 'Resolved' && 'Your complaint has been resolved'}
-                    {complaint.status === 'Closed' && 'This complaint has been closed'}
-                  </p>
+                <div className={`mt-4 p-4 rounded-2xl flex items-center gap-3 border ${getStatusStyles(complaint.status)}`}>
+                   <div className="p-2 bg-white rounded-xl shadow-sm">
+                      {getStatusIcon(complaint.status)}
+                   </div>
+                   <p className="text-xs font-bold">
+                    {complaint.status === 'Open' && 'Complaint received and under initial review.'}
+                    {complaint.status === 'In Progress' && 'Investigation is currently active.'}
+                    {complaint.status === 'Resolved' && 'Resolution completed. Check your email.'}
+                    {complaint.status === 'Closed' && 'This thread is now archived.'}
+                   </p>
                 </div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-          <MessageSquare className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No complaints submitted</h3>
-          <p className="text-gray-600 mb-6">
-            Have feedback or concerns? Submit your first complaint
+        <div className="bg-white border-2 border-dashed border-gray-100 rounded-[3rem] p-20 text-center">
+          <div className="bg-gray-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+            <MessageSquare className="h-10 w-10 text-gray-300" />
+          </div>
+          <h3 className="text-2xl font-black text-gray-900 mb-2">Clean Slate!</h3>
+          <p className="text-gray-500 mb-8 font-medium max-w-xs mx-auto">
+            You haven't submitted any complaints yet. We're here to help if you have concerns.
           </p>
           <button
-            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 mx-auto"
-            onClick={() =>
-              (document.getElementById('create_complaint_modal') as HTMLDialogElement)?.showModal()
-            }
+            className="bg-teal-600 text-white px-10 py-4 rounded-2xl font-black hover:bg-teal-700 transition-all shadow-lg shadow-teal-100 flex items-center gap-2 mx-auto active:scale-95"
+            onClick={() => (document.getElementById('create_complaint_modal') as HTMLDialogElement)?.showModal()}
           >
-            <Plus className="h-5 w-5" />
-            Submit Your First Complaint
+            <Plus size={20} /> Start New Ticket
           </button>
         </div>
       )}
 
-      {/* Summary Stats */}
-      {complaintsData && complaintsData.data && complaintsData.data.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Complaints Summary</h3>
+      {/* Summary Stats Grid */}
+      {complaintsData?.data && complaintsData.data.length > 0 && (
+        <section className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+          <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em] mb-6 text-center">Executive Summary</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-teal-50 rounded-lg">
-              <div className="text-2xl font-bold text-teal-600">{complaintsData.data.length}</div>
-              <div className="text-sm text-gray-600">Total Complaints</div>
-            </div>
-            <div className="text-center p-4 bg-red-50 rounded-lg">
-              <div className="text-2xl font-bold text-red-600">
-                {
-                  complaintsData.data.filter((complaint: TComplaint) => complaint.status === 'Open')
-                    .length
-                }
+            {[
+              { label: 'Total Cases', value: complaintsData.data.length, color: 'teal' },
+              { label: 'Pending Review', value: complaintsData.data.filter(c => c.status === 'Open').length, color: 'red' },
+              { label: 'Active', value: complaintsData.data.filter(c => c.status === 'In Progress').length, color: 'amber' },
+              { label: 'Resolved', value: complaintsData.data.filter(c => c.status === 'Resolved').length, color: 'emerald' },
+            ].map((stat, i) => (
+              <div key={i} className="text-center p-6 bg-gray-50/50 rounded-3xl border border-gray-50 hover:bg-white hover:shadow-md transition-all">
+                <div className={`text-3xl font-black mb-1 text-${stat.color}-600`}>{stat.value}</div>
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{stat.label}</div>
               </div>
-              <div className="text-sm text-gray-600">Open</div>
-            </div>
-            <div className="text-center p-4 bg-yellow-50 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600">
-                {
-                  complaintsData.data.filter(
-                    (complaint: TComplaint) => complaint.status === 'In Progress'
-                  ).length
-                }
-              </div>
-              <div className="text-sm text-gray-600">In Progress</div>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                {
-                  complaintsData.data.filter(
-                    (complaint: TComplaint) => complaint.status === 'Resolved'
-                  ).length
-                }
-              </div>
-              <div className="text-sm text-gray-600">Resolved</div>
-            </div>
+            ))}
           </div>
-        </div>
+        </section>
       )}
     </div>
   );

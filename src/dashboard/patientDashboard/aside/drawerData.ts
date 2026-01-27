@@ -1,5 +1,5 @@
 import { TbBrandGoogleAnalytics } from 'react-icons/tb';
-import { FaNotesMedical, FaRegComment, FaUserCheck, FaUserDoctor } from 'react-icons/fa6';
+import { FaNotesMedical, FaRegComment, FaUserCheck, FaUserDoctor, FaPills } from 'react-icons/fa6';
 import { RiSecurePaymentLine } from 'react-icons/ri';
 
 export type DrawerData = {
@@ -21,6 +21,12 @@ export const userDrawerData: DrawerData[] = [
     name: 'Doctors',
     icon: FaUserDoctor,
     link: 'doctors',
+  },
+  {
+    id: 'prescriptions',
+    name: 'Prescriptions',
+    icon: FaPills,
+    link: 'prescriptions',
   },
   {
     id: 'complaints',

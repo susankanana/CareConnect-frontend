@@ -5,7 +5,19 @@ import {
   prescriptionsAPI,
   type TPrescription,
 } from '../../../../reducers/prescriptions/prescriptionsAPI';
-import { Edit, Trash2, Plus, Pill, User, Calendar, XCircle, FileText } from 'lucide-react';
+import { 
+  Edit, 
+  Trash2, 
+  Plus, 
+  Pill, 
+  User, 
+  Calendar, 
+  XCircle, 
+  FileText, 
+  Hash, 
+  TrendingUp, 
+  Users 
+} from 'lucide-react';
 import CreatePrescription from './CreatePrescription';
 import UpdatePrescription from './UpdatePrescription';
 import DeletePrescription from './DeletePrescription';
@@ -28,6 +40,8 @@ const DoctorPrescriptions = () => {
   const [selectedPrescription, setSelectedPrescription] = useState<TPrescription | null>(null);
   const [prescriptionToDelete, setPrescriptionToDelete] = useState<TPrescription | null>(null);
 
+  const prescriptions = prescriptionsData?.data || [];
+
   const handleEdit = (prescription: TPrescription) => {
     setSelectedPrescription(prescription);
     (document.getElementById('update_prescription_modal') as HTMLDialogElement)?.showModal();
@@ -38,205 +52,173 @@ const DoctorPrescriptions = () => {
     (document.getElementById('delete_prescription_modal') as HTMLDialogElement)?.showModal();
   };
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <div className="flex justify-center items-center min-h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
       </div>
     );
-  }
 
-  if (error) {
+  if (error)
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
         <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
         <p className="text-red-700 text-lg font-semibold">Error fetching prescriptions</p>
-        <p className="text-red-600 mt-2">Please try again later</p>
       </div>
     );
-  }
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-7xl mx-auto p-4 space-y-8">
+      {/* Integrated Dashboard Header & Summary */}
+      <div className="space-y-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Pill className="h-7 w-7 text-teal-600" />
-              My Prescriptions
+              <Pill className="h-7 w-7 text-teal-600" /> Medical Prescriptions
             </h1>
-            <p className="text-gray-600 mt-1">
-              Manage patient prescriptions - {prescriptionsData?.data?.length || 0} total
-              prescriptions
+            <p className="text-gray-500 text-sm ml-9">
+              Managing <span className="font-bold text-teal-700">{prescriptions.length}</span> issued prescriptions
             </p>
           </div>
           <button
-            data-test="open-create-prescription"
-            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-md"
-            onClick={() =>
-              (
-                document.getElementById('create_prescription_modal') as HTMLDialogElement
-              )?.showModal()
-            }
+            onClick={() => (document.getElementById('create_prescription_modal') as HTMLDialogElement)?.showModal()}
+            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-teal-100 active:scale-95"
           >
-            <Plus className="h-5 w-5" />
-            Add New Prescription
+            <Plus size={20} /> New Prescription
           </button>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 overflow-hidden">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {/* Total Prescriptions */}
+            <div className="flex flex-col items-center justify-center p-4 bg-teal-50/50 rounded-xl border border-teal-100/50">
+              <span className="text-2xl font-black text-teal-700">{prescriptions.length}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-teal-600/70">Total Issued</span>
+            </div>
+
+            {/* Unique Patients */}
+            <div className="flex flex-col items-center justify-center p-4 bg-blue-50/50 rounded-xl border border-blue-100/50">
+              <span className="text-2xl font-black text-blue-700">
+                {new Set(prescriptions.map((p) => p.patientId)).size}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600/70">Patients</span>
+            </div>
+
+            {/* Total Value */}
+            <div className="flex flex-col items-center justify-center p-4 bg-amber-50/50 rounded-xl border border-amber-100/50">
+              <span className="text-2xl font-black text-amber-700">
+                KSh {prescriptions.reduce((t, p) => t + parseFloat(p.amount || '0'), 0).toLocaleString()}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600/70">Revenue</span>
+            </div>
+
+            {/* Avg Value */}
+            <div className="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <span className="text-2xl font-black text-gray-900">
+                {prescriptions.length > 0 
+                  ? (prescriptions.reduce((t, p) => t + parseFloat(p.amount || '0'), 0) / prescriptions.length).toFixed(0)
+                  : 0}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Avg Cost</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Modals */}
       <CreatePrescription refetch={refetch} />
       <UpdatePrescription prescription={selectedPrescription} refetch={refetch} />
       <DeletePrescription prescription={prescriptionToDelete} refetch={refetch} />
 
       {/* Prescriptions Grid */}
-      {prescriptionsData && prescriptionsData.data && prescriptionsData.data.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {prescriptionsData.data.map((prescription: TPrescription) => (
-            <div
-              data-test="prescription-card"
+      {prescriptions.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {prescriptions.map((prescription: TPrescription) => (
+            <PrescriptionCard
               key={prescription.prescriptionId}
-              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden"
-            >
-              {/* Prescription Header */}
-              <div className="bg-gradient-to-r from-teal-50 to-pink-50 p-4 border-b">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">
-                      Prescription #{prescription.prescriptionId}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Calendar className="h-4 w-4 text-teal-600" />
-                      <span className="text-sm text-gray-600">
-                        {prescription.createdAt
-                          ? new Date(prescription.createdAt).toLocaleDateString()
-                          : 'N/A'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-lg font-bold text-teal-600">
-                      KSh {parseFloat(prescription.amount).toFixed(2)}
-                    </span>
-                    <p className="text-xs text-gray-500">Amount</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Prescription Details */}
-              <div className="p-6">
-                {/* Patient Information */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <User className="h-4 w-4 text-teal-600" />
-                    Patient ID: {prescription.patientId}
-                  </h4>
-                </div>
-
-                {/* Appointment Information */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-teal-600" />
-                    Appointment ID: {prescription.appointmentId}
-                  </h4>
-                </div>
-
-                {/* Prescription Notes */}
-                <div className="mb-6">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-teal-600" />
-                    Notes
-                  </h4>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-sm text-gray-700 leading-relaxed">{prescription.notes}</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    data-test="edit-prescription-button"
-                    onClick={() => handleEdit(prescription)}
-                    className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-teal-200"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </button>
-                  <button
-                    data-test="delete-prescription-button"
-                    onClick={() => handleDelete(prescription)}
-                    className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-red-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
+              prescription={prescription}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           ))}
         </div>
       ) : (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-          <Pill className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No prescriptions found</h3>
-          <p className="text-gray-600 mb-6">
-            Start by creating your first prescription for a patient
-          </p>
-          <button
-            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 mx-auto"
-            onClick={() =>
-              (
-                document.getElementById('create_prescription_modal') as HTMLDialogElement
-              )?.showModal()
-            }
-          >
-            <Plus className="h-5 w-5" />
-            Create Your First Prescription
-          </button>
+        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-16 text-center">
+          <Pill className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">No prescriptions recorded yet.</p>
         </div>
       )}
+    </div>
+  );
+};
 
-      {/* Summary Stats */}
-      {prescriptionsData && prescriptionsData.data && prescriptionsData.data.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Prescriptions Summary</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-teal-50 rounded-lg">
-              <div className="text-2xl font-bold text-teal-600">
-                {prescriptionsData.data.length}
-              </div>
-              <div className="text-sm text-gray-600">Total Prescriptions</div>
+const PrescriptionCard = ({ prescription, onEdit, onDelete }: any) => {
+  return (
+    <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col">
+      <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-black text-gray-400 uppercase">RX ID #{prescription.prescriptionId}</span>
+        </div>
+        <div className="text-sm font-black text-teal-700">
+          KSh {parseFloat(prescription.amount).toLocaleString()}
+        </div>
+      </div>
+
+      <div className="p-5 flex-grow space-y-4">
+        {/* Patient & Context */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-teal-50 flex items-center justify-center text-teal-600">
+              <User size={16} />
             </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">
-                {new Set(prescriptionsData.data.map((p) => p.patientId)).size}
-              </div>
-              <div className="text-sm text-gray-600">Unique Patients</div>
+            <div>
+              <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">Patient ID</p>
+              <h3 className="font-bold text-gray-900">{prescription.patientId}</h3>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                KSh{' '}
-                {prescriptionsData.data
-                  .reduce((total, p) => total + parseFloat(p.amount), 0)
-                  .toFixed(0)}
-              </div>
-              <div className="text-sm text-gray-600">Total Value</div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+              <Hash size={16} />
             </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-gray-600">
-                KSh{' '}
-                {(
-                  prescriptionsData.data.reduce((total, p) => total + parseFloat(p.amount), 0) /
-                  prescriptionsData.data.length
-                ).toFixed(0)}
-              </div>
-              <div className="text-sm text-gray-600">Average Amount</div>
+            <div>
+              <p className="text-[10px] uppercase font-bold text-gray-400 leading-none">Appointment Ref</p>
+              <h3 className="font-bold text-gray-900">{prescription.appointmentId}</h3>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Notes Section */}
+        <div className="pt-3 border-t border-dashed border-gray-200">
+          <div className="flex items-center gap-2 mb-2 text-gray-500">
+            <FileText size={14} />
+            <span className="text-[10px] font-bold uppercase">Clinical Notes</span>
+          </div>
+          <div className="bg-gray-50 rounded-xl p-3 min-h-[80px]">
+            <p className="text-xs text-gray-600 italic leading-relaxed">
+              "{prescription.notes || 'No specific instructions provided.'}"
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold uppercase">
+          <Calendar size={12} /> Issued on: {prescription.createdAt ? new Date(prescription.createdAt).toLocaleDateString() : 'N/A'}
+        </div>
+      </div>
+
+      <div className="p-5 pt-0 flex gap-2">
+        <button 
+          onClick={() => onEdit(prescription)} 
+          className="flex-1 bg-gray-50 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 text-gray-700 py-2.5 rounded-lg text-xs font-bold border border-gray-200 transition-all flex items-center justify-center gap-2"
+        >
+          <Edit size={14} /> Edit
+        </button>
+        <button 
+          onClick={() => onDelete(prescription)} 
+          className="flex-1 bg-gray-50 hover:bg-red-50 hover:text-red-700 hover:border-red-200 text-gray-700 py-2.5 rounded-lg text-xs font-bold border border-gray-200 transition-all flex items-center justify-center gap-2"
+        >
+          <Trash2 size={14} /> Delete
+        </button>
+      </div>
     </div>
   );
 };

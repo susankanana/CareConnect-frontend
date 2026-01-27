@@ -1,82 +1,30 @@
-// import { useEffect } from 'react';
-// import { useLocation } from 'react-router';
-// import { useGetServiceByTitleQuery } from '../../../src/reducers/services/servicesAPI';
-// import { CheckCircle } from 'lucide-react';
-// import { slugToTitleMap } from './slug';
-
-// const EmergencyCare = () => {
-//   const location = useLocation();
-
-//   // Extract the slug from the URL (e.g., "emergencycare")
-//   const slug = decodeURIComponent(location.pathname.split('/service/')[1]);
-
-//   // Convert slug to the proper title (e.g., "Emergency Care")
-//   const title = slugToTitleMap[slug];
-
-//   const { data: service, isLoading, isError } = useGetServiceByTitleQuery(title, {
-//     skip: !title, //skip query if title is undefined
-//     refetchOnMountOrArgChange: true,
-//   });
-
-//   useEffect(() => {
-//     window.scrollTo(0, 0);
-//   }, []);
-
-//   if (!title) {
-//     return <div className="text-center mt-10 text-red-500">Invalid service URL.</div>;
-//   }
-
-//   if (isLoading) {
-//     return <div className="text-center mt-10 text-gray-600">Loading service...</div>;
-//   }
-
-//   if (isError || !service) {
-//     return <div className="text-center mt-10 text-red-500">Service not found.</div>;
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-white py-20 px-4 sm:px-6 lg:px-8">
-//       <div className="max-w-4xl mx-auto">
-//         <h1 className="text-4xl font-bold text-gray-900 mb-6">{service.title}</h1>
-//         <p className="text-lg text-gray-700 mb-8">{service.description}</p>
-
-//         <h2 className="text-2xl font-semibold text-gray-900 mb-4">Features</h2>
-//         <ul className="space-y-3">
-//           {service.features?.map((feature: string, index: number) => (
-//             <li key={index} className="flex items-start gap-2 text-gray-800">
-//               <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
-//               {feature}
-//             </li>
-//           ))}
-//         </ul>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default EmergencyCare;
 import { useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useGetServiceByTitleQuery } from '../../../src/reducers/services/servicesAPI';
-import { CheckCircle, Ambulance, BriefcaseMedical, Stethoscope, Users } from 'lucide-react';
+import {
+  CheckCircle,
+  Ambulance,
+  Stethoscope,
+  Users,
+  ArrowLeft,
+  Award,
+  Activity,
+} from 'lucide-react';
 import { slugToTitleMap } from './slug';
 
 const EmergencyCare = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Extract the slug from the URL (e.g., "emergencycare")
   const slug = decodeURIComponent(location.pathname.split('/service/')[1]);
-
-  // Convert slug to the proper title (e.g., "Emergency Care")
   const title = slugToTitleMap[slug];
 
-  // Fetch the service data based on the title
   const {
     data: service,
     isLoading,
     isError,
   } = useGetServiceByTitleQuery(title, {
-    skip: !title, // Skip query if title is undefined
+    skip: !title,
     refetchOnMountOrArgChange: true,
   });
 
@@ -84,82 +32,60 @@ const EmergencyCare = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Define static exhaustive content for Emergency Care
+  const navigateAndScroll = (sectionId: string) => {
+    if (window.location.pathname === '/') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(`/#${sectionId}`);
+    }
+  };
+
   const exhaustiveEmergencyCareContent = {
     sections: [
       {
         title: 'The Scope of Emergency Care',
-        icon: <Ambulance className="h-8 w-8 text-teal-600" />,
+        icon: <Ambulance size={24} />,
         paragraphs: [
-          'Emergency care is a critical medical specialty focused on the **immediate evaluation and treatment of acute illnesses and injuries** that pose an immediate threat to life or limb, or require urgent medical attention. Emergency departments (EDs) are equipped to handle a vast array of conditions, providing rapid assessment, stabilization, and appropriate disposition for patients of all ages. The core mission is to save lives, prevent disability, and alleviate suffering during critical moments.',
+          'Emergency care is focused on the immediate evaluation and treatment of acute illnesses and injuries that pose a threat to life or limb. Our department is equipped for rapid assessment and stabilization 24/7.',
         ],
         features: [
-          '**Life-Threatening Conditions:** Responding to heart attacks, strokes, severe bleeding, anaphylaxis, and other conditions requiring immediate intervention.',
-          '**Traumatic Injuries:** Managing injuries from accidents, falls, burns, and assaults, including fractures, head injuries, and internal organ damage.',
-          '**Acute Illnesses:** Treating sudden onset severe infections (e.g., sepsis, pneumonia), respiratory distress (e.g., asthma attacks), severe allergic reactions, and acute abdominal pain.',
-          '**Pediatric Emergencies:** Specialized care for infants and children experiencing medical emergencies, considering their unique physiological and developmental needs.',
-          '**Psychiatric Emergencies:** Providing initial assessment and stabilization for individuals experiencing acute mental health crises, including suicidal ideation or severe behavioral disturbances.',
-          '**Toxicology and Overdoses:** Managing poisoning, drug overdoses, and adverse reactions to medications.',
-          '**Environmental Emergencies:** Treating conditions like heatstroke, hypothermia, frostbite, and bites/stings.',
-          '**Stabilization and Transfer:** Stabilizing critically ill or injured patients before transferring them to specialized units (e.g., ICU, operating room) or other facilities.',
-          '**Minor Injuries & Illnesses (Urgent Care):** While not life-threatening, many EDs also treat conditions requiring prompt attention but not immediate critical intervention, such as cuts, sprains, or minor infections.',
+          '**Life-Threatening Conditions:** Heart attacks, strokes, and anaphylaxis.',
+          '**Traumatic Injuries:** Managing accidents, falls, and internal organ damage.',
+          '**Pediatric Emergencies:** Specialized care for infants and children.',
+          '**Stabilization:** Critical care before transferring to specialized units.',
         ],
       },
       {
-        title: 'Diagnostic Approaches in Emergency Care',
-        icon: <Stethoscope className="h-8 w-8 text-teal-600" />,
+        title: 'Diagnostic Approaches',
+        icon: <Stethoscope size={24} />,
         paragraphs: [
-          'Rapid and accurate diagnosis is paramount in emergency settings. Emergency physicians and their teams utilize swift assessment tools to identify life-threatening conditions and guide immediate interventions:',
+          'Rapid and accurate diagnosis is paramount. We utilize swift assessment tools to identify critical conditions within minutes of arrival.',
         ],
         features: [
-          '**Rapid Clinical Assessment:** Immediate evaluation of vital signs (heart rate, blood pressure, respiration, oxygen saturation, temperature), airway, breathing, circulation, and level of consciousness.',
-          '**Point-of-Care Testing (POCT):** Quick laboratory tests performed at the bedside (e.g., blood glucose, blood gas analysis, cardiac markers) for rapid results.',
-          '**Diagnostic Imaging:** Immediate access to X-rays for fractures, CT scans for head injuries or internal bleeding, and ultrasound for rapid assessment of internal organs.',
-          '**Electrocardiogram (ECG):** Performed immediately for chest pain or cardiac symptoms to detect heart attacks or arrhythmias.',
-          '**Focused Assessment with Sonography for Trauma (FAST) Exam:** A quick ultrasound examination to detect internal bleeding in trauma patients.',
-          '**Laboratory Investigations:** Comprehensive blood and urine tests ordered based on initial assessment to further diagnose conditions like infection, organ dysfunction, or electrolyte imbalances.',
-          '**Patient History and Collateral Information:** Gathering crucial information from the patient, family, or emergency responders to understand the context of the emergency.',
-        ],
-      },
-      {
-        title: 'Treatment Modalities in Emergency Care',
-        icon: <BriefcaseMedical className="h-8 w-8 text-teal-600" />,
-        paragraphs: [
-          'Emergency treatment focuses on stabilization, resuscitation, and addressing the immediate cause of the emergency. Interventions are often time-sensitive and life-saving:',
-        ],
-        features: [
-          '**Resuscitation (CPR/ACLS/PALS):** Advanced life support protocols for cardiac arrest, severe trauma, or respiratory failure, including airway management, defibrillation, and medication administration.',
-          '**Trauma Management:** Initial assessment and stabilization of severe injuries, including bleeding control, splinting, and preparation for surgery.',
-          '**Medication Administration:** Rapid delivery of life-saving drugs for conditions like anaphylaxis, severe pain, seizures, or cardiac events.',
-          '**Fluid Resuscitation:** Administering intravenous fluids to patients with shock, severe dehydration, or blood loss.',
-          '**Wound Care:** Cleaning, closing, and dressing lacerations and other wounds to prevent infection.',
-          '**Pain Management:** Rapid and effective relief of acute pain through various pharmacological and non-pharmacological methods.',
-          '**Symptom Control:** Addressing acute symptoms like nausea, vomiting, severe headache, or allergic reactions.',
-          '**Stabilization for Transfer:** Preparing patients who require higher levels of care or specialized surgery for safe transfer to other hospital units or facilities.',
-          '**Emergency Surgical Procedures:** Performing urgent procedures like chest tube insertion, intubation, or emergency fasciotomy when immediate surgical intervention is critical.',
-        ],
-      },
-      {
-        title: 'Preparedness and Evolution of Emergency Care',
-        icon: <Users className="h-8 w-8 text-teal-600" />,
-        paragraphs: [
-          'Emergency departments operate 24/7, staffed by highly trained teams of emergency physicians, nurses, paramedics, and support staff, all working together in a fast-paced environment. Readiness includes having specialized equipment, protocols for mass casualties, and strong collaboration with pre-hospital services (ambulances) and other hospital departments.',
-          'The field of emergency medicine is constantly evolving with advancements in trauma care, critical care techniques, rapid diagnostics, and public health preparedness. The goal remains to provide immediate, life-saving care, ensuring the best possible outcomes during medical crises. In Kenya, access to well-equipped emergency care is crucial for public health, especially given the current time (July 2025).',
+          '**Rapid Clinical Assessment:** Immediate evaluation of vital signs.',
+          '**Point-of-Care Testing:** Quick bedside laboratory results.',
+          '**Diagnostic Imaging:** Immediate access to X-rays and CT scans.',
+          '**ECG Monitoring:** Instant detection of cardiac arrhythmias.',
         ],
       },
     ],
   };
 
-  // --- Render Logic ---
-
-  if (!title) {
+  if (!title || isError || (!isLoading && !service)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <p className="text-2xl text-red-600 font-semibold mb-4">Invalid Service URL</p>
-          <p className="text-gray-700">
-            The URL you're trying to access is not a recognized service. Please check and try again.
-          </p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-black text-[#003d3d] uppercase italic">Service Not Found</h2>
+          <div
+            onClick={() => navigateAndScroll('services')}
+            className="inline-flex items-center gap-2 text-[#00a18e] text-[10px] font-black uppercase tracking-widest mt-4 hover:text-pink-500 transition-colors cursor-pointer group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Back to all services
+          </div>
         </div>
       </div>
     );
@@ -167,114 +93,115 @@ const EmergencyCare = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <span className="loading loading-spinner loading-lg text-teal-600"></span>
-          <p className="text-xl text-gray-700 mt-4">Loading service details...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#003d3d]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#00a18e] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-white font-black uppercase tracking-widest text-xs">Accessing Emergency Records</p>
         </div>
       </div>
     );
   }
 
-  // Handle case where service is not found after loading
-  if (isError || !service) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <p className="text-2xl text-red-600 font-semibold mb-4">Service Not Found</p>
-          <p className="text-gray-700">
-            The service "{title}" could not be found. It might not exist or there was an issue
-            fetching it.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Assuming 'service' now contains the fetched Emergency Care data
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {/* === Fetched Service Details Section (Hero/Header Card) === */}
-        <div className="relative bg-gradient-to-br from-teal-500 to-pink-500 text-white p-8 md:p-12 lg:p-16">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left flex-1">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">
-                {service.title}
+    <div className="min-h-screen bg-[#fcfcfc]">
+      {/* --- PREMIUM HERO SECTION --- */}
+      <div className="bg-[#003d3d] pt-24 pb-16 px-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#00a18e] rounded-full blur-[150px] opacity-10"></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div
+            onClick={() => navigateAndScroll('services')}
+            className="inline-flex items-center gap-2 text-[#00a18e] text-[10px] font-black uppercase tracking-widest mb-8 hover:text-white transition-colors cursor-pointer group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+            Back to all services
+          </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-3xl">
+              <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase mb-4">
+                {service.title}<span className="text-[#f43f8e]">.</span>
               </h1>
-              <p className="text-lg sm:text-xl opacity-90 max-w-3xl">{service.description}</p>
+              <p className="text-teal-100/60 text-lg font-medium leading-relaxed">
+                {service.description}
+              </p>
             </div>
-            <div className="hidden md:block">
-              <Ambulance className="w-24 h-24 opacity-20" /> {/* Main icon for Emergency Care */}
+            <div className="hidden lg:block bg-white/5 p-8 rounded-[40px] border border-white/10 backdrop-blur-sm">
+              <Ambulance size={64} className="text-[#f43f8e] animate-pulse" />
             </div>
           </div>
-          {service.features && service.features.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-white border-opacity-30">
-              <h2 className="text-2xl font-semibold text-white mb-4">Our Key Features</h2>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-lg">
-                {service.features.map((feature: string, index: number) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-teal-200" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
+      </div>
 
-        {/* === Exhaustive Static Content Sections === */}
-        <div className="p-8 md:p-12 lg:p-16 space-y-12">
-          {exhaustiveEmergencyCareContent.sections.map((section, sectionIndex) => (
-            <div
-              key={sectionIndex}
-              className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100"
-            >
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 pb-3 flex items-center gap-3 border-b border-gray-200">
-                {section.icon}
-                {section.title}
-              </h2>
-              {section.paragraphs &&
-                section.paragraphs.map((paragraph, pIndex) => (
-                  <p key={`p-${pIndex}`} className="text-lg text-gray-700 mb-4 leading-relaxed">
-                    {paragraph}
-                  </p>
+      {/* --- CONTENT AREA --- */}
+      <div className="max-w-7xl mx-auto px-4 -mt-10 pb-24 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <div className="lg:col-span-2 space-y-8">
+            {/* Dynamic Features Grid */}
+            {service.features && (
+              <div className="bg-white rounded-[40px] shadow-2xl shadow-gray-200/50 p-8 md:p-12 border border-gray-100">
+                <h2 className="text-2xl font-black text-[#003d3d] uppercase tracking-tight mb-8 flex items-center gap-3">
+                  <div className="bg-pink-50 p-2 rounded-xl text-[#f43f8e]"><Award size={20}/></div>
+                  Emergency Response Highlights
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {service.features.map((feature: string, i: number) => (
+                    <div key={i} className="flex items-center gap-4 p-5 bg-gray-50 rounded-3xl border border-gray-100 hover:border-[#f43f8e]/30 transition-all group">
+                      <CheckCircle className="text-[#f43f8e] group-hover:scale-110 transition-transform" size={20} />
+                      <span className="font-bold text-[#003d3d] text-sm uppercase">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Exhaustive Content Sections */}
+            {exhaustiveEmergencyCareContent.sections.map((section, idx) => (
+              <div key={idx} className="bg-white rounded-[40px] shadow-xl p-8 md:p-12 border border-gray-100">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="bg-[#003d3d] text-white p-3 rounded-2xl shadow-lg shadow-teal-900/20">
+                    {section.icon}
+                  </div>
+                  <h3 className="text-2xl font-black text-[#003d3d] uppercase tracking-tight">{section.title}</h3>
+                </div>
+                
+                {section.paragraphs.map((p, pi) => (
+                  <p key={pi} className="text-gray-600 text-lg leading-relaxed mb-8">{p}</p>
                 ))}
 
-              {section.features && section.features.length > 0 && (
-                <ul className="space-y-4 text-lg mt-6">
-                  {section.features.map((feature: string, featureIndex: number) => (
-                    <li
-                      key={`feature-${featureIndex}`}
-                      className="flex items-start gap-3 text-gray-800 p-3 bg-gray-50 rounded-lg shadow-sm"
-                    >
-                      <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
-                      {/* Using dangerouslySetInnerHTML to render bold markdown within strings */}
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: feature.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
-                        }}
+                <div className="space-y-4">
+                  {section.features.map((feature, fi) => (
+                    <div key={fi} className="flex gap-4 items-start p-4 rounded-2xl bg-pink-50/30 border-l-4 border-[#f43f8e]">
+                      <span className="text-sm text-gray-700 leading-relaxed" 
+                        dangerouslySetInnerHTML={{ __html: feature.replace(/\*\*(.*?)\*\*/g, '<b class="text-[#003d3d] font-black uppercase text-[12px]">$1</b>') }} 
                       />
-                    </li>
+                    </div>
                   ))}
-                </ul>
-              )}
-            </div>
-          ))}
-
-          {/* Concluding Section for overall Emergency Care */}
-          <div className="text-center mt-16 bg-gradient-to-r from-teal-50 to-pink-50 p-8 rounded-2xl shadow-inner">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Responding to Crisis, Saving Lives
-            </h3>
-            <p className="text-xl text-gray-700 max-w-4xl mx-auto">
-              Emergency care is a vital frontline service, providing immediate and critical medical
-              attention during acute crises. Through rapid assessment, advanced interventions, and
-              dedicated teams, emergency departments are indispensable in safeguarding public health
-              and delivering urgent care when every second counts, especially in dynamic healthcare
-              environments like Kenya.
-            </p>
+                </div>
+              </div>
+            ))}
           </div>
+
+          {/* Sidebar */}
+          <div className="space-y-8">
+            <div className="bg-[#f43f8e] rounded-[40px] p-10 text-white shadow-2xl shadow-pink-200 sticky top-24">
+              <Activity className="mb-6 opacity-50" size={40} />
+              <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">Urgent Attention</h3>
+              <p className="text-pink-100 font-medium mb-8">
+                If you are experiencing a medical emergency, do not wait. Our team is ready to assist you immediately.
+              </p>
+              <a href="tel:+254700000000" className="block w-full bg-white text-[#f43f8e] text-center py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-pink-50 transition-colors shadow-lg">
+                Call Emergency Now
+              </a>
+            </div>
+
+            <div className="bg-[#003d3d] rounded-[40px] p-10 text-white overflow-hidden relative">
+              <Users className="absolute -bottom-4 -right-4 text-white/5 w-32 h-32" />
+              <h4 className="text-xs font-black uppercase tracking-[0.3em] text-[#00a18e] mb-2">Availability</h4>
+              <p className="text-xl font-bold italic mb-0">Trauma Center Open</p>
+              <p className="text-3xl font-black mt-2">24 Hours / 7 Days</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

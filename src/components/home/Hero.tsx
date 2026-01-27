@@ -5,16 +5,14 @@ import {
   Clock,
   Star,
   ArrowRight,
-  Phone,
   MapPin,
-  Mail,
   Award,
   Users,
   CheckCircle,
+  Video,
 } from 'lucide-react';
 
 import { useGetAllServicesQuery, type TService } from '../../../src/reducers/services/servicesAPI';
-import { testimonials } from './data/testimonials';
 import { useGetDoctorsQuery, type TDoctor } from '../../../src/reducers/doctors/doctorsAPI';
 import { useNavigate, useLocation } from 'react-router';
 import { useEffect } from 'react';
@@ -23,22 +21,12 @@ const Hero = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Fetch doctors data using the Redux Toolkit Query hook
-  const {
-    data: doctorsData,
-    isLoading: doctorsLoading,
-    error: doctorsError,
-  } = useGetDoctorsQuery(undefined, {
+  const { data: doctorsData, isLoading: doctorsLoading, error: doctorsError } = useGetDoctorsQuery(undefined, {
     refetchOnMountOrArgChange: true,
     pollingInterval: 60000,
   });
 
-  // Fetch services data using the Redux Toolkit Query hook
-  const {
-    data: servicesData,
-    isLoading: servicesLoading,
-    error: servicesError,
-  } = useGetAllServicesQuery(undefined, {
+  const { data: servicesData, isLoading: servicesLoading, error: servicesError } = useGetAllServicesQuery(undefined, {
     refetchOnMountOrArgChange: true,
     pollingInterval: 60000,
   });
@@ -47,111 +35,109 @@ const Hero = () => {
     navigate(path);
   };
 
-  // code for scrolling
   useEffect(() => {
-    // Check if there's a hash in the URL (e.g., #services, #doctors)
     if (location.hash) {
-      const id = location.hash.substring(1); // Remove the '#' from the hash
-      const element = document.getElementById(id); // Find the element by its ID
-
+      const id = location.hash.substring(1);
+      const element = document.getElementById(id);
       if (element) {
-        // Scroll to the element smoothly
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
   }, [location]);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section (rest of the hero section remains unchanged) */}
-      <section className="relative bg-gradient-to-br from-teal-50 to-pink-50 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            {/* Left content */}
-            <div className="lg:w-1/2 space-y-8">
+    <div className="min-h-screen bg-white font-sans">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-white pt-8 pb-20">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+            <div className="lg:w-1/2 space-y-10">
               <div className="space-y-6">
-                <div className="flex items-center space-x-2">
-                  <div className="flex text-yellow-400">
+                <div className="inline-flex items-center space-x-2 bg-teal-50 px-4 py-2 rounded-full border border-teal-100">
+                  <div className="flex text-yellow-500">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-current" />
+                      <Star key={i} className="h-3 w-3 fill-current" />
                     ))}
                   </div>
-                  <span className="text-gray-600 font-medium">
-                    5.0 Rating • 50,000+ Patients Served
+                  <span className="text-[#00a18e] text-[10px] font-black uppercase tracking-[0.1em]">
+                    5.0 Rating • 50,000+ Patients
                   </span>
                 </div>
 
                 <h1
                   data-test="careconnect-welcome-header"
-                  className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight"
+                  className="text-5xl lg:text-7xl font-black text-[#003d3d] leading-[1.1] tracking-tight"
                 >
                   Your Health is Our
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-pink-600 block">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00a18e] to-[#f43f8e] block">
                     Priority
                   </span>
                 </h1>
 
-                <p className="text-xl text-gray-600 leading-relaxed">
-                  Experience world-class healthcare with CareConnect. Our team of expert doctors and
-                  state-of-the-art facilities ensure you receive the best medical care in Kenya.
+                <p className="text-xl text-gray-500 font-medium leading-relaxed max-w-xl">
+                  Experience world-class healthcare with CareConnect. From <strong className="text-gray-900 font-black">Virtual Video Consultations</strong> to 
+                  in-person specialist visits.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-5">
                 <button
                   onClick={() => navigateTo('/appointments')}
-                  className="bg-gradient-to-r from-teal-500 to-pink-500 text-white px-8 py-4 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold text-lg flex items-center justify-center gap-2"
+                  className="bg-gradient-to-r from-[#00a18e] to-[#f43f8e] text-white px-10 py-5 rounded-2xl hover:scale-105 transition-all font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-pink-200"
                 >
-                  <Calendar className="h-5 w-5" />
+                  <Calendar className="h-6 w-6" />
                   Book Appointment
                 </button>
-                <button className="border-2 border-teal-600 text-teal-600 px-8 py-4 rounded-lg hover:bg-teal-50 transition-colors font-semibold text-lg">
-                  Emergency: +254 700 000 911
+                <button className="bg-white border-2 border-[#00a18e] text-[#00a18e] px-10 py-5 rounded-2xl hover:bg-teal-50 transition-all font-black text-lg flex items-center justify-center gap-3">
+                  <Video className="h-6 w-6" />
+                  Video Consult
                 </button>
               </div>
 
               {/* Trust indicators */}
-              <div className="grid grid-cols-3 gap-6 pt-8">
-                <div className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <Shield className="h-8 w-8 text-teal-600" />
+              <div className="grid grid-cols-4 gap-4 pt-10 border-t border-gray-100">
+                {[
+                  { icon: Shield, val: '100%', label: 'Secure', color: 'text-teal-600' },
+                  { icon: Video, val: 'Virtual', label: 'Consults', color: 'text-pink-600' },
+                  { icon: Clock, val: '24/7', label: 'Available', color: 'text-teal-600' },
+                  { icon: Award, val: '200+', label: 'Doctors', color: 'text-teal-600' },
+                ].map((item, idx) => (
+                  <div key={idx} className={`text-center ${idx !== 3 ? 'border-r border-gray-100' : ''}`}>
+                    <div className="flex justify-center mb-2">
+                      <item.icon className={`h-6 w-6 ${item.color}`} />
+                    </div>
+                    <div className="text-lg font-black text-[#003d3d]">{item.val}</div>
+                    <div className="text-[9px] uppercase font-black tracking-widest text-gray-400">{item.label}</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">100%</div>
-                  <div className="text-sm text-gray-600">Secure</div>
-                </div>
-                <div className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <Clock className="h-8 w-8 text-teal-600" />
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900">24/7</div>
-                  <div className="text-sm text-gray-600">Available</div>
-                </div>
-                <div className="text-center">
-                  <div className="flex justify-center mb-2">
-                    <Award className="h-8 w-8 text-teal-600" />
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900">200+</div>
-                  <div className="text-sm text-gray-600">Specialists</div>
-                </div>
+                ))}
               </div>
             </div>
 
             {/* Right content - Image */}
-            <div className="lg:w-1/2">
+            <div className="lg:w-1/2 relative">
+              <div className="absolute -top-10 -right-10 w-64 h-64 bg-teal-50 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
               <div className="relative">
                 <img
                   src="https://images.pexels.com/photos/18252410/pexels-photo-18252410.jpeg"
-                  alt="Medical professionals at CareConnect"
-                  className="w-full h-96 lg:h-[500px] object-cover object-top rounded-2xl shadow-2xl"
+                  alt="Medical professionals"
+                  className="w-full h-[550px] object-cover object-top rounded-[40px] shadow-2xl border-8 border-white relative z-10"
                 />
-                <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-lg">
+                <div className="absolute top-8 right-8 bg-white/95 backdrop-blur-md p-5 rounded-[24px] shadow-2xl border border-pink-100 flex items-center gap-4 animate-bounce z-20">
+                    <div className="bg-[#f43f8e] p-2.5 rounded-xl">
+                        <Video className="h-5 w-5 text-white" />
+                    </div>
+                    <p className="text-xs font-black text-[#003d3d]">Telemedicine <br/><span className="text-[#f43f8e] uppercase tracking-tighter">Now Active</span></p>
+                </div>
+                
+                <div className="absolute -bottom-8 -left-8 bg-white p-8 rounded-[32px] shadow-2xl z-20 border border-gray-50">
                   <div className="flex items-center space-x-4">
-                    <div className="bg-green-100 p-3 rounded-full">
-                      <Heart className="h-6 w-6 text-green-600" />
+                    <div className="bg-teal-500 p-3.5 rounded-2xl">
+                      <Heart className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-900">Expert Care</div>
-                      <div className="text-sm text-gray-600">15+ Years Experience</div>
+                      <div className="font-black text-[#003d3d] text-xl">Expert Care</div>
+                      <div className="text-xs font-bold text-gray-400 uppercase tracking-tight">15+ Years Experience</div>
                     </div>
                   </div>
                 </div>
@@ -160,243 +146,101 @@ const Hero = () => {
           </div>
         </div>
       </section>
-      ---
+
       {/* Services Section */}
-      <section id="services" className="py-20 bg-white">
+      <section id="services" className="py-32 bg-gray-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Medical Services</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive healthcare services delivered by our team of experienced medical
-              professionals using the latest technology and treatment methods.
-            </p>
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-black text-[#003d3d] tracking-tight mb-4">Our Medical Services</h2>
+            <div className="w-20 h-1.5 bg-gradient-to-r from-[#00a18e] to-[#f43f8e] mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {servicesLoading && <p className="text-center text-gray-700">Loading services...</p>}
-            {servicesError && <p className="text-center text-red-500">Error loading services.</p>}
-
-            {servicesData &&
-              servicesData.length > 0 &&
-              servicesData.map((service: TService, index: number) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow p-8 border border-gray-100"
-                >
-                  <div className="text-center mb-6">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-teal-100 to-pink-100 rounded-full mb-4">
-                      <Heart className="h-8 w-8 text-teal-600" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {servicesData?.map((service: TService, index: number) => (
+              <div key={index} className="bg-white rounded-[40px] p-10 border border-gray-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
+                {service.title.toLowerCase().includes('consultation') && (
+                    <div className="absolute top-0 right-0 bg-[#f43f8e] text-white text-[10px] font-black px-4 py-1.5 rounded-bl-2xl uppercase tracking-[0.1em]">
+                        Video Available
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{service.title}</h3>
-                    <p className="text-gray-600">{service.description}</p>
+                )}
+                <div className="mb-8">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-teal-50 rounded-[20px] mb-6 group-hover:bg-[#00a18e] transition-colors">
+                    <Heart className="h-8 w-8 text-[#00a18e] group-hover:text-white" />
                   </div>
-
-                  <div className="space-y-3 mb-6">
-                    {service.features.map((feature: string, featureIndex: number) => (
-                      <div key={featureIndex} className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                        <span className="text-gray-700">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      navigate(`/service/${service.title.toLowerCase().replace(/\s+/g, '')}`)
-                    }
-                    className="w-full bg-gradient-to-r from-teal-500 to-pink-500 text-white py-3 px-6 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2"
-                  >
-                    Learn More
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-          </div>
-        </div>
-      </section>
-      ---
-      {/* Doctors Section */}
-      <section id="doctors" className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Meet Our Expert Doctors</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our team of highly qualified medical professionals is dedicated to providing you with
-              the best possible healthcare experience.
-            </p>
-          </div>
-
-          {/* Conditional rendering based on fetching status */}
-          {doctorsLoading && <p className="text-center text-gray-700">Loading doctors...</p>}
-          {doctorsError && (
-            <p className="text-center text-red-500">
-              Error fetching doctors. Please try again later.
-            </p>
-          )}
-
-          {/* Render doctors only if data is available and not loading/errored */}
-          {doctorsData && doctorsData.data && doctorsData.data.length > 0 ? (
-            <div className="grid md:grid-cols-3 gap-8">
-              {doctorsData.data.map((doctor: TDoctor) => (
-                <div
-                  key={doctor.doctor?.doctorId}
-                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow overflow-hidden"
-                >
-                  <img
-                    src={doctor.user?.image_url || 'https://via.placeholder.com/400'} // Use image_url from user or a placeholder
-                    alt={`${doctor.user?.firstName} ${doctor.user?.lastName}`}
-                    className="w-full h-64 object-cover object-top"
-                  />
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {doctor.user?.firstName} {doctor.user?.lastName}
-                    </h3>
-                    <p className="text-teal-600 font-semibold mb-2">
-                      {doctor.doctor?.specialization}
-                    </p>
-
-                    <div className="flex items-center space-x-4 mb-4">
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                        <span className="text-sm font-medium">
-                          {doctor.doctor?.rating || 'N/A'}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {doctor.doctor?.experience != null
-                          ? `${doctor.doctor.experience} years experience`
-                          : 'N/A'}
-                      </div>
-                    </div>
-
-                    <div className="text-sm text-gray-600 mb-4">
-                      <Users className="h-4 w-4 inline mr-1" />
-                      {doctor.doctor?.patients || 'N/A'} patients treated
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            // Only show "No doctors found." if not loading and no error, and data is empty
-            !doctorsLoading &&
-            !doctorsError && <p className="text-center text-gray-700">No doctors found.</p>
-          )}
-        </div>
-      </section>
-      {/* Testimonials Section (remains unchanged) */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">What Our Patients Say</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Real stories from real patients who have experienced our exceptional healthcare
-              services.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div
-                key={index}
-                className="bg-gray-50 rounded-2xl p-8 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center mb-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover mr-4"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-600">{testimonial.condition}</p>
-                  </div>
+                  <h3 className="text-2xl font-black text-[#003d3d] mb-4">{service.title}</h3>
+                  <p className="text-gray-400 font-medium leading-relaxed mb-8">{service.description}</p>
                 </div>
 
-                <div className="flex text-yellow-400 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-current" />
+                <div className="space-y-4 mb-10">
+                  {service.features.map((feature: string, fIndex: number) => (
+                    <div key={fIndex} className="flex items-center space-x-3">
+                      <div className="bg-green-50 p-1 rounded-full">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      </div>
+                      <span className="text-gray-600 font-bold text-sm">{feature}</span>
+                    </div>
                   ))}
                 </div>
 
-                <p className="text-gray-700 leading-relaxed">"{testimonial.text}"</p>
+                <button
+                  onClick={() => navigate(`/service/${service.title.toLowerCase().replace(/\s+/g, '')}`)}
+                  className="w-full bg-gray-50 text-[#003d3d] py-4 rounded-2xl font-black flex items-center justify-center gap-2 group-hover:bg-[#003d3d] group-hover:text-white transition-all"
+                >
+                  Learn More <ArrowRight className="h-4 w-4" />
+                </button>
               </div>
             ))}
           </div>
         </div>
       </section>
-      {/* Stats Section (remains unchanged) */}
-      <section className="py-20 bg-gradient-to-r from-teal-600 to-pink-600">
+
+      {/* Doctors Section */}
+      <section id="doctors" className="py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8 text-center text-white">
-            <div>
-              <div className="text-4xl font-bold mb-2">50,000+</div>
-              <div className="text-teal-100">Patients Served</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">200+</div>
-              <div className="text-teal-100">Medical Specialists</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">15+</div>
-              <div className="text-teal-100">Years of Excellence</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">24/7</div>
-              <div className="text-teal-100">Emergency Care</div>
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* Contact Section (remains unchanged) */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Get in Touch</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Ready to experience exceptional healthcare? Contact us today to schedule your
-              appointment or learn more about our services.
-            </p>
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-black text-[#003d3d] tracking-tight mb-4">Meet Our Expert Doctors</h2>
+            <p className="text-xl text-gray-400 font-medium">Ready for in-person visits or secure video consultations.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
-              <div className="bg-gradient-to-r from-teal-100 to-pink-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Phone className="h-8 w-8 text-teal-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Call Us</h3>
-              <p className="text-gray-600 mb-2">Emergency: +254 700 000 911</p>
-              <p className="text-gray-600">General: +254 700 123 456</p>
+          {doctorsData?.data && (
+            <div className="grid md:grid-cols-3 gap-10">
+              {doctorsData.data.map((doctor: TDoctor) => (
+                <div key={doctor.doctor?.doctorId} className="group cursor-pointer">
+                  <div className="relative h-[450px] overflow-hidden rounded-[40px] mb-6">
+                    <img
+                      src={doctor.user?.image_url || 'https://via.placeholder.com/400'}
+                      alt="Doctor"
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-105 group-hover:scale-100"
+                    />
+                    <div className="absolute bottom-6 left-6 right-6 flex gap-3">
+                        <span className="bg-white/95 backdrop-blur-md text-[10px] font-black uppercase tracking-tighter px-4 py-2 rounded-xl shadow-lg flex items-center gap-2">
+                            <Video className="h-3.5 w-3.5 text-[#f43f8e]" /> Video Call
+                        </span>
+                        <span className="bg-white/95 backdrop-blur-md text-[10px] font-black uppercase tracking-tighter px-4 py-2 rounded-xl shadow-lg flex items-center gap-2">
+                            <MapPin className="h-3.5 w-3.5 text-[#00a18e]" /> In-Clinic
+                        </span>
+                    </div>
+                  </div>
+                  <div className="px-2">
+                    <h3 className="text-2xl font-black text-[#003d3d] mb-1 group-hover:text-[#00a18e] transition-colors">
+                        {doctor.user?.firstName} {doctor.user?.lastName}
+                    </h3>
+                    <p className="text-[#f43f8e] font-black text-sm uppercase tracking-widest mb-4">{doctor.doctor?.specialization}</p>
+                    <div className="flex items-center gap-6 text-sm text-gray-400 font-bold">
+                      <div className="flex items-center gap-1.5">
+                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                        <span className="text-[#003d3d]">{doctor.doctor?.rating || 'N/A'}</span>
+                      </div>
+                      <div className="border-l border-gray-100 pl-6">{doctor.doctor?.experience} Yrs Exp</div>
+                      <div className="flex items-center gap-1.5 border-l border-gray-100 pl-6">
+                        <Users className="h-4 w-4" /> {doctor.doctor?.patients}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-
-            <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
-              <div className="bg-gradient-to-r from-teal-100 to-pink-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <MapPin className="h-8 w-8 text-teal-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Visit Us</h3>
-              <p className="text-gray-600 mb-2">123 Healthcare Avenue</p>
-              <p className="text-gray-600">Nairobi, Kenya</p>
-            </div>
-
-            <div className="text-center p-8 bg-white rounded-2xl shadow-lg">
-              <div className="bg-gradient-to-r from-teal-100 to-pink-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Mail className="h-8 w-8 text-teal-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Email Us</h3>
-              <p className="text-gray-600 mb-2">info@careconnect.co.ke</p>
-              <p className="text-gray-600">support@careconnect.co.ke</p>
-            </div>
-          </div>
-
-          <div className="text-center mt-12">
-            <button
-              onClick={() => navigateTo('/appointments')}
-              className="bg-gradient-to-r from-teal-500 to-pink-500 text-white px-8 py-4 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold text-lg flex items-center justify-center gap-2 mx-auto"
-            >
-              <Calendar className="h-5 w-5" />
-              Book Your Appointment Now
-            </button>
-          </div>
+          )}
         </div>
       </section>
     </div>

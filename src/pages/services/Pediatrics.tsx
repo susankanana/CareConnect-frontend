@@ -1,82 +1,30 @@
-// import { useEffect } from 'react';
-// import { useLocation } from 'react-router';
-// import { useGetServiceByTitleQuery } from '../../../src/reducers/services/servicesAPI';
-// import { CheckCircle } from 'lucide-react';
-// import { slugToTitleMap } from './slug';
-
-// const Pediatrics = () => {
-//   const location = useLocation();
-
-//   // Extract the slug from the URL (e.g., "emergencycare")
-//   const slug = decodeURIComponent(location.pathname.split('/service/')[1]);
-
-//   // Convert slug to the proper title (e.g., "Emergency Care")
-//   const title = slugToTitleMap[slug];
-
-//   const { data: service, isLoading, isError } = useGetServiceByTitleQuery(title, {
-//     skip: !title, //skip query if title is undefined
-//     refetchOnMountOrArgChange: true,
-//   });
-
-//   useEffect(() => {
-//     window.scrollTo(0, 0);
-//   }, []);
-
-//   if (!title) {
-//     return <div className="text-center mt-10 text-red-500">Invalid service URL.</div>;
-//   }
-
-//   if (isLoading) {
-//     return <div className="text-center mt-10 text-gray-600">Loading service...</div>;
-//   }
-
-//   if (isError || !service) {
-//     return <div className="text-center mt-10 text-red-500">Service not found.</div>;
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-white py-20 px-4 sm:px-6 lg:px-8">
-//       <div className="max-w-4xl mx-auto">
-//         <h1 className="text-4xl font-bold text-gray-900 mb-6">{service.title}</h1>
-//         <p className="text-lg text-gray-700 mb-8">{service.description}</p>
-
-//         <h2 className="text-2xl font-semibold text-gray-900 mb-4">Features</h2>
-//         <ul className="space-y-3">
-//           {service.features?.map((feature: string, index: number) => (
-//             <li key={index} className="flex items-start gap-2 text-gray-800">
-//               <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
-//               {feature}
-//             </li>
-//           ))}
-//         </ul>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Pediatrics;
 import { useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate, Link } from 'react-router';
 import { useGetServiceByTitleQuery } from '../../../src/reducers/services/servicesAPI';
-import { CheckCircle, Baby, Stethoscope, ShieldCheck, LineChart } from 'lucide-react';
+import {
+  CheckCircle,
+  Baby,
+  Stethoscope,
+  ShieldCheck,
+  ArrowLeft,
+  Heart,
+  Award,
+} from 'lucide-react';
 import { slugToTitleMap } from './slug';
 
 const Pediatrics = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Extract the slug from the URL (e.g., "pediatrics")
   const slug = decodeURIComponent(location.pathname.split('/service/')[1]);
-
-  // Convert slug to the proper title (e.g., "Pediatrics")
   const title = slugToTitleMap[slug];
 
-  // Fetch the service data based on the title
   const {
     data: service,
     isLoading,
     isError,
   } = useGetServiceByTitleQuery(title, {
-    skip: !title, // Skip query if title is undefined
+    skip: !title,
     refetchOnMountOrArgChange: true,
   });
 
@@ -84,83 +32,60 @@ const Pediatrics = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Define static exhaustive content for Pediatrics
+  const navigateAndScroll = (sectionId: string) => {
+    if (window.location.pathname === '/') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(`/#${sectionId}`);
+    }
+  };
+
   const exhaustivePediatricsContent = {
     sections: [
       {
         title: 'The Scope of Pediatrics',
-        icon: <Baby className="h-8 w-8 text-teal-600" />,
+        icon: <Baby size={24} />,
         paragraphs: [
-          'Pediatrics is the branch of medicine that deals with the **medical care of infants, children, and adolescents**. Pediatricians provide comprehensive health services, from preventive health maintenance to the diagnosis and treatment of acute and chronic illnesses. Their focus is not just on physical health, but also on the overall growth, development, and well-being of young people, understanding that children are not just small adults.',
+          'Pediatrics is dedicated to the medical care of infants, children, and adolescents. Our focus is on the overall growth, development, and well-being of young people, understanding that children require specialized, age-appropriate care.',
         ],
         features: [
-          '**Well-Child Visits:** Regular check-ups from infancy through adolescence to monitor growth, development, provide immunizations, and offer guidance on child health.',
-          '**Immunizations:** Administering vaccines to protect children from a wide range of infectious diseases, following established national and international schedules.',
-          '**Acute Illnesses:** Diagnosing and treating common childhood illnesses such as colds, flu, ear infections, strep throat, and various viral infections.',
-          '**Chronic Conditions:** Managing long-term health issues like asthma, allergies, diabetes, epilepsy, and developmental disorders, often coordinating care with specialists.',
-          '**Growth and Development Monitoring:** Tracking physical, cognitive, and emotional milestones to identify any delays or concerns early.',
-          '**Behavioral and Mental Health:** Addressing common behavioral issues, ADHD, anxiety, depression, and other mental health challenges in children and adolescents.',
-          '**Nutrition and Feeding:** Providing guidance on healthy eating habits, managing feeding difficulties, and addressing issues like childhood obesity or picky eating.',
-          '**Injuries and Accidents:** Treating common childhood injuries, providing wound care, and offering safety counseling to prevent accidents.',
-          '**Adolescent Health:** Addressing specific health needs of teenagers, including reproductive health, substance abuse prevention, and mental well-being.',
+          '**Well-Child Visits:** Regular check-ups to monitor growth and development.',
+          '**Immunizations:** Administering vaccines to protect against infectious diseases.',
+          '**Acute Illnesses:** Treating common childhood infections and viral issues.',
+          '**Chronic Conditions:** Managing asthma, allergies, and developmental disorders.',
         ],
       },
       {
-        title: 'Diagnostic Tools and Techniques',
-        icon: <Stethoscope className="h-8 w-8 text-teal-600" />,
+        title: 'Diagnostic Tools',
+        icon: <Stethoscope size={24} />,
         paragraphs: [
-          'Pediatricians use age-appropriate diagnostic methods to ensure accurate assessment and minimize discomfort for their young patients:',
+          'We use child-friendly diagnostic methods to ensure accurate assessment while minimizing discomfort for our young patients:',
         ],
         features: [
-          '**Physical Examination:** A thorough head-to-toe examination, adapted for different age groups, to assess overall health and development.',
-          "**Growth Charts:** Essential tools to plot and monitor a child's weight, height, and head circumference against established norms.",
-          '**Developmental Screenings:** Tools and questionnaires to assess motor skills, language, cognitive abilities, and social-emotional development.',
-          '**Vaccination Records Review:** Meticulous tracking of immunization status to ensure timely and complete vaccination.',
-          '**Laboratory Tests:** Age-appropriate blood, urine, and stool tests for diagnosing infections, anemia, allergies, and other conditions.',
-          '**Imaging Studies:** X-rays, ultrasounds, and sometimes MRI/CT scans (when necessary) performed with child-friendly protocols for conditions like fractures, abdominal issues, or neurological concerns.',
-          '**Hearing and Vision Screenings:** Regular tests to detect any impairments early that could affect learning and development.',
-          '**Referral to Specialists:** Collaborating with pediatric sub-specialists (e.g., pediatric cardiologists, neurologists, endocrinologists) for complex or specialized care.',
-        ],
-      },
-      {
-        title: 'Treatment Approaches in Pediatrics',
-        icon: <ShieldCheck className="h-8 w-8 text-teal-600" />,
-        paragraphs: [
-          'Pediatric treatment focuses on effective and safe interventions tailored to the unique physiological and developmental needs of children. Approaches range from preventive measures to managing complex illnesses:',
-        ],
-        features: [
-          '**Immunization Schedules:** Adhering to and administering recommended vaccine doses to build immunity against infectious diseases.',
-          "**Medication Management:** Prescribing and carefully monitoring medications, with dosages adjusted precisely for a child's weight and age.",
-          '**Hydration and Nutritional Support:** Managing dehydration due to illness and providing guidance on appropriate nutrition for growth and recovery.',
-          '**Fever Management:** Education and strategies for safely managing fever, which is a common symptom in childhood illnesses.',
-          '**Antibiotic/Antiviral Therapy:** Treating bacterial or viral infections with appropriate antimicrobial agents.',
-          '**Inhaler/Nebulizer Therapy:** For respiratory conditions like asthma or bronchiolitis.',
-          '**Behavioral Interventions:** Counseling for parents and children to address behavioral challenges, sleep issues, or developmental concerns.',
-          '**Minor Procedures:** Performing procedures like wound care, ear wax removal, or minor injury management in the clinic.',
-          '**Chronic Disease Management Plans:** Developing comprehensive plans for conditions like diabetes or asthma, including medication, lifestyle, and emergency protocols.',
-        ],
-      },
-      {
-        title: 'Growth, Development, and Prevention',
-        icon: <LineChart className="h-8 w-8 text-teal-600" />,
-        paragraphs: [
-          'A cornerstone of pediatrics is preventive care, focusing on optimal growth and development. This includes regular check-ups, comprehensive immunization, nutritional counseling, safety education (e.g., car seat safety, poison prevention), and early intervention for developmental delays. Pediatricians work closely with families to foster healthy lifestyles and create supportive environments for children.',
-          'The field continuously evolves with new research in child health, infectious diseases, genetics, and developmental psychology. Advances in pediatric medicine aim to ensure every child has the best possible start in life and the opportunity to reach their full potential, contributing to healthier future generations.',
+          '**Growth Charts:** Monitoring physical milestones against global norms.',
+          '**Developmental Screenings:** Assessing motor, language, and social skills.',
+          '**Imaging Studies:** Child-friendly X-rays and ultrasounds.',
+          '**Hearing & Vision:** Early detection of impairments affecting learning.',
         ],
       },
     ],
   };
 
-  // --- Render Logic ---
-
-  if (!title) {
+  if (!title || isError || (!isLoading && !service)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <p className="text-2xl text-red-600 font-semibold mb-4">Invalid Service URL</p>
-          <p className="text-gray-700">
-            The URL you're trying to access is not a recognized service. Please check and try again.
-          </p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-black text-[#003d3d] uppercase italic">Service Not Found</h2>
+          <div
+            onClick={() => navigateAndScroll('services')}
+            className="inline-flex items-center gap-2 text-[#00a18e] text-[10px] font-black uppercase tracking-widest mt-4 hover:text-pink-500 transition-colors cursor-pointer group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Back to all services
+          </div>
         </div>
       </div>
     );
@@ -168,114 +93,115 @@ const Pediatrics = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <span className="loading loading-spinner loading-lg text-teal-600"></span>
-          <p className="text-xl text-gray-700 mt-4">Loading service details...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#003d3d]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[#00a18e] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-white font-black uppercase tracking-widest text-xs">Loading Specialist Data</p>
         </div>
       </div>
     );
   }
 
-  // Handle case where service is not found after loading
-  if (isError || !service) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-center p-8 bg-white rounded-lg shadow-xl">
-          <p className="text-2xl text-red-600 font-semibold mb-4">Service Not Found</p>
-          <p className="text-gray-700">
-            The service "{title}" could not be found. It might not exist or there was an issue
-            fetching it.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Assuming 'service' now contains the fetched Pediatrics data
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {/* === Fetched Service Details Section (Hero/Header Card) === */}
-        <div className="relative bg-gradient-to-br from-teal-500 to-pink-500 text-white p-8 md:p-12 lg:p-16">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left flex-1">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 leading-tight">
-                {service.title}
+    <div className="min-h-screen bg-[#fcfcfc]">
+      {/* --- PREMIUM HERO SECTION --- */}
+      <div className="bg-[#003d3d] pt-24 pb-16 px-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#00a18e] rounded-full blur-[150px] opacity-10"></div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div
+            onClick={() => navigateAndScroll('services')}
+            className="inline-flex items-center gap-2 text-[#00a18e] text-[10px] font-black uppercase tracking-widest mb-8 hover:text-white transition-colors cursor-pointer group"
+          >
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+            Back to all services
+          </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-3xl">
+              <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase mb-4">
+                {service.title}<span className="text-[#00a18e]">.</span>
               </h1>
-              <p className="text-lg sm:text-xl opacity-90 max-w-3xl">{service.description}</p>
+              <p className="text-teal-100/60 text-lg font-medium leading-relaxed">
+                {service.description}
+              </p>
             </div>
-            <div className="hidden md:block">
-              <Baby className="w-24 h-24 opacity-20" /> {/* Main icon for Pediatrics */}
+            <div className="hidden lg:block bg-white/5 p-8 rounded-[40px] border border-white/10 backdrop-blur-sm">
+              <Baby size={64} className="text-[#00a18e] animate-bounce-slow" />
             </div>
           </div>
-          {service.features && service.features.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-white border-opacity-30">
-              <h2 className="text-2xl font-semibold text-white mb-4">Our Key Features</h2>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-lg">
-                {service.features.map((feature: string, index: number) => (
-                  <li key={index} className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-teal-200" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
+      </div>
 
-        {/* === Exhaustive Static Content Sections === */}
-        <div className="p-8 md:p-12 lg:p-16 space-y-12">
-          {exhaustivePediatricsContent.sections.map((section, sectionIndex) => (
-            <div
-              key={sectionIndex}
-              className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border border-gray-100"
-            >
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 pb-3 flex items-center gap-3 border-b border-gray-200">
-                {section.icon}
-                {section.title}
-              </h2>
-              {section.paragraphs &&
-                section.paragraphs.map((paragraph, pIndex) => (
-                  <p key={`p-${pIndex}`} className="text-lg text-gray-700 mb-4 leading-relaxed">
-                    {paragraph}
-                  </p>
+      {/* --- CONTENT AREA --- */}
+      <div className="max-w-7xl mx-auto px-4 -mt-10 pb-24 relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <div className="lg:col-span-2 space-y-8">
+            {/* Dynamic Features Grid */}
+            {service.features && (
+              <div className="bg-white rounded-[40px] shadow-2xl shadow-gray-200/50 p-8 md:p-12 border border-gray-100">
+                <h2 className="text-2xl font-black text-[#003d3d] uppercase tracking-tight mb-8 flex items-center gap-3">
+                  <div className="bg-teal-50 p-2 rounded-xl text-[#00a18e]"><Award size={20}/></div>
+                  Care Highlights
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {service.features.map((feature: string, i: number) => (
+                    <div key={i} className="flex items-center gap-4 p-5 bg-gray-50 rounded-3xl border border-gray-100 hover:border-[#00a18e]/30 transition-all group">
+                      <CheckCircle className="text-[#00a18e] group-hover:scale-110 transition-transform" size={20} />
+                      <span className="font-bold text-[#003d3d] text-sm uppercase">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Exhaustive Content Sections */}
+            {exhaustivePediatricsContent.sections.map((section, idx) => (
+              <div key={idx} className="bg-white rounded-[40px] shadow-xl p-8 md:p-12 border border-gray-100">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="bg-[#003d3d] text-white p-3 rounded-2xl shadow-lg shadow-teal-900/20">
+                    {section.icon}
+                  </div>
+                  <h3 className="text-2xl font-black text-[#003d3d] uppercase tracking-tight">{section.title}</h3>
+                </div>
+                
+                {section.paragraphs.map((p, pi) => (
+                  <p key={pi} className="text-gray-600 text-lg leading-relaxed mb-8">{p}</p>
                 ))}
 
-              {section.features && section.features.length > 0 && (
-                <ul className="space-y-4 text-lg mt-6">
-                  {section.features.map((feature: string, featureIndex: number) => (
-                    <li
-                      key={`feature-${featureIndex}`}
-                      className="flex items-start gap-3 text-gray-800 p-3 bg-gray-50 rounded-lg shadow-sm"
-                    >
-                      <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
-                      {/* Using dangerouslySetInnerHTML to render bold markdown within strings */}
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: feature.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
-                        }}
+                <div className="space-y-4">
+                  {section.features.map((feature, fi) => (
+                    <div key={fi} className="flex gap-4 items-start p-4 rounded-2xl bg-teal-50/30 border-l-4 border-[#00a18e]">
+                      <span className="text-sm text-gray-700 leading-relaxed" 
+                        dangerouslySetInnerHTML={{ __html: feature.replace(/\*\*(.*?)\*\*/g, '<b class="text-[#003d3d] font-black uppercase text-[12px]">$1</b>') }} 
                       />
-                    </li>
+                    </div>
                   ))}
-                </ul>
-              )}
-            </div>
-          ))}
-
-          {/* Concluding Section for overall Pediatrics */}
-          <div className="text-center mt-16 bg-gradient-to-r from-teal-50 to-pink-50 p-8 rounded-2xl shadow-inner">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">
-              Nurturing Health and Growth for Future Generations
-            </h3>
-            <p className="text-xl text-gray-700 max-w-4xl mx-auto">
-              Pediatrics is a foundational medical specialty dedicated to safeguarding the health
-              and development of children from birth through adolescence. Through continuous
-              advancements in medical science, preventative care, and compassionate patient-centered
-              approaches, pediatricians play a vital role in ensuring a healthy start and a brighter
-              future for every child.
-            </p>
+                </div>
+              </div>
+            ))}
           </div>
+
+          {/* Sidebar */}
+          <div className="space-y-8">
+            <div className="bg-[#f43f8e] rounded-[40px] p-10 text-white shadow-2xl shadow-pink-200 sticky top-24">
+              <Heart className="mb-6 opacity-50" size={40} />
+              <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">Book a Consultation</h3>
+              <p className="text-pink-100 font-medium mb-8">
+                Trust your child's health to the experts. Schedule a pediatric visit today.
+              </p>
+              <Link to="/appointments" className="block w-full bg-white text-[#f43f8e] text-center py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-pink-50 transition-colors shadow-lg">
+                Book Now
+              </Link>
+            </div>
+
+            <div className="bg-[#003d3d] rounded-[40px] p-10 text-white overflow-hidden relative">
+              <ShieldCheck className="absolute -bottom-4 -right-4 text-white/5 w-32 h-32" />
+              <h4 className="text-xs font-black uppercase tracking-[0.3em] text-[#00a18e] mb-2">Emergency</h4>
+              <p className="text-xl font-bold italic mb-0">24/7 Pediatric Support</p>
+              <p className="text-3xl font-black mt-2">+254 700 000 000</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

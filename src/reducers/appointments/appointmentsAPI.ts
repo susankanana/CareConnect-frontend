@@ -22,6 +22,7 @@ export type TDetailedAppointment = {
   timeSlot: string;
   status: AppointmentStatus;
   totalAmount: string;
+  videoUrl?: string;
   patient: {
     id: number;
     name: string;
@@ -124,6 +125,11 @@ export const appointmentsAPI = createApi({
       }),
       invalidatesTags: ['Appointments'],
     }),
+
+    // Fetch Daily token for an existing room
+    getVideoToken: builder.query<{ url: string; token: string }, number>({
+      query: (appointmentId) => `/video/token/${appointmentId}`,
+    }),
   }),
 });
 
@@ -138,4 +144,5 @@ export const {
   useUpdateAppointmentMutation,
   useUpdateAppointmentStatusMutation,
   useDeleteAppointmentMutation,
+  useGetVideoTokenQuery,
 } = appointmentsAPI;

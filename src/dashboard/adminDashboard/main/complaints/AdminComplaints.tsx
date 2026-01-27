@@ -9,6 +9,9 @@ import {
   XCircle,
   Clock,
   AlertCircle,
+  Hash,
+  Loader,
+  ArrowRight
 } from 'lucide-react';
 import { useState } from 'react';
 import UpdateComplaint from './UpdateComplaint';
@@ -45,230 +48,165 @@ const Complaints = () => {
     (document.getElementById('change_status_modal') as HTMLDialogElement)?.showModal();
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusTheme = (status: string) => {
     switch (status) {
       case 'Open':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-100', dot: 'bg-red-500' };
       case 'In Progress':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100', dot: 'bg-amber-500' };
       case 'Resolved':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'Closed':
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return { bg: 'bg-teal-50', text: 'text-teal-600', border: 'border-teal-100', dot: 'bg-teal-500' };
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return { bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-100', dot: 'bg-gray-500' };
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Open':
-        return <AlertCircle className="h-3 w-3" />;
-      case 'In Progress':
-        return <Clock className="h-3 w-3" />;
-      case 'Resolved':
-        return <CheckCircle className="h-3 w-3" />;
-      case 'Closed':
-        return <XCircle className="h-3 w-3" />;
-      default:
-        return <AlertCircle className="h-3 w-3" />;
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-        <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <p className="text-red-700 text-lg font-semibold">Error fetching complaints</p>
-        <p className="text-red-600 mt-2">Please try again later</p>
-      </div>
-    );
-  }
+  if (isLoading) return (
+    <div className="flex flex-col justify-center items-center min-h-[400px]">
+      <Loader className="animate-spin text-teal-600" size={40} />
+      <p className="text-gray-500 font-bold mt-4">Retrieving Patient Feedback...</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-7xl mx-auto p-4 space-y-10">
+      {/* Chique Header */}
+      <div className="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-3xl border border-gray-100 shadow-sm gap-6">
+        <div className="flex items-center gap-5">
+          <div className="bg-pink-50 p-4 rounded-2xl">
+            <MessageSquare className="h-8 w-8 text-pink-500" />
+          </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <MessageSquare className="h-7 w-7 text-teal-600" />
-              Complaints Management
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Manage patient complaints - {complaintsData?.data?.length || 0} total complaints
+            <h1 className="text-2xl font-black text-gray-900 tracking-tighter">Resolution Center</h1>
+            <p className="text-gray-400 text-sm font-semibold mt-1">
+              Monitoring {complaintsData?.data?.length || 0} active inquiries
             </p>
           </div>
         </div>
       </div>
 
-      {/* Modals */}
       <UpdateComplaint complaint={selectedComplaint} refetch={refetch} />
       <DeleteComplaint complaint={complaintToDelete} refetch={refetch} />
       <ChangeStatus complaint={complaintToChangeStatus} refetch={refetch} />
 
-      {/* Complaints Grid */}
-      {complaintsData && complaintsData.data && complaintsData.data.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {complaintsData.data.map((complaint: TComplaint) => (
-            <div
-              data-test={`complaint-card-${complaint.complaintId}`}
-              key={complaint.complaintId}
-              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden"
-            >
-              {/* Complaint Header */}
-              <div className="bg-gradient-to-r from-teal-50 to-pink-50 p-4 border-b">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">
-                      Complaint #{complaint.complaintId}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Calendar className="h-4 w-4 text-teal-600" />
-                      <span className="text-sm text-gray-600">
-                        {complaint.createdAt
-                          ? new Date(complaint.createdAt).toLocaleDateString()
-                          : 'N/A'}
-                      </span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {complaintsData?.data?.map((complaint: TComplaint) => {
+          const theme = getStatusTheme(complaint.status);
+          return (
+            <div key={complaint.complaintId} className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col hover:shadow-xl transition-all duration-500 group">
+              
+              {/* Card Top Strip */}
+              <div className="p-6 flex justify-between items-center bg-gray-50/50 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Hash size={14} className="text-pink-500" />
+                  <span className="text-xs font-black text-gray-900">CASE-{complaint.complaintId}</span>
+                </div>
+                <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm flex items-center gap-2 bg-white ${theme.text} ${theme.border}`}>
+                  <div className={`h-1.5 w-1.5 rounded-full ${theme.dot} animate-pulse`} />
+                  {complaint.status}
+                </div>
+              </div>
+
+              <div className="p-8 space-y-6">
+                {/* Subject Area */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle size={14} className="text-teal-500" />
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Inquiry Subject</span>
+                  </div>
+                  <h3 className="text-lg font-black text-gray-900 leading-snug">
+                    {complaint.subject}
+                  </h3>
+                </div>
+
+                {/* Description Box */}
+                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 italic text-gray-600 text-sm leading-relaxed">
+                  "{complaint.description}"
+                </div>
+
+                {/* Meta Data Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-teal-50 rounded-xl">
+                      <User size={16} className="text-teal-600" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">Patient ID</p>
+                      <p className="text-xs font-bold text-gray-700">USR-{complaint.userId}</p>
                     </div>
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(complaint.status)}`}
-                  >
-                    {getStatusIcon(complaint.status)}
-                    {complaint.status}
-                  </span>
-                </div>
-              </div>
-
-              {/* Complaint Details */}
-              <div className="p-6">
-                {/* Subject */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-teal-600" />
-                    Subject
-                  </h4>
-                  <p className="font-medium text-gray-900 bg-gray-50 rounded-lg p-3">
-                    {complaint.subject}
-                  </p>
-                </div>
-
-                {/* Description */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Description</h4>
-                  <p className="text-gray-700 bg-gray-50 rounded-lg p-3 text-sm leading-relaxed">
-                    {complaint.description}
-                  </p>
-                </div>
-
-                {/* User Information */}
-                <div className="mb-6">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <User className="h-4 w-4 text-teal-600" />
-                    Patient Information
-                  </h4>
-                  <div className="bg-teal-50 rounded-lg p-3">
-                    <p className="text-sm text-gray-700">
-                      <span className="font-medium">User ID:</span> {complaint.userId}
-                    </p>
-                    {complaint.relatedAppointmentId && (
-                      <p className="text-sm text-gray-700 mt-1">
-                        <span className="font-medium">Related Appointment:</span> #
-                        {complaint.relatedAppointmentId}
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-pink-50 rounded-xl">
+                      <Calendar size={16} className="text-pink-500" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">Filed On</p>
+                      <p className="text-xs font-bold text-gray-700">
+                        {complaint.createdAt ? new Date(complaint.createdAt).toLocaleDateString() : 'N/A'}
                       </p>
-                    )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    data-test={`change-status-${complaint.complaintId}`}
-                    onClick={() => handleChangeStatus(complaint)}
-                    className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-blue-200"
-                  >
-                    <Clock className="h-4 w-4" />
-                    Status
-                  </button>
-                  <button
-                    data-test={`edit-complaint-${complaint.complaintId}`}
-                    onClick={() => handleEdit(complaint)}
-                    className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-teal-200"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </button>
-                  <button
-                    data-test={`delete-complaint-${complaint.complaintId}`}
-                    onClick={() => handleDelete(complaint)}
-                    className="flex-1 bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-red-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </button>
-                </div>
+                {/* Status-related action items */}
+                {complaint.relatedAppointmentId && (
+                  <div className="flex items-center justify-between p-4 bg-teal-600 rounded-2xl text-white">
+                    <div className="flex items-center gap-3">
+                      <Clock size={18} />
+                      <span className="text-xs font-bold">Related to Appointment #{complaint.relatedAppointmentId}</span>
+                    </div>
+                    <ArrowRight size={16} />
+                  </div>
+                )}
               </div>
+
+              {/* Action Footer */}
+              <div className="p-8 pt-0 mt-auto flex gap-3">
+                <button
+                  onClick={() => handleChangeStatus(complaint)}
+                  className="flex-1 border border-teal-400 text-teal-600 bg-teal-50/30 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-teal-600 hover:text-white transition-all flex items-center justify-center gap-2"
+                >
+                  Update Status
+                </button>
+                <button
+                  onClick={() => handleEdit(complaint)}
+                  className="px-5 py-3.5 bg-white text-gray-600 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all"
+                >
+                  <Edit size={16} />
+                </button>
+                <button
+                  onClick={() => handleDelete(complaint)}
+                  className="px-5 py-3.5 bg-white text-red-500 border border-red-100 rounded-2xl hover:bg-red-50 transition-all"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Chique Footer Summary - Teal Gradient (No Black) */}
+      <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl -mr-40 -mt-40"></div>
+        <h3 className="text-xl font-black mb-10 flex items-center gap-3 tracking-tighter uppercase">
+          <div className="w-1.5 h-6 bg-teal-400 rounded-full"></div> 
+          Department Health Summary
+        </h3>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center md:text-left">
+          {[
+            { label: 'Total Logs', value: complaintsData?.data?.length || 0, color: 'text-white' },
+            { label: 'Pending Action', value: complaintsData?.data?.filter(c => c.status === 'Open').length || 0, color: 'text-red-300' },
+            { label: 'Ongoing', value: complaintsData?.data?.filter(c => c.status === 'In Progress').length || 0, color: 'text-amber-300' },
+            { label: 'Resolved Rate', value: `${complaintsData?.data?.length ? Math.round((complaintsData.data.filter(c => c.status === 'Resolved').length / complaintsData.data.length) * 100) : 0}%`, color: 'text-teal-300' }
+          ].map((stat, i) => (
+            <div key={i} className="bg-white/5 backdrop-blur-md rounded-3xl p-6 border border-white/10">
+              <p className="text-[10px] font-bold text-teal-100/60 uppercase tracking-widest mb-2">{stat.label}</p>
+              <div className={`text-2xl font-black ${stat.color} tracking-tight`}>{stat.value}</div>
             </div>
           ))}
         </div>
-      ) : (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-          <MessageSquare className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No complaints found</h3>
-          <p className="text-gray-600">Patient complaints will appear here when submitted</p>
-        </div>
-      )}
-
-      {/* Summary Stats */}
-      {complaintsData && complaintsData.data && complaintsData.data.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Complaints Summary</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-teal-50 rounded-lg">
-              <div className="text-2xl font-bold text-teal-600">{complaintsData.data.length}</div>
-              <div className="text-sm text-gray-600">Total Complaints</div>
-            </div>
-            <div className="text-center p-4 bg-red-50 rounded-lg">
-              <div className="text-2xl font-bold text-red-600">
-                {
-                  complaintsData.data.filter((complaint: TComplaint) => complaint.status === 'Open')
-                    .length
-                }
-              </div>
-              <div className="text-sm text-gray-600">Open</div>
-            </div>
-            <div className="text-center p-4 bg-yellow-50 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600">
-                {
-                  complaintsData.data.filter(
-                    (complaint: TComplaint) => complaint.status === 'In Progress'
-                  ).length
-                }
-              </div>
-              <div className="text-sm text-gray-600">In Progress</div>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                {
-                  complaintsData.data.filter(
-                    (complaint: TComplaint) => complaint.status === 'Resolved'
-                  ).length
-                }
-              </div>
-              <div className="text-sm text-gray-600">Resolved</div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

@@ -43,12 +43,57 @@ const timeSlots = [
   '15:30:00',
   '16:00:00',
   '16:30:00',
+  '17:00:00',
+  '17:30:00',
+  '18:00:00',
+  '18:30:00',
+  '19:00:00',
+  '19:30:00',
+  '20:00:00',
+  '20:30:00',
+  '21:00:00',
+  '21:30:00',
+  '22:00:00',
 ];
 
 const DEFAULT_CONSULTATION_FEE = '6500.00';
 
 type CreateAppointmentProps = {
   refetch: () => void;
+};
+const SLOT_DURATION_MINUTES = 30;
+
+const getTimeRangeLabel = (timeSlot: string) => {
+  const [h, m] = timeSlot.split(':').map(Number);
+
+  const start = new Date();
+  start.setHours(h, m, 0, 0);
+
+  const end = new Date(start);
+  end.setMinutes(start.getMinutes() + SLOT_DURATION_MINUTES);
+
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  return `${formatter.format(start)} – ${formatter.format(end)}`;
+};
+
+const isPastTimeSlot = (date: string, timeSlot: string) => {
+  if (!date) return false;
+
+  const now = new Date();
+  const [h, m] = timeSlot.split(':').map(Number);
+
+  const slotTime = new Date(date);
+  slotTime.setHours(h, m, 0, 0);
+
+  // Only disable past times IF date is today
+  const isToday = new Date(date).toDateString() === now.toDateString();
+
+  return isToday && slotTime <= now;
 };
 
 const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
@@ -59,6 +104,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
 
   const [createAppointment, { isLoading }] = appointmentsAPI.useCreateAppointmentMutation();
   const { data: doctorsData, isLoading: doctorsLoading } = doctorsAPI.useGetDoctorsQuery();
+  const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
 
   const {
     register,
@@ -106,14 +152,6 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
     }
   };
 
-  const formatTimeSlot = (timeSlot: string) => {
-    const [hours, minutes] = timeSlot.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
-    return `${displayHour}:${minutes} ${ampm}`;
-  };
-
   const getDayName = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { weekday: 'long' });
@@ -130,7 +168,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
   return (
     <dialog id="create_appointment_modal" className="modal sm:modal-middle">
       <div className="modal-box bg-white w-full max-w-xs sm:max-w-2xl mx-auto rounded-lg border border-gray-200">
-        <div className="bg-gradient-to-r from-teal-500 to-pink-500 -m-6 mb-6 p-6 rounded-t-lg">
+        <div className="bg-linear-to-r from-teal-500 to-pink-500 -m-6 mb-6 p-6 rounded-t-lg">
           <h3 className="font-bold text-lg text-white">Book New Appointment</h3>
           <p className="text-teal-100 text-sm mt-1">Schedule your consultation with our doctors</p>
         </div>
@@ -212,21 +250,52 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
           </div>
 
           {/* Time Selection */}
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
-            <select
-              data-test="appointment-time-slot-select"
-              {...register('timeSlot')}
-              className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
+
+            {/* Trigger */}
+            <button
+              type="button"
+              className="input input-bordered w-full text-left bg-white text-gray-800 border-gray-300 focus:border-teal-500"
               disabled={!selectedDoctor || !watchedValues.appointmentDate}
+              onClick={() => setTimeDropdownOpen((prev) => !prev)}
             >
-              <option value="">Select a time slot</option>
-              {timeSlots.map((slot) => (
-                <option key={slot} value={slot}>
-                  {formatTimeSlot(slot)}
-                </option>
-              ))}
-            </select>
+              {watchedValues.timeSlot
+                ? getTimeRangeLabel(watchedValues.timeSlot)
+                : 'Select a time slot'}
+            </button>
+
+            {/* Dropdown */}
+            {timeDropdownOpen && (
+              <div className="absolute z-50 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg max-h-64 overflow-y-auto">
+                {timeSlots.map((slot) => {
+                  const disabled = isPastTimeSlot(watchedValues.appointmentDate, slot);
+
+                  return (
+                    <button
+                      key={slot}
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => {
+                        if (disabled) return;
+                        reset({ ...watchedValues, timeSlot: slot });
+                        setTimeDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-3 text-left text-sm transition
+              ${disabled ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-teal-50 text-gray-800'}
+            `}
+                    >
+                      {getTimeRangeLabel(slot)}
+                      {disabled && ' (Unavailable)'}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Hidden input for react-hook-form */}
+            <input type="hidden" {...register('timeSlot')} />
+
             {errors.timeSlot && (
               <span className="text-sm text-red-600">{errors.timeSlot.message}</span>
             )}
