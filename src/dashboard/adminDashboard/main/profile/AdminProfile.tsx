@@ -41,7 +41,7 @@ const AdminProfile = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Profile Identity Card */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm flex flex-col items-center text-center">
+          <div className="bg-white rounded-4xl border border-gray-100 p-8 shadow-sm flex flex-col items-center text-center">
             <div className="relative group">
               <img
                 src={data?.image_url || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y'}
@@ -88,7 +88,7 @@ const AdminProfile = () => {
 
         {/* System Credentials Card */}
         <div className="lg:col-span-8">
-          <div className="bg-[#003d3d] rounded-[2rem] p-1 shadow-xl h-full">
+          <div className="bg-[#003d3d] rounded-4xl p-1 shadow-xl h-full">
             <div className="bg-white rounded-[1.8rem] h-full p-8 lg:p-12">
               <div className="flex items-center justify-between mb-10">
                 <h4 className="text-[11px] font-black text-gray-400 uppercase tracking-[0.2em]">
