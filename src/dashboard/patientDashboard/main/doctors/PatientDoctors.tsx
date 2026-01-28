@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react';
 import { doctorsAPI, type TDoctor } from '../../../../reducers/doctors/doctorsAPI';
-import {
-  Search,
-  Stethoscope,
-  Star,
-  Calendar,
-  Mail,
-  MapPin,
-} from 'lucide-react';
+import { Search, Stethoscope, Star, Calendar, Mail, MapPin, ChevronDown } from 'lucide-react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -37,10 +30,69 @@ const appointmentSchema = yup.object({
   timeSlot: yup.string().required('Please select a time slot'),
 });
 
-const timeSlots = ['09:00:00', '10:00:00', '11:00:00', '14:00:00', '15:00:00', '16:00:00'];
+// 1. Constants and Helpers from your reference
+const SLOT_DURATION_MINUTES = 30;
+const timeSlots = [
+  '09:00:00',
+  '09:30:00',
+  '10:00:00',
+  '10:30:00',
+  '11:00:00',
+  '11:30:00',
+  '14:00:00',
+  '14:30:00',
+  '15:00:00',
+  '15:30:00',
+  '16:00:00',
+  '16:30:00',
+  '17:00:00',
+  '17:30:00',
+  '18:00:00',
+  '18:30:00',
+  '19:00:00',
+  '19:30:00',
+];
+
+// Helper for time ranges
+const getTimeRangeLabel = (timeSlot: string) => {
+  const [h, m] = timeSlot.split(':').map(Number);
+  const start = new Date();
+  start.setHours(h, m, 0, 0);
+  const end = new Date(start);
+  end.setMinutes(start.getMinutes() + SLOT_DURATION_MINUTES);
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+  return `${formatter.format(start)} – ${formatter.format(end)}`;
+};
+
+const isPastTimeSlot = (date: string, timeSlot: string) => {
+  if (!date) return false;
+  const now = new Date();
+  const [h, m] = timeSlot.split(':').map(Number);
+  const slotTime = new Date(date);
+  slotTime.setHours(h, m, 0, 0);
+  const isToday = new Date(date).toDateString() === now.toDateString();
+  return isToday && slotTime <= now;
+};
+
+const getDayName = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('en-US', { weekday: 'long' });
+};
+
+const isDateAvailable = (dateString: string, doctor: any) => {
+  if (!doctor?.doctor?.availableDays) return false;
+  const dayName = getDayName(dateString);
+  return (
+    Array.isArray(doctor.doctor.availableDays) && doctor.doctor.availableDays.includes(dayName)
+  );
+};
 const DEFAULT_FEE = '6500.00';
 
 const PatientDoctors = () => {
+  const [timeDropdownOpen, setTimeDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialization, setSelectedSpecialization] = useState('');
   const [doctorToBook, setDoctorToBook] = useState<TDoctor | null>(null);
@@ -55,15 +107,11 @@ const PatientDoctors = () => {
   const [createAppointment, { isLoading: isBookingLoading }] =
     appointmentsAPI.useCreateAppointmentMutation();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<CreateAppointmentInputs>({
+  const { register, handleSubmit, reset, setValue, watch } = useForm<CreateAppointmentInputs>({
     resolver: yupResolver(appointmentSchema),
   });
+  const watchedDate = watch('appointmentDate');
+  const watchedTime = watch('timeSlot');
 
   useEffect(() => {
     if (doctorToBook) setValue('doctorId', doctorToBook.doctor.doctorId);
@@ -161,7 +209,6 @@ const PatientDoctors = () => {
             key={doc.doctor.doctorId}
             className="bg-white rounded-4xl border border-gray-100 p-2 shadow-sm hover:shadow-xl transition-all group"
           >
-            {/* RESTORED: Doctor Image */}
             <div className="relative h-48 bg-gray-50 rounded-[1.8rem] overflow-hidden mb-4">
               <img
                 src={doc.user.image_url || 'https://via.placeholder.com/400'}
@@ -176,7 +223,6 @@ const PatientDoctors = () => {
             </div>
 
             <div className="px-6 pb-6 text-center">
-              {/* RESTORED: Specialization and Doctor Name */}
               <p className="text-teal-600 font-black text-[10px] uppercase tracking-widest mb-1">
                 {doc.doctor.specialization}
               </p>
@@ -184,13 +230,11 @@ const PatientDoctors = () => {
                 Dr. {doc.user.firstName} {doc.user.lastName}
               </h2>
 
-              {/* Rating */}
               <div className="flex items-center justify-center gap-1 text-gray-900 font-black mb-4">
                 <Star size={16} className="fill-yellow-400 text-yellow-400" />
                 {doc.doctor.rating || '5.0'}
               </div>
 
-              {/* Contact & Availability Info */}
               <div className="space-y-2 mb-4 text-left border-t border-gray-50 pt-4">
                 <div className="flex items-center gap-2 text-gray-500 text-xs">
                   <Mail size={14} className="text-teal-500" /> {doc.user.email}
@@ -202,8 +246,6 @@ const PatientDoctors = () => {
                   <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 text-left">
                     Available Days
                   </p>
-
-                  {/* Horizontal Scroll Container */}
                   <div className="flex flex-nowrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
                     {doc.doctor.availableDays?.map((day) => (
                       <span
@@ -217,7 +259,6 @@ const PatientDoctors = () => {
                 </div>
               </div>
 
-              {/* Stats */}
               <div className="grid grid-cols-2 gap-2 mb-6">
                 <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100">
                   <span className="block text-xs font-bold text-gray-400 uppercase">
@@ -235,7 +276,6 @@ const PatientDoctors = () => {
                 </div>
               </div>
 
-              {/* Teal Action Button */}
               <button
                 onClick={() => handleBookClick(doc)}
                 className="w-full bg-teal-600 text-white py-4 rounded-2xl font-black hover:bg-teal-700 transition-all shadow-lg shadow-teal-100 active:scale-95 flex items-center justify-center gap-2"
@@ -248,22 +288,26 @@ const PatientDoctors = () => {
       </div>
 
       {/* Booking Modal */}
-      <dialog id="booking_modal" className="modal backdrop:backdrop-blur-sm">
-        <div className="modal-box p-0 rounded-[2.5rem] bg-white overflow-hidden max-w-2xl">
-          {/* Header Gradient */}
-          <div className="bg-linear-to-r from-teal-500 to-pink-500 p-8 text-white">
+
+      <dialog id="booking_modal" className="modal modal-middle backdrop:backdrop-blur-sm">
+        <div className="modal-box p-0 rounded-[2.5rem] bg-white overflow-hidden max-w-2xl w-[95%] max-h-[90vh] flex flex-col shadow-2xl">
+          {/* Header */}
+          <div className="bg-linear-to-r from-teal-500 to-pink-500 p-8 text-white shrink-0">
             <h3 className="text-2xl font-black">Book New Appointment</h3>
-            <p className="text-teal-50/80 font-medium">
+            <p className="text-teal-50/80 font-medium lowercase">
               Schedule your consultation with our doctors
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
-            <div className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col overflow-hidden h-full">
+            <div className="p-8 space-y-6 overflow-y-auto flex-1">
+              {/* Doctor Selection (ReadOnly in Modal) */}
               <div>
-                <label className="text-sm font-black text-gray-700 mb-2 block">Select Doctor</label>
+                <label className="text-xs font-black text-gray-400 uppercase ml-1 mb-2 block">
+                  Select Doctor
+                </label>
                 <select
-                  className="w-full bg-gray-50 p-4 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-teal-500 font-bold"
+                  className="w-full bg-gray-50 p-4 rounded-2xl border border-gray-200 font-bold appearance-none cursor-not-allowed"
                   disabled
                 >
                   <option>
@@ -273,91 +317,131 @@ const PatientDoctors = () => {
                 </select>
               </div>
 
-              {/* Selected Doctor Preview Card */}
+              {/* Doctor Info Card */}
               {doctorToBook && (
-                <div className="bg-teal-50/50 border border-teal-100 p-5 rounded-2xl flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                    <img
-                      src={doctorToBook.user.image_url || 'https://via.placeholder.com/150'}
-                      className="w-full h-full object-cover"
-                      alt="Doctor"
-                    />
-                  </div>
+                <div className="bg-teal-50/50 border border-teal-100 p-5 rounded-3xl flex items-center gap-4">
+                  <img
+                    src={doctorToBook.user.image_url}
+                    className="w-14 h-14 rounded-2xl object-cover shadow-sm"
+                    alt="dr"
+                  />
                   <div>
-                    <h4 className="font-black text-gray-900">
-                      Dr. {doctorToBook.user.firstName} {doctorToBook.user.lastName}
+                    <h4 className="font-black text-gray-900 lowercase">
+                      dr. {doctorToBook.user.firstName} {doctorToBook.user.lastName}
                     </h4>
-                    <p className="text-teal-600 text-xs font-bold">
+                    <p className="text-teal-600 text-[10px] font-black uppercase tracking-widest">
                       {doctorToBook.doctor.specialization}
                     </p>
-                    <p className="text-gray-500 text-xs mt-1">
+                    <p className="text-gray-400 text-[10px] font-bold uppercase mt-1">
                       Available: {doctorToBook.doctor.availableDays?.join(', ')}
                     </p>
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Date Picker */}
+                <div className="space-y-2">
                   <label className="text-xs font-black text-gray-400 uppercase ml-1">
                     Appointment Date
                   </label>
                   <input
                     type="date"
                     {...register('appointmentDate')}
-                    className="w-full bg-gray-50 p-4 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-teal-500 font-bold"
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full bg-gray-50 p-4 rounded-2xl border-2 border-transparent focus:border-teal-500 outline-none font-bold transition-all"
                   />
-                  {errors.appointmentDate && (
-                    <p className="text-red-500 text-[10px] font-bold ml-1 uppercase">
-                      {errors.appointmentDate.message}
+                  {doctorToBook && watchedDate && !isDateAvailable(watchedDate, doctorToBook) && (
+                    <p className="text-[10px] text-red-500 font-black uppercase px-1">
+                      Doctor not available on {getDayName(watchedDate)}
                     </p>
                   )}
                 </div>
 
-                <div className="flex flex-col gap-2">
+                {/* Time Slot Custom Dropdown */}
+                <div className="space-y-2">
                   <label className="text-xs font-black text-gray-400 uppercase ml-1">
                     Time Slot
                   </label>
-                  <select
-                    {...register('timeSlot')}
-                    className="w-full bg-gray-50 p-4 rounded-2xl border border-gray-200 outline-none focus:ring-2 focus:ring-teal-500 font-bold appearance-none"
-                  >
-                    <option value="">Select Time</option>
-                    {timeSlots.map((t) => (
-                      <option key={t} value={t}>
-                        {t.substring(0, 5)}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      className="w-full p-4 bg-gray-50 rounded-2xl font-bold text-left flex justify-between items-center border-2 border-transparent hover:border-gray-200 transition-all"
+                      disabled={
+                        !watchedDate ||
+                        (!!doctorToBook && !isDateAvailable(watchedDate, doctorToBook))
+                      }
+                      onClick={() => setTimeDropdownOpen(!timeDropdownOpen)}
+                    >
+                      <span className={watchedTime ? 'text-gray-900' : 'text-gray-400'}>
+                        {watchedTime ? getTimeRangeLabel(watchedTime) : 'Select Time'}
+                      </span>
+                      <ChevronDown
+                        className={`w-5 h-5 transition-transform ${timeDropdownOpen ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+
+                    {timeDropdownOpen && (
+                      <div className="absolute z-50 mt-2 w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-48 overflow-y-auto custom-scrollbar">
+                        {timeSlots.map((slot) => {
+                          const disabled = isPastTimeSlot(watchedDate, slot);
+                          return (
+                            <button
+                              key={slot}
+                              type="button"
+                              disabled={disabled}
+                              onClick={() => {
+                                setValue('timeSlot', slot);
+                                setTimeDropdownOpen(false);
+                              }}
+                              className={`w-full p-3 text-left text-xs font-bold border-b border-gray-50 last:border-0 transition-colors ${
+                                disabled
+                                  ? 'bg-gray-50 text-gray-300 cursor-not-allowed'
+                                  : 'hover:bg-teal-50 text-gray-700'
+                              }`}
+                            >
+                              {getTimeRangeLabel(slot)} {disabled && '(Passed)'}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                  <input type="hidden" {...register('timeSlot')} />
                 </div>
               </div>
             </div>
 
-            <div className="bg-gray-50 p-6 rounded-3xl flex items-center justify-between border border-gray-100">
-              <div>
-                <p className="text-[10px] font-black text-gray-400 uppercase">Consultation Fee</p>
-                <p className="text-2xl font-black text-teal-600">
-                  KSh {parseFloat(DEFAULT_FEE).toLocaleString()}
-                </p>
-                <p className="text-[10px] text-gray-400 font-bold">Payment due at appointment</p>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="px-6 py-4 font-bold text-gray-500 hover:text-gray-900 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isBookingLoading}
-                  className="bg-teal-600 text-white px-8 py-4 rounded-2xl font-black hover:bg-teal-700 transition-all shadow-lg shadow-teal-100 disabled:opacity-50"
-                >
-                  {isBookingLoading ? 'Processing...' : 'Book Appointment'}
-                </button>
-              </div>
-            </div>
+            {/* footer / fee section */}
+<div className="bg-gray-50 p-8 flex flex-col md:flex-row items-center justify-between gap-6 shrink-0 border-t border-gray-100">
+  <div className="text-center md:text-left">
+    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+      consultation fee
+    </p>
+    <p className="text-3xl font-black text-teal-600">ksh 6,500</p>
+    <p className="text-[10px] text-gray-400 font-bold uppercase">
+      payment due at appointment
+    </p>
+  </div>
+  
+  <div className="flex items-center gap-8 w-full md:w-auto">
+    <button
+      type="button"
+      onClick={handleCloseModal}
+      className="text-sm font-black text-gray-500 hover:text-gray-700 transition-colors uppercase tracking-wider"
+    >
+      cancel
+    </button>
+    
+    <button
+      type="submit"
+      disabled={isBookingLoading}
+      className="flex-1 md:flex-none bg-[#00a18e] text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-[#008a7a] transition-all shadow-lg shadow-teal-100 disabled:opacity-50 active:scale-95"
+    >
+      {isBookingLoading ? 'processing...' : 'book appointment'}
+    </button>
+  </div>
+</div>
           </form>
         </div>
       </dialog>
