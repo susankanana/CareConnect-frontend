@@ -3,9 +3,6 @@ import { usersAPI, type TUser } from '../../../../reducers/users/usersAPI';
 import {
   Users as UsersIcon,
   Mail,
-  Shield,
-  CheckCircle,
-  XCircle,
   Settings,
   Crown,
   User,
@@ -19,7 +16,6 @@ const Users = () => {
   const {
     data: usersData,
     isLoading,
-    error,
   } = usersAPI.useGetUsersQuery(undefined, {
     refetchOnMountOrArgChange: true,
     pollingInterval: 60000,
@@ -56,7 +52,7 @@ const Users = () => {
   };
 
   if (isLoading) return (
-    <div className="flex flex-col justify-center items-center min-h-[400px] space-y-4">
+    <div className="flex flex-col justify-center items-center min-h-100 space-y-4">
       <Loader className="animate-spin text-teal-600" size={40} />
       <p className="text-gray-500 font-bold tracking-tight text-sm">Syncing Directory...</p>
     </div>
@@ -111,7 +107,7 @@ const Users = () => {
 
               <div className="p-7 space-y-6 grow">
                 <div className="flex items-start gap-4">
-                  <div className="h-16 w-16 rounded-[1.5rem] bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-teal-100 shrink-0">
+                  <div className="h-16 w-16 rounded-3xl bg-linear-to-br from-teal-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-teal-100 shrink-0">
                     <User size={32} />
                   </div>
                   <div className="overflow-hidden">
@@ -159,7 +155,7 @@ const Users = () => {
       </div>
 
       {/* NEW FOOTER: Removed black, used Deep Teal Gradient */}
-      <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
+      <div className="bg-linear-to-r from-[#004d4d] to-[#006666] rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl -mr-40 -mt-40"></div>
         <h3 className="text-xl font-black mb-10 flex items-center gap-3 tracking-tighter uppercase">
           <div className="w-1.5 h-6 bg-teal-400 rounded-full"></div> 

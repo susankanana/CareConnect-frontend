@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../../../../app/store';
 import { appointmentsAPI } from '../../../../../reducers/appointments/appointmentsAPI';
 import { prescriptionsAPI } from '../../../../../reducers/prescriptions/prescriptionsAPI';
-import { complaintsAPI } from '../../../../../reducers/complaints/complaintsAPI';
 import { toast } from 'sonner';
 import { Download, Heart, X, Loader, CheckCircle } from 'lucide-react';
 
@@ -26,282 +25,92 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
     userId ?? 0,
     { skip: !userId }
   );
-  const { data: complaintsData } = complaintsAPI.useGetComplaintsByUserIdQuery(userId ?? 0, {
-    skip: !userId,
-  });
 
   const generateHealthReport = async () => {
     if (!appointmentsData?.data || !user) {
-      toast.error('No health data available for report generation');
+      toast.error('health data not available');
       return;
     }
 
     setIsGenerating(true);
-
     try {
       const appointments = appointmentsData.data;
       const prescriptions = prescriptionsData?.data || [];
-      const complaints = complaintsData?.data || [];
-
-      // Calculate health metrics
       const totalSpent = appointments.reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0);
-      const totalAppointments = appointments.length;
-      const uniqueDoctors = new Set(appointments.map((apt) => apt.doctor.id)).size;
-      const specializations = [...new Set(appointments.map((apt) => apt.doctor.specialization))];
+      const engagementScore = ((appointments.filter(a => a.status === 'Confirmed').length / Math.max(appointments.length, 1)) * 100).toFixed(0);
 
-      const appointmentsByStatus = {
-        confirmed: appointments.filter((apt) => apt.status === 'Confirmed').length,
-        pending: appointments.filter((apt) => apt.status === 'Pending').length,
-        cancelled: appointments.filter((apt) => apt.status === 'Cancelled').length,
-      };
-
-      const complaintsByStatus = {
-        open: complaints.filter((c) => c.status === 'Open').length,
-        inProgress: complaints.filter((c) => c.status === 'In Progress').length,
-        resolved: complaints.filter((c) => c.status === 'Resolved').length,
-        closed: complaints.filter((c) => c.status === 'Closed').length,
-      };
-
-      // Generate HTML report
       const reportHTML = `
         <!DOCTYPE html>
         <html>
         <head>
-          <title>CareConnect - Personal Health Report</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 40px; color: #333; line-height: 1.6; }
-            .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #14B8A6; padding-bottom: 20px; }
-            .logo { color: #14B8A6; font-size: 24px; font-weight: bold; margin-bottom: 10px; }
-            .report-title { font-size: 28px; font-weight: bold; margin: 10px 0; }
-            .patient-info { background: #f0fdfa; padding: 20px; border-radius: 8px; margin: 20px 0; }
-            .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 30px 0; }
-            .metric-card { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-            .metric-value { font-size: 32px; font-weight: bold; color: #14B8A6; }
-            .metric-label { color: #666; font-size: 14px; margin-top: 5px; }
-            .section { margin: 30px 0; }
-            .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #14B8A6; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; }
-            .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            .table th, .table td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; }
-            .table th { background: #f9fafb; font-weight: bold; }
-            .footer { margin-top: 50px; text-align: center; color: #666; font-size: 12px; border-top: 1px solid #e5e7eb; padding-top: 20px; }
-            .status-confirmed { color: #059669; font-weight: bold; }
-            .status-pending { color: #d97706; font-weight: bold; }
-            .status-cancelled { color: #dc2626; font-weight: bold; }
-            .health-score { background: linear-gradient(135deg, #14B8A6, #EC4899); color: white; padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0; }
-            .health-score-value { font-size: 48px; font-weight: bold; }
-            .specialization-list { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
-            .specialization-tag { background: #e0f2fe; color: #0369a1; padding: 5px 12px; border-radius: 20px; font-size: 12px; }
+            body { font-family: 'Inter', sans-serif; color: #003d3d; margin: 0; padding: 40px; background: #f4f7f7; }
+            .sheet { background: white; max-width: 800px; margin: 0 auto; padding: 50px; border-radius: 4px; }
+            .header { border-bottom: 4px solid #003d3d; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+            .title { font-size: 24px; font-weight: 900; letter-spacing: -1px; }
+            .accent { color: #00a18e; }
+            .score-box { background: #003d3d; color: white; padding: 30px; border-radius: 20px; text-align: center; margin: 20px 0; }
+            .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 30px; }
+            .metric-card { background: #f4f7f7; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+            .m-val { font-size: 18px; font-weight: 800; display: block; }
+            .m-lbl { font-size: 9px; text-transform: uppercase; color: #00a18e; letter-spacing: 1px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+            th { text-align: left; font-size: 10px; text-transform: uppercase; padding: 12px; border-bottom: 2px solid #003d3d; color: #00a18e; }
+            td { padding: 12px; font-size: 12px; border-bottom: 1px solid #e2e8f0; }
+            .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
           </style>
         </head>
         <body>
-          <div class="header">
-            <div class="logo">CareConnect Hospital</div>
-            <div class="report-title">Personal Health Report</div>
-            <div style="color: #666; font-size: 16px;">Comprehensive Health Journey Summary</div>
-          </div>
-
-          <div class="patient-info">
-            <h3>Patient Information</h3>
-            <p><strong>Name:</strong> ${user.first_name} ${user.last_name}</p>
-            <p><strong>Email:</strong> ${user.email}</p>
-            <p><strong>Report Generated:</strong> ${new Date().toLocaleString()}</p>
-          </div>
-
-          <div class="health-score">
-            <div class="health-score-value">${((appointmentsByStatus.confirmed / Math.max(totalAppointments, 1)) * 100).toFixed(0)}%</div>
-            <div style="font-size: 18px; margin-top: 10px;">Health Engagement Score</div>
-            <div style="font-size: 14px; opacity: 0.9;">Based on appointment completion rate</div>
-          </div>
-
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <div class="metric-value">${totalAppointments}</div>
-              <div class="metric-label">Total Appointments</div>
+          <div class="sheet">
+            <div class="header">
+              <div class="title">health<span class="accent">.</span>journey</div>
+              <div style="font-size: 12px; opacity: 0.6;">generated: ${new Date().toLocaleDateString()}</div>
             </div>
-            <div class="metric-card">
-              <div class="metric-value">KSh ${totalSpent.toLocaleString()}</div>
-              <div class="metric-label">Healthcare Investment</div>
+            <div style="margin-bottom: 20px;">
+              <span style="font-size: 12px; text-transform: uppercase; color: #94a3b8;">patient record</span>
+              <div style="font-size: 20px; font-weight: 700;">${user.first_name} ${user.last_name}</div>
             </div>
-            <div class="metric-card">
-              <div class="metric-value">${uniqueDoctors}</div>
-              <div class="metric-label">Doctors Consulted</div>
+            <div class="score-box">
+              <div style="font-size: 48px; font-weight: 900;">${engagementScore}%</div>
+              <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.8;">engagement score</div>
             </div>
-            <div class="metric-card">
-              <div class="metric-value">${prescriptions.length}</div>
-              <div class="metric-label">Prescriptions Received</div>
+            <div class="metrics">
+              <div class="metric-card"><span class="m-val">${appointments.length}</span><span class="m-lbl">visits</span></div>
+              <div class="metric-card"><span class="m-val">KSh ${totalSpent.toLocaleString()}</span><span class="m-lbl">investment</span></div>
+              <div class="metric-card"><span class="m-val">${prescriptions.length}</span><span class="m-lbl">meds</span></div>
+              <div class="metric-card"><span class="m-val">${new Set(appointments.map(a => a.doctor.id)).size}</span><span class="m-lbl">physicians</span></div>
             </div>
-          </div>
-
-          <div class="section">
-            <div class="section-title">Medical Specializations Visited</div>
-            <div class="specialization-list">
-              ${specializations.map((spec) => `<span class="specialization-tag">${spec}</span>`).join('')}
-            </div>
-            <p style="margin-top: 15px; color: #666;">You have consulted with specialists across ${specializations.length} different medical fields, showing comprehensive healthcare coverage.</p>
-          </div>
-
-          <div class="section">
-            <div class="section-title">Appointment History</div>
-            <table class="table">
-              <tr>
-                <th>Status</th>
-                <th>Count</th>
-                <th>Percentage</th>
-              </tr>
-              <tr>
-                <td class="status-confirmed">Confirmed</td>
-                <td>${appointmentsByStatus.confirmed}</td>
-                <td>${totalAppointments > 0 ? ((appointmentsByStatus.confirmed / totalAppointments) * 100).toFixed(1) : 0}%</td>
-              </tr>
-              <tr>
-                <td class="status-pending">Pending</td>
-                <td>${appointmentsByStatus.pending}</td>
-                <td>${totalAppointments > 0 ? ((appointmentsByStatus.pending / totalAppointments) * 100).toFixed(1) : 0}%</td>
-              </tr>
-              <tr>
-                <td class="status-cancelled">Cancelled</td>
-                <td>${appointmentsByStatus.cancelled}</td>
-                <td>${totalAppointments > 0 ? ((appointmentsByStatus.cancelled / totalAppointments) * 100).toFixed(1) : 0}%</td>
-              </tr>
-            </table>
-          </div>
-
-          ${
-            reportType === 'detailed'
-              ? `
-          <div class="section">
-            <div class="section-title">Recent Appointments</div>
-            <table class="table">
-              <tr>
-                <th>Date</th>
-                <th>Doctor</th>
-                <th>Specialization</th>
-                <th>Status</th>
-                <th>Amount</th>
-              </tr>
-              ${appointments
-                .slice(0, 10)
-                .map(
-                  (apt) => `
-                <tr>
-                  <td>${new Date(apt.appointmentDate).toLocaleDateString()}</td>
-                  <td>Dr. ${apt.doctor.name} ${apt.doctor.lastName}</td>
-                  <td>${apt.doctor.specialization}</td>
-                  <td class="status-${apt.status.toLowerCase()}">${apt.status}</td>
-                  <td>KSh ${parseFloat(apt.totalAmount).toLocaleString()}</td>
-                </tr>
-              `
-                )
-                .join('')}
-            </table>
-          </div>
-
-          ${
-            prescriptions.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">Prescription Summary</div>
-            <table class="table">
-              <tr>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Notes</th>
-              </tr>
-              ${prescriptions
-                .slice(0, 5)
-                .map((prescription) => {
-                  const relatedAppointment = appointments.find(
-                    (apt) => apt.appointmentId === prescription.appointmentId
-                  );
-                  return `
+            <table>
+              <thead><tr><th>date</th><th>provider</th><th>department</th><th>status</th></tr></thead>
+              <tbody>
+                ${appointments.slice(0, 10).map(apt => `
                   <tr>
-                    <td>${relatedAppointment ? new Date(relatedAppointment.appointmentDate).toLocaleDateString() : 'N/A'}</td>
-                    <td>KSh ${parseFloat(prescription.amount).toLocaleString()}</td>
-                    <td>${prescription.notes.substring(0, 100)}${prescription.notes.length > 100 ? '...' : ''}</td>
-                  </tr>
-                `;
-                })
-                .join('')}
+                    <td>${new Date(apt.appointmentDate).toLocaleDateString()}</td>
+                    <td>dr. ${apt.doctor.lastName}</td>
+                    <td>${apt.doctor.specialization.toLowerCase()}</td>
+                    <td>${apt.status.toLowerCase()}</td>
+                  </tr>`).join('')}
+              </tbody>
             </table>
-          </div>
-          `
-              : ''
-          }
-          `
-              : ''
-          }
-
-          ${
-            complaints.length > 0
-              ? `
-          <div class="section">
-            <div class="section-title">Feedback & Complaints</div>
-            <table class="table">
-              <tr>
-                <th>Status</th>
-                <th>Count</th>
-              </tr>
-              <tr>
-                <td>Open</td>
-                <td>${complaintsByStatus.open}</td>
-              </tr>
-              <tr>
-                <td>In Progress</td>
-                <td>${complaintsByStatus.inProgress}</td>
-              </tr>
-              <tr>
-                <td>Resolved</td>
-                <td>${complaintsByStatus.resolved}</td>
-              </tr>
-              <tr>
-                <td>Closed</td>
-                <td>${complaintsByStatus.closed}</td>
-              </tr>
-            </table>
-          </div>
-          `
-              : ''
-          }
-
-          <div class="section">
-            <div class="section-title">Health Insights</div>
-            <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
-              <h4 style="color: #14B8A6; margin-bottom: 15px;">Key Observations:</h4>
-              <ul style="margin: 0; padding-left: 20px;">
-                <li>You have maintained ${appointmentsByStatus.confirmed > 0 ? 'good' : 'developing'} appointment attendance with ${appointmentsByStatus.confirmed} confirmed visits</li>
-                <li>Your healthcare investment of KSh ${totalSpent.toLocaleString()} shows ${totalSpent > 10000 ? 'strong' : 'growing'} commitment to health</li>
-                <li>Consulting ${uniqueDoctors} different doctors indicates ${uniqueDoctors > 2 ? 'comprehensive' : 'focused'} healthcare approach</li>
-                ${prescriptions.length > 0 ? `<li>You have received ${prescriptions.length} prescriptions, showing active medical management</li>` : ''}
-                ${complaints.length === 0 ? '<li>No complaints filed shows satisfaction with care received</li>' : `<li>${complaintsByStatus.resolved} of ${complaints.length} complaints resolved shows responsive care</li>`}
-              </ul>
-            </div>
-          </div>
-
-          <div class="footer">
-            <p>This report was generated by CareConnect Hospital Management System</p>
-            <p>For questions about your health data, please contact your healthcare provider</p>
-            <p>© ${new Date().getFullYear()} CareConnect. All rights reserved.</p>
+            <div class="footer">careconnect medical group — confidential patient document</div>
           </div>
         </body>
         </html>
       `;
 
-      // Create and download the report
       const blob = new Blob([reportHTML], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `CareConnect_Health_Report_${user.first_name}_${user.last_name}_${new Date().toISOString().split('T')[0]}.html`;
+      link.download = `health_report_${user.last_name.toLowerCase()}.html`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-
-      toast.success('Health report generated and downloaded successfully!');
+      toast.success('health report downloaded');
       onClose();
     } catch (error) {
-      console.error('Error generating health report:', error);
-      toast.error('Failed to generate health report. Please try again.');
+      toast.error('failed to generate report');
     } finally {
       setIsGenerating(false);
     }
@@ -310,134 +119,69 @@ const PatientHealthReport: React.FC<HealthReportProps> = ({ isOpen, onClose }) =
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-teal-500 to-pink-500 p-6 rounded-t-2xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Heart className="h-6 w-6 text-white" />
-              <h2 className="text-xl font-bold text-white">Generate Health Report</h2>
+    <div className="fixed inset-0 bg-[#003d3d]/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100">
+        <div className="bg-[#003d3d] p-8 text-white relative">
+          <button onClick={onClose} className="absolute top-6 right-6 hover:opacity-70 transition-opacity">
+            <X className="h-5 w-5" />
+          </button>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="bg-[#00a18e] p-2 rounded-lg">
+              <Heart className="h-5 w-5 text-white" />
             </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:bg-white/20 p-2 rounded-full transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <h2 className="text-xl font-bold lowercase">health record export</h2>
           </div>
+          <p className="text-teal-100/60 text-xs">summary of your medical history and wellness metrics</p>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-6">
-          {/* Report Type Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Report Type</label>
-            <div className="grid grid-cols-2 gap-3">
+        <div className="p-8 space-y-6">
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { id: 'summary', label: 'summary' },
+              { id: 'detailed', label: 'detailed' }
+            ].map((type) => (
               <button
-                onClick={() => setReportType('summary')}
-                className={`p-3 rounded-lg border-2 transition-colors ${
-                  reportType === 'summary'
-                    ? 'border-teal-500 bg-teal-50 text-teal-700'
-                    : 'border-gray-200 hover:border-gray-300'
+                key={type.id}
+                onClick={() => setReportType(type.id as any)}
+                className={`py-3 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all border-2 ${
+                  reportType === type.id ? 'border-[#003d3d] bg-[#f4f7f7] text-[#003d3d]' : 'border-gray-50 text-gray-400'
                 }`}
               >
-                Summary Report
+                {type.label}
               </button>
-              <button
-                onClick={() => setReportType('detailed')}
-                className={`p-3 rounded-lg border-2 transition-colors ${
-                  reportType === 'detailed'
-                    ? 'border-teal-500 bg-teal-50 text-teal-700'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                Detailed Report
-              </button>
+            ))}
+          </div>
+
+          <div className="bg-[#f4f7f7] rounded-2xl p-5 border border-gray-100">
+            <h4 className="text-[10px] uppercase font-extrabold text-[#00a18e] mb-4 tracking-widest">report contents</h4>
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                'visit history summary',
+                'healthcare investment audit',
+                'prescription records',
+                'engagement performance'
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs text-gray-600 font-medium lowercase">
+                  <CheckCircle className="h-3.5 w-3.5 text-[#00a18e]" /> {item}
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Report Preview */}
-          {appointmentsData?.data && (
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">Your Health Summary</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-teal-600">
-                    {appointmentsData.data.length}
-                  </div>
-                  <div className="text-sm text-gray-600">Total Visits</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-teal-600">
-                    KSh{' '}
-                    {appointmentsData.data
-                      .reduce((sum, apt) => sum + parseFloat(apt.totalAmount), 0)
-                      .toFixed(0)}
-                  </div>
-                  <div className="text-sm text-gray-600">Healthcare Investment</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Report Features */}
-          <div className="bg-blue-50 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-900 mb-2">Report Includes:</h4>
-            <div className="grid grid-cols-1 gap-2 text-sm text-blue-800">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Complete appointment history</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Healthcare spending analysis</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Doctor consultations summary</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Prescription records</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Health engagement score</span>
-              </div>
-              {reportType === 'detailed' && (
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Detailed visit records</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-4">
+          <div className="flex gap-4 pt-2 items-center">
             <button
               onClick={onClose}
-              className="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
+              className="flex-1 text-gray-400 text-[10px] font-bold uppercase tracking-widest hover:text-gray-600"
             >
-              Cancel
+              dismiss
             </button>
             <button
               onClick={generateHealthReport}
               disabled={isGenerating}
-              className="flex-1 bg-gradient-to-r from-teal-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-teal-600 hover:to-pink-600 transition-all font-semibold flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-2 bg-[#00a18e] text-white py-4 rounded-2xl font-bold text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#008f7e] transition-all disabled:opacity-50"
             >
-              {isGenerating ? (
-                <>
-                  <Loader className="h-5 w-5 animate-spin" />
-                  <span>Generating...</span>
-                </>
-              ) : (
-                <>
-                  <Download className="h-5 w-5" />
-                  <span>Download Report</span>
-                </>
-              )}
+              {isGenerating ? <Loader className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              {isGenerating ? 'processing' : 'generate report'}
             </button>
           </div>
         </div>

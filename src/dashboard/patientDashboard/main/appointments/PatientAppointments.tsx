@@ -18,6 +18,7 @@ import {
   Video,
   Smartphone,
   Receipt,
+  CalendarClock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import CreateAppointment from './CreateAppointment';
@@ -162,16 +163,29 @@ const PatientAppointments = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-4 space-y-8">
-      <div className="flex justify-between items-center bg-white p-6 rounded-xl border shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">My Medical History</h1>
-          <p className="text-gray-500 text-sm">Manage your consultations and payments</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-8 rounded-4xl border border-gray-100 shadow-sm gap-4">
+        <div className="flex items-center gap-4">
+          {/* icon container height matches the combined height of the text block */}
+          <div className="bg-[#14b8a6] p-2.5 rounded-[15px] text-white shadow-md shadow-teal-100/50 flex items-center justify-center shrink-0">
+            <CalendarClock size={24} strokeWidth={2.5} />
+          </div>
+
+          <div className="flex flex-col justify-center">
+            <h1 className="text-2xl font-black text-[#003d3d] tracking-tight leading-none mb-1">
+              My Medical History
+            </h1>
+            <p className="text-gray-400 text-xs font-medium leading-none">
+              Manage your consultations and payments
+            </p>
+          </div>
         </div>
+
         <button
           onClick={() => (document.getElementById('create_appointment_modal') as any)?.showModal()}
-          className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-all shadow-lg shadow-teal-100"
+          className="group relative flex items-center gap-2 bg-[#003d3d] hover:bg-[#00a18e] text-white px-8 py-4 rounded-2xl font-bold text-[11px] uppercase tracking-[0.15em] transition-all duration-300 shadow-xl shadow-[#003d3d]/10 active:scale-95"
         >
-          <Plus size={20} /> Book Appointment
+          <Plus size={16} className="transition-transform group-hover:rotate-90" />
+          <span>book appointment</span>
         </button>
       </div>
 
@@ -331,7 +345,9 @@ const PatientAppointments = () => {
                 <div className="p-3 bg-teal-50 rounded-2xl text-teal-600">
                   <Calendar size={20} />
                 </div>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Lifetime</span>
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  Lifetime
+                </span>
               </div>
               <div className="text-3xl font-black text-gray-900 leading-none">
                 {appointmentsData.data.length}
@@ -345,10 +361,16 @@ const PatientAppointments = () => {
                 <div className="p-3 bg-green-50 rounded-2xl text-green-600">
                   <CheckCircle size={20} />
                 </div>
-                <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">Verified</span>
+                <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">
+                  Verified
+                </span>
               </div>
               <div className="text-3xl font-black text-gray-900 leading-none">
-                {appointmentsData.data.filter((apt: TDetailedAppointment) => apt.status === 'Confirmed').length}
+                {
+                  appointmentsData.data.filter(
+                    (apt: TDetailedAppointment) => apt.status === 'Confirmed'
+                  ).length
+                }
               </div>
               <div className="text-sm font-bold text-gray-500 mt-2">Confirmed</div>
             </div>
@@ -359,10 +381,16 @@ const PatientAppointments = () => {
                 <div className="p-3 bg-amber-50 rounded-2xl text-amber-600">
                   <Clock size={20} />
                 </div>
-                <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">In Review</span>
+                <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">
+                  In Review
+                </span>
               </div>
               <div className="text-3xl font-black text-gray-900 leading-none">
-                {appointmentsData.data.filter((apt: TDetailedAppointment) => apt.status === 'Pending').length}
+                {
+                  appointmentsData.data.filter(
+                    (apt: TDetailedAppointment) => apt.status === 'Pending'
+                  ).length
+                }
               </div>
               <div className="text-sm font-bold text-gray-500 mt-2">Pending</div>
             </div>
@@ -373,15 +401,23 @@ const PatientAppointments = () => {
                 <div className="p-3 bg-white/10 rounded-2xl text-teal-400">
                   <CreditCard size={20} />
                 </div>
-                <span className="text-[10px] font-black text-teal-400/50 uppercase tracking-widest">Payments</span>
+                <span className="text-[10px] font-black text-teal-400/50 uppercase tracking-widest">
+                  Payments
+                </span>
               </div>
               <div className="text-2xl font-black text-white flex items-baseline gap-1 leading-none">
                 <span className="text-xs font-bold text-teal-400">KSh</span>
                 {appointmentsData.data
-                  .reduce((total: number, apt: TDetailedAppointment) => total + parseFloat(apt?.totalAmount || '0'), 0)
+                  .reduce(
+                    (total: number, apt: TDetailedAppointment) =>
+                      total + parseFloat(apt?.totalAmount || '0'),
+                    0
+                  )
                   .toLocaleString()}
               </div>
-              <div className="text-sm font-bold text-teal-100/40 mt-2 tracking-tight">Total Investment</div>
+              <div className="text-sm font-bold text-teal-100/40 mt-2 tracking-tight">
+                Total Investment
+              </div>
             </div>
           </div>
         </div>

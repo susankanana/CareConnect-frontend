@@ -111,6 +111,7 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<CreateAppointmentInputs>({
     resolver: yupResolver(schema),
@@ -152,192 +153,143 @@ const CreateAppointment = ({ refetch }: CreateAppointmentProps) => {
     }
   };
 
-  const getDayName = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { weekday: 'long' });
-  };
-
-  const isDateAvailable = (dateString: string, doctor: TDoctor) => {
-    if (!doctor || !doctor.doctor?.availableDays) return false;
-    const dayName = getDayName(dateString);
-    return (
-      Array.isArray(doctor.doctor.availableDays) && doctor.doctor.availableDays.includes(dayName)
-    );
-  };
-
   return (
-    <dialog id="create_appointment_modal" className="modal sm:modal-middle">
-      <div className="modal-box bg-white w-full max-w-xs sm:max-w-2xl mx-auto rounded-lg border border-gray-200">
-        <div className="bg-linear-to-r from-teal-500 to-pink-500 -m-6 mb-6 p-6 rounded-t-lg">
-          <h3 className="font-bold text-lg text-white">Book New Appointment</h3>
-          <p className="text-teal-100 text-sm mt-1">Schedule your consultation with our doctors</p>
+    <dialog id="create_appointment_modal" className="modal backdrop-blur-sm bg-[#003d3d]/40">
+      <div className="modal-box bg-white w-full max-w-2xl p-0 overflow-hidden rounded-[40px] border-none shadow-2xl flex flex-col max-h-[90vh]">
+        
+        {/* Fixed Header */}
+        <div className="bg-linear-to-r from-[#14b8a6] to-[#e91e63] p-8 text-white shrink-0">
+          <h3 className="font-black text-2xl tracking-tight lowercase">book new appointment</h3>
+          <p className="text-white/80 text-sm font-medium">schedule your consultation with our doctors</p>
         </div>
 
+        {/* Scrollable Form Body */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          data-test="create-appointment-form"
-          className="flex flex-col gap-6"
+          className="flex flex-col overflow-hidden"
         >
-          {/* Doctor Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
-            {doctorsLoading ? (
-              <p className="text-gray-500">Loading doctors...</p>
-            ) : (
-              <select
-                data-test="doctor-select"
-                {...register('doctorId', { valueAsNumber: true })}
-                className="select select-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
-              >
-                <option value="">Choose a doctor</option>
-                {doctorsData?.data?.map((doctor: TDoctor) => (
-                  <option key={doctor.doctor?.doctorId} value={doctor.doctor?.doctorId}>
-                    Dr. {doctor.user?.firstName} {doctor.user?.lastName} -{' '}
-                    {doctor.doctor?.specialization}
-                  </option>
-                ))}
-              </select>
-            )}
-            {errors.doctorId && (
-              <span className="text-sm text-red-600">{errors.doctorId.message}</span>
-            )}
-          </div>
+          <div className="p-8 pt-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
+            {/* Doctor Selection */}
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">select doctor</label>
+              {doctorsLoading ? (
+                <p className="text-gray-500 animate-pulse">loading doctors...</p>
+              ) : (
+                <select
+                  {...register('doctorId', { valueAsNumber: true })}
+                  className="select select-bordered w-full bg-gray-50 border-gray-200 rounded-2xl text-[#003d3d] font-bold focus:border-[#14b8a6]"
+                >
+                  <option value="">choose a doctor</option>
+                  {doctorsData?.data?.map((doctor: TDoctor) => (
+                    <option key={doctor.doctor?.doctorId} value={doctor.doctor?.doctorId}>
+                      Dr. {doctor.user?.firstName} {doctor.user?.lastName} - {doctor.doctor?.specialization}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {errors.doctorId && <span className="text-xs text-red-500 font-bold">{errors.doctorId.message}</span>}
+            </div>
 
-          {/* Selected Doctor Info */}
-          {selectedDoctor && (
-            <div className="bg-teal-50 rounded-lg p-4">
-              <h4 className="font-semibold text-teal-800 mb-2">Selected Doctor</h4>
-              <div className="flex items-center gap-4">
+            {/* Doctor Info Card */}
+            {selectedDoctor && (
+              <div className="bg-[#f8fafc] border border-gray-100 rounded-[30px] p-5 flex items-center gap-4">
                 <img
                   src={selectedDoctor.user?.image_url || 'https://via.placeholder.com/400'}
-                  alt={`Dr. ${selectedDoctor.user?.firstName}`}
-                  className="w-16 h-16 rounded-full object-cover"
+                  alt="doctor"
+                  className="w-16 h-16 rounded-[20px] object-cover shadow-sm"
                 />
-                <div>
-                  <p className="font-medium text-gray-900">
-                    Dr. {selectedDoctor.user?.firstName} {selectedDoctor.user?.lastName}
+                <div className="space-y-0.5">
+                  <p className="font-black text-[#003d3d] lowercase text-lg leading-tight">
+                    dr. {selectedDoctor.user?.firstName} {selectedDoctor.user?.lastName}
                   </p>
-                  <p className="text-sm text-teal-600">{selectedDoctor.doctor?.specialization}</p>
-                  <p className="text-sm text-gray-600">
-                    Available: {selectedDoctor.doctor?.availableDays?.join(', ') || 'Not specified'}
+                  <p className="text-sm text-[#14b8a6] font-bold lowercase">{selectedDoctor.doctor?.specialization}</p>
+                  <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                    available: {selectedDoctor.doctor?.availableDays?.join(', ')}
                   </p>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Date Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
-            <input
-              data-test="appointment-date-input"
-              type="date"
-              {...register('appointmentDate')}
-              min={new Date().toISOString().split('T')[0]}
-              className="input input-bordered w-full bg-white text-gray-800 border-gray-300 focus:border-teal-500"
-            />
-            {errors.appointmentDate && (
-              <span className="text-sm text-red-600">{errors.appointmentDate.message}</span>
             )}
 
-            {selectedDoctor &&
-              watchedValues.appointmentDate &&
-              !isDateAvailable(watchedValues.appointmentDate, selectedDoctor) && (
-                <p className="text-sm text-red-600 mt-1">
-                  Doctor is not available on {getDayName(watchedValues.appointmentDate)}.
-                </p>
-              )}
-          </div>
-
-          {/* Time Selection */}
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
-
-            {/* Trigger */}
-            <button
-              type="button"
-              className="input input-bordered w-full text-left bg-white text-gray-800 border-gray-300 focus:border-teal-500"
-              disabled={!selectedDoctor || !watchedValues.appointmentDate}
-              onClick={() => setTimeDropdownOpen((prev) => !prev)}
-            >
-              {watchedValues.timeSlot
-                ? getTimeRangeLabel(watchedValues.timeSlot)
-                : 'Select a time slot'}
-            </button>
-
-            {/* Dropdown */}
-            {timeDropdownOpen && (
-              <div className="absolute z-50 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg max-h-64 overflow-y-auto">
-                {timeSlots.map((slot) => {
-                  const disabled = isPastTimeSlot(watchedValues.appointmentDate, slot);
-
-                  return (
-                    <button
-                      key={slot}
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => {
-                        if (disabled) return;
-                        reset({ ...watchedValues, timeSlot: slot });
-                        setTimeDropdownOpen(false);
-                      }}
-                      className={`w-full px-4 py-3 text-left text-sm transition
-              ${disabled ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-teal-50 text-gray-800'}
-            `}
-                    >
-                      {getTimeRangeLabel(slot)}
-                      {disabled && ' (Unavailable)'}
-                    </button>
-                  );
-                })}
+            {/* Grid for Date and Time */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">date</label>
+                <input
+                  type="date"
+                  {...register('appointmentDate')}
+                  className="input input-bordered w-full bg-gray-50 border-gray-200 rounded-2xl font-bold text-[#003d3d]"
+                />
               </div>
-            )}
 
-            {/* Hidden input for react-hook-form */}
-            <input type="hidden" {...register('timeSlot')} />
-
-            {errors.timeSlot && (
-              <span className="text-sm text-red-600">{errors.timeSlot.message}</span>
-            )}
-          </div>
-
-          {/* Consultation Fee */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-gray-900">Consultation Fee</span>
-              <span className="text-2xl font-bold text-teal-600">
-                KSh {parseFloat(DEFAULT_CONSULTATION_FEE).toFixed(2)}
-              </span>
+            <div className="relative">
+  <label className="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">time slot</label>
+  <button
+    type="button"
+    className="input input-bordered w-full text-left bg-gray-50 border-gray-200 rounded-2xl font-bold text-[#003d3d] flex justify-between items-center"
+    disabled={!selectedDoctor || !watchedValues.appointmentDate}
+    onClick={() => setTimeDropdownOpen(!timeDropdownOpen)}
+  >
+    {watchedValues.timeSlot ? getTimeRangeLabel(watchedValues.timeSlot) : 'select time'}
+    <span className={`transition-transform ${timeDropdownOpen ? 'rotate-180' : ''}`}>▼</span>
+  </button>
+  
+  {timeDropdownOpen && (
+    /* Changed to fixed and added a calculation for positioning or used a higher z-index */
+    <div className="absolute left-0 right-0 z-100 mt-2 rounded-2xl border border-gray-100 bg-white shadow-2xl max-h-48 overflow-y-auto p-2">
+      {timeSlots.map((slot) => {
+        const disabled = isPastTimeSlot(watchedValues.appointmentDate, slot);
+        return (
+          <button
+            key={slot}
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              if (!disabled) {
+                setValue('timeSlot', slot);
+                setTimeDropdownOpen(false);
+              }
+            }}
+            className={`w-full px-4 py-2 text-left text-sm font-bold rounded-lg mb-1 transition
+              ${disabled ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-teal-50 text-[#003d3d]'}
+            `}
+          >
+            {getTimeRangeLabel(slot)}
+          </button>
+        );
+      })}
+    </div>
+  )}
+</div>
             </div>
-            <p className="text-sm text-gray-600 mt-1">Payment due at appointment</p>
+
+            {/* Fee Section (Now inside the scrollable area) */}
+            <div className="bg-[#003d3d] rounded-[25px] p-6 text-white flex justify-between items-center shadow-lg">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-teal-400">consultation fee</span>
+                <p className="text-xs text-white/60 lowercase">due at appointment</p>
+              </div>
+              <span className="text-2xl font-black">KSh {parseFloat(DEFAULT_CONSULTATION_FEE).toLocaleString()}</span>
+            </div>
           </div>
 
-          {/* Actions */}
-          <div className="modal-action">
+          {/* Fixed Actions Footer */}
+          <div className="p-8 border-t border-gray-100 flex gap-3 shrink-0 bg-white">
             <button
-              data-test="submit-appointment-btn"
               type="submit"
-              className="btn bg-teal-600 hover:bg-teal-700 text-white border-none"
+              className="btn flex-1 bg-linear-to-r from-[#14b8a6] to-[#e91e63] border-none text-white rounded-2xl font-black lowercase text-lg shadow-lg shadow-teal-100/20"
               disabled={isLoading}
             >
-              {isLoading ? (
-                <>
-                  <span className="loading loading-spinner loading-sm" /> Booking...
-                </>
-              ) : (
-                'Book Appointment'
-              )}
+              {isLoading ? <span className="loading loading-spinner" /> : 'book appointment'}
             </button>
             <button
-              data-test="cancel-appointment-btn"
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-ghost lowercase font-bold text-gray-400"
               onClick={() => {
-                (document.getElementById('create_appointment_modal') as HTMLDialogElement)?.close();
+                (document.getElementById('create_appointment_modal') as any)?.close();
                 reset();
               }}
             >
-              Cancel
+              cancel
             </button>
           </div>
         </form>
